@@ -367,7 +367,15 @@ export const db = {
       try {
         const rows = await postgrestRequest('jstip_merchants', { query: 'order=id.asc' });
         if (Array.isArray(rows)) {
-          return rows;
+          return rows.map((r: any) => ({
+            id: r.id,
+            username: r.username,
+            password: r.password,
+            businessName: r.business_name || r.businessName || '',
+            role: r.role,
+            paid: r.paid,
+            createdAt: r.created_at || r.createdAt || ''
+          }));
         }
       } catch (e) {
         console.error('Supabase get merchants error:', e);
@@ -389,9 +397,18 @@ export const db = {
 
     if (isSupabaseConfigured()) {
       try {
+        const dbPayload = {
+          id: merchant.id,
+          username: merchant.username,
+          password: merchant.password,
+          business_name: merchant.businessName || merchant.business_name || '',
+          role: merchant.role,
+          paid: merchant.paid,
+          created_at: merchant.createdAt || merchant.created_at || new Date().toISOString()
+        };
         await postgrestRequest('jstip_merchants', {
           method: 'POST',
-          body: merchant,
+          body: dbPayload,
           query: 'on_conflict=id'
         });
       } catch (e) {

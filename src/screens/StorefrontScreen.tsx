@@ -98,6 +98,7 @@ export function StorefrontScreen() {
       return;
     }
 
+    const merchantId = item?.merchant_id || item?.merchantId;
     const newRequest = {
       id: 'wish_' + Date.now(),
       name: item.name,
@@ -106,11 +107,13 @@ export function StorefrontScreen() {
       price: budgetNum,
       location: clientLocation.trim() || settings?.trip?.origin || 'Seoul',
       image: item.image,
-      note: clientNotes.trim() || undefined
+      note: clientNotes.trim() || undefined,
+      merchantId: merchantId,
+      merchant_id: merchantId
     };
 
     try {
-      await db.saveWishlist(newRequest);
+      await db.saveWishlist(newRequest, merchantId);
       toast.success('Sourcing request submitted successfully!', {
         description: `Traveler Jane Doe has been notified to search for "${item.name}" in ${newRequest.location}.`
       });

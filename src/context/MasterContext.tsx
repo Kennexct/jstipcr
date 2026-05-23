@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { db } from '../lib/supabase';
+import { db, isSupabaseConfigured } from '../lib/supabase';
 import { toast } from 'sonner';
 
 export interface MasterContextType {
@@ -128,6 +128,19 @@ export function MasterProvider({ children }: { children: ReactNode }) {
     }
     setLoading(true);
     try {
+      // Safeguard: Ensure current user exists in remote database if Supabase is active
+      if (isSupabaseConfigured()) {
+        try {
+          const remoteMerchant = await db.getMerchantByUsername(currentUser.username);
+          if (!remoteMerchant) {
+            console.log('[Supabase] Current merchant missing from remote DB, auto-registering...');
+            await db.saveMerchant(currentUser);
+          }
+        } catch (err) {
+          console.error('Failed to auto-verify merchant existence:', err);
+        }
+      }
+
       const [loadedExpenses, loadedSales, loadedItems, loadedWishlist, loadedSettings] = await Promise.all([
         db.getExpenses(currentUser.id),
         db.getSales(currentUser.id),

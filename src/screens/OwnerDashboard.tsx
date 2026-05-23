@@ -86,9 +86,7 @@ export function OwnerDashboard() {
   const [selectedItemId, setSelectedItemId] = useState('');
   const [productSearchText, setProductSearchText] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(false);
-  const [tempItemCost, setTempItemCost] = useState('0');
-  const [tempItemPrice, setTempItemPrice] = useState('0');
-  const [tempItemLocation, setTempItemLocation] = useState('Seoul');
+
   const [selectedQty, setSelectedQty] = useState(1);
   const [draftSaleItems, setDraftSaleItems] = useState<any[]>([]);
   const [isSaleOpen, setIsSaleOpen] = useState(false);
@@ -833,48 +831,18 @@ export function OwnerDashboard() {
                   )}
 
                   {!selectedItemId && productSearchText.trim() !== "" && (
-                    <div className="p-3 bg-indigo-50/70 border border-indigo-150 border-indigo-100 rounded-xl space-y-1.5 mt-1.5">
+                    <div className="p-3 bg-indigo-50/70 border border-indigo-100 rounded-xl space-y-1.5 mt-1.5">
                       <p className="text-[9px] font-black text-indigo-900 uppercase tracking-wide">
                         ✨ Product not in current catalog
                       </p>
                       <p className="text-[9px] text-slate-600 leading-normal">
-                        Optionally add "{productSearchText}" directly to the travel Wishlist board so traveler can acquire it:
+                        Add "{productSearchText}" directly to the travel Wishlist board and select it.
                       </p>
-                      <div className="grid grid-cols-2 gap-2 mt-1">
-                        <div className="space-y-0.5">
-                          <label className="text-[8px] font-bold text-slate-500 uppercase">Cost ({currencySettings.code})</label>
-                          <Input 
-                            type="number"
-                            placeholder="0"
-                            value={tempItemCost}
-                            onChange={e => setTempItemCost(e.target.value)}
-                            inputMode="numeric"
-                            className="h-8 text-[11px] font-bold bg-white"
-                          />
-                        </div>
-                        <div className="space-y-0.5">
-                          <label className="text-[8px] font-bold text-slate-500 uppercase">Est Price (Rp)</label>
-                          <Input 
-                            type="number"
-                            placeholder="0"
-                            value={tempItemPrice}
-                            onChange={e => setTempItemPrice(e.target.value)}
-                            inputMode="numeric"
-                            className="h-8 text-[11px] font-bold bg-white"
-                          />
-                        </div>
-                      </div>
                       <Button 
                         type="button" 
                         size="sm" 
                         onClick={async () => {
-                          const priceNum = parseInt(tempItemPrice) || 0;
-                          if (priceNum <= 0) {
-                            toast.error('Please enter a target price budget');
-                            return;
-                          }
-                          
-                          if (!window.confirm(`Are you sure you want to add "${productSearchText.trim()}" to the wishlist and select it for this sale?`)) {
+                          if (!window.confirm(`Are you sure you want to add "${productSearchText.trim()}" to the wishlist and select it?`)) {
                             return;
                           }
                           
@@ -884,7 +852,7 @@ export function OwnerDashboard() {
                             name: productSearchText.trim(),
                             requester: customerName.trim() || 'Alya Putri',
                             status: 'find',
-                            price: priceNum,
+                            price: 0,
                             location: tripSettings?.trip?.destination || 'Seoul',
                             image: ''
                           };
@@ -895,8 +863,8 @@ export function OwnerDashboard() {
                              const newCatItem = {
                                id: newId,
                                name: productSearchText.trim(),
-                               price: priceNum,
-                               cost: Number(tempItemCost) || 0,
+                               price: 0,
+                               cost: 0,
                                currency: currencySettings.code,
                                image: '',
                                status: 'active'
@@ -910,9 +878,9 @@ export function OwnerDashboard() {
                              toast.error('Failed to save item to wishlist');
                            }
                         }}
-                        className="w-full h-8 text-[9px] font-black uppercase tracking-wider bg-indigo-600 text-white hover:bg-indigo-700 mt-1"
+                        className="w-full h-9 text-[10px] font-black uppercase tracking-wider bg-indigo-600 text-white hover:bg-indigo-700 mt-1 rounded-xl shadow-sm"
                       >
-                        ➕ Save to Wishlist list
+                        Add to Wishlist
                       </Button>
                     </div>
                   )}
