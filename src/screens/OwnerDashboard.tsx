@@ -94,13 +94,18 @@ export function OwnerDashboard() {
   const [isSaleOpen, setIsSaleOpen] = useState(false);
 
 
-  // Sync default selected item when catalog items are loaded
+  // Reset all sale form fields when sale dialog is opened
   useEffect(() => {
-    if (catalogItems.length > 0 && !selectedItemId) {
-      setSelectedItemId(catalogItems[0].id);
-      setProductSearchText(catalogItems[0].name);
+    if (isSaleOpen) {
+      setCustomerName('');
+      setSelectedItemId('');
+      setProductSearchText('');
+      setDraftSaleItems([]);
+      setSelectedQty(1);
+      setTempItemCost('0');
+      setTempItemPrice('0');
     }
-  }, [catalogItems, selectedItemId]);
+  }, [isSaleOpen]);
 
   const currencySettings = tripSettings?.currency || {
     code: 'SGD',
@@ -234,6 +239,8 @@ export function OwnerDashboard() {
     }
     toast.success(`Added ${selectedQty}x ${matchedProduct.name} to sale draft`);
     setSelectedQty(1);
+    setSelectedItemId('');
+    setProductSearchText('');
   };
 
   const handleRemoveDraftItem = (index: number) => {
@@ -774,7 +781,7 @@ export function OwnerDashboard() {
                   </div>
 
                   {/* HTML Suggestions overlay */}
-                  {showSuggestions && productSearchText.trim() !== "" && (
+                  {showSuggestions && (
                     <>
                       <div className="fixed inset-0 z-30" onClick={() => setShowSuggestions(false)} />
                       <div className="absolute left-0 right-0 top-16 bg-white border border-slate-200 rounded-xl shadow-lg p-1.5 z-40 max-h-[140px] overflow-y-auto space-y-0.5">

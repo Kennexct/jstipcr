@@ -56,8 +56,23 @@ export function ExploreScreen() {
     wishlistItems: myWishlist,
     saveWishlist,
     boughtIds,
-    toggleBoughtId
+    toggleBoughtId,
+    tripSettings
   } = useMaster();
+
+  const shoppingCurrencyCode = tripSettings?.currency?.code || 'SGD';
+  const payoutCurrencyCode = tripSettings?.currency?.payout || 'IDR';
+
+  const getCurrencySymbol = (code: string) => {
+    if (code === 'IDR') return 'Rp';
+    if (code === 'SGD') return 'S$';
+    if (code === 'KRW') return '₩';
+    if (code === 'JPY') return '¥';
+    if (code === 'THB') return '฿';
+    if (code === 'USD') return '$';
+    if (code === 'EUR') return '€';
+    return '$';
+  };
 
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [viewMode, setViewMode] = useState<'board' | 'checklist'>('board');
@@ -66,6 +81,26 @@ export function ExploreScreen() {
   // Track active popup elements
   const [activeDropdownId, setActiveDropdownId] = useState<string | null>(null);
   const [selectedDetailItem, setSelectedDetailItem] = useState<WishlistItem | null>(null);
+
+  const [editBudgetAmount, setEditBudgetAmount] = useState('');
+  const [editBudgetCurrency, setEditBudgetCurrency] = useState('IDR');
+
+  useEffect(() => {
+    if (selectedDetailItem) {
+      setEditBudgetAmount(selectedDetailItem.price.toString());
+      setEditBudgetCurrency('IDR');
+    }
+  }, [selectedDetailItem]);
+
+  const conversionRate = tripSettings?.currency?.manualRate || 13500;
+  const computedPriceInIdr = editBudgetCurrency === shoppingCurrencyCode
+    ? Math.round((parseInt(editBudgetAmount.replace(/[^0-9]/g, '')) || 0) * conversionRate)
+    : (parseInt(editBudgetAmount.replace(/[^0-9]/g, '')) || 0);
+
+  const handleCycleBudgetCurrency = () => {
+    const nextCurrency = editBudgetCurrency === shoppingCurrencyCode ? payoutCurrencyCode : shoppingCurrencyCode;
+    setEditBudgetCurrency(nextCurrency);
+  };
 
   // Form states for manually recording a wishlist
   const [formName, setFormName] = useState('');
@@ -89,18 +124,18 @@ export function ExploreScreen() {
   };
 
   const handleCreateWishlist = async () => {
-    if (!formName || !formBudget) {
-      toast.error('Please fill in required fields');
+    if (!formName) {
+      toast.error('Please fill in product name');
       return;
     }
-    if (!window.confirm(`Are you sure you want to create a new wishlist request for "${formName}" with budget Rp ${Number(formBudget.replace(/[^0-9]/g, '')).toLocaleString()}?`)) {
+    if (!window.confirm(`Are you sure you want to create a new wishlist request for "${formName}"?`)) {
       return;
     }
     const newEntry: WishlistItem = {
       id: 'w_' + Date.now(),
       name: formName,
       location: formLocation || 'External Chat',
-      price: parseInt(formBudget.replace(/[^0-9]/g, '')) || 0,
+      price: 0,
       requester: formCustomer || 'Walk-in Client',
       status: 'find',
       image: formImage || undefined
@@ -113,7 +148,6 @@ export function ExploreScreen() {
       // Reset Form
       setFormName('');
       setFormLocation('');
-      setFormBudget('');
       setFormCustomer('');
       setFormImage('');
     } catch (e) {
@@ -428,19 +462,7 @@ export function ExploreScreen() {
                   </div>
                 </div>
 
-                <div className="space-y-1.5">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Approved Budget (IDR) *</label>
-                  <div className="relative">
-                    <DollarSign className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-primary" />
-                    <Input 
-                      placeholder="e.g. 450000" 
-                      value={formBudget}
-                      onChange={e => setFormBudget(e.target.value)}
-                      inputMode="numeric"
-                      className="h-12 pl-12 rounded-xl bg-muted/30 border-none font-bold placeholder:font-normal text-sm" 
-                    />
-                  </div>
-                </div>
+
 
                 <div className="space-y-1.5">
                   <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Customer Identifier</label>
@@ -803,10 +825,62 @@ export function ExploreScreen() {
                 </div>
               )}
 
-              {/* Meta specifications bento board */}
-              <div className="p-3 rounded-2xl bg-slate-50 border space-y-0.5">
-                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none">Target Budget</p>
-                <p className="text-sm font-black text-slate-800 font-mono">Rp {selectedDetailItem.price.toLocaleString()}</p>
+              {/* Meta specifications bento board - Editable Target Budget */}
+              <div className="p-4 rounded-2xl bg-slate-50 border space-y-2 text-left">
+                <div className="flex items-center justify-between">
+                  <label className="text-[9px] font-black text-slate-550 text-slate-500 uppercase tracking-widest leading-none">Target Budget</label>
+                  <span className="text-[8px] font-bold text-slate-400">Click currency to cycle</span>
+                </div>
+                <div className="flex gap-2">
+                  <div className="relative flex-1">
+                    <button
+                      type="button"
+                      onClick={handleCycleBudgetCurrency}
+                      className="absolute left-3 top-1/2 -translate-y-1/2 font-black text-[10px] text-primary bg-primary/10 hover:bg-primary/20 px-2 py-1 rounded transition-all flex items-center gap-0.5 active:scale-95 animate-pulse"
+                      title="Click to switch currency"
+                    >
+                      <span>{getCurrencySymbol(editBudgetCurrency)}</span>
+                      <span className="text-[8px] opacity-80">{editBudgetCurrency}</span>
+                    </button>
+                    <Input 
+                      type="text" 
+                      value={editBudgetAmount}
+                      onChange={(e) => setEditBudgetAmount(e.target.value.replace(/[^0-9]/g, ''))}
+                      className="h-10 pl-16 rounded-xl bg-white border-slate-200 font-bold text-xs font-mono"
+                    />
+                  </div>
+                  <Button
+                    size="sm"
+                    className="h-10 rounded-xl px-3 font-bold text-xs uppercase"
+                    onClick={async () => {
+                      if (!selectedDetailItem) return;
+                      const parsedAmount = parseInt(editBudgetAmount.replace(/[^0-9]/g, '')) || 0;
+                      const finalIdrPrice = editBudgetCurrency === shoppingCurrencyCode
+                        ? Math.round(parsedAmount * conversionRate)
+                        : parsedAmount;
+                      
+                      const updatedItem = {
+                        ...selectedDetailItem,
+                        price: finalIdrPrice
+                      };
+                      
+                      try {
+                        await saveWishlist(updatedItem);
+                        setSelectedDetailItem(updatedItem);
+                        toast.success(`Target budget updated to Rp ${finalIdrPrice.toLocaleString()}!`);
+                      } catch (err) {
+                        toast.error('Failed to update target budget');
+                      }
+                    }}
+                  >
+                    Save
+                  </Button>
+                </div>
+                {editBudgetCurrency !== 'IDR' && (
+                  <p className="text-[8.5px] text-slate-550 text-slate-500 font-semibold px-0.5">
+                    Approx. <span className="font-bold text-indigo-600">Rp {computedPriceInIdr.toLocaleString()}</span> IDR (1 {editBudgetCurrency} = Rp {conversionRate.toLocaleString()})
+                  </p>
+                )}
               </div>
 
               {/* Detail inline quick state modifiers */}
