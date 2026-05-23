@@ -28,6 +28,43 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog';
 
+const applyWatermark = (originalImageSrc: string, watermarkImageSrc: string): Promise<string> => {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = img.width;
+      canvas.height = img.height;
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.drawImage(img, 0, 0);
+        const wmImg = new Image();
+        wmImg.crossOrigin = "anonymous";
+        wmImg.onload = () => {
+          const size = Math.min(canvas.width, canvas.height) * 0.15;
+          const x = canvas.width - size - 20;
+          const y = canvas.height - size - 20;
+          ctx.globalAlpha = 0.6;
+          ctx.drawImage(wmImg, x, y, size, size);
+          ctx.globalAlpha = 1.0;
+          resolve(canvas.toDataURL('image/jpeg', 0.85));
+        };
+        wmImg.onerror = () => {
+          resolve(originalImageSrc);
+        };
+        wmImg.src = watermarkImageSrc;
+      } else {
+        resolve(originalImageSrc);
+      }
+    };
+    img.onerror = () => {
+      resolve(originalImageSrc);
+    };
+    img.src = originalImageSrc;
+  });
+};
+
 export function UploadItemScreen() {
   const navigate = useNavigate();
   const { id } = useParams();
@@ -98,7 +135,15 @@ export function UploadItemScreen() {
   }, []);
 
   const processImageWithAI = async (dataUrl: string) => {
-    setImage(dataUrl);
+    let finalUrl = dataUrl;
+    if (tripSettings?.watermark?.enabled && tripSettings?.watermark?.image) {
+      try {
+        finalUrl = await applyWatermark(dataUrl, tripSettings.watermark.image);
+      } catch (e) {
+        console.error('Failed to apply watermark:', e);
+      }
+    }
+    setImage(finalUrl);
     if (!isAiConfigured() || isEdit) return;
 
     setIsAnalyzing(true);
@@ -201,7 +246,7 @@ export function UploadItemScreen() {
       return;
     }
 
-    if (!window.confirm(isEdit ? "Are you sure you want to save changes to this catalog item?" : "Are you sure you want to list this new catalog item?")) {
+    if (!window.confirm(isEdit ? "Are you sure you want to save changes to this catalog item?" : "Are you sure you want to add this item to the catalog?")) {
       return;
     }
 
@@ -232,7 +277,7 @@ export function UploadItemScreen() {
         <Button variant="ghost" size="icon" className="rounded-full" onClick={() => navigate(-1)}>
           <ArrowLeft className="h-5 w-5" />
         </Button>
-        <h2 className="text-lg font-bold">{isEdit ? 'Edit Product' : 'List New Item'}</h2>
+        <h2 className="text-lg font-bold">{isEdit ? 'Edit Product' : 'Add to Catalog'}</h2>
       </header>
 
       <div className="p-6 space-y-8">
@@ -461,7 +506,7 @@ export function UploadItemScreen() {
           disabled={!image || !price || !name}
         >
           {isEdit ? <Save className="h-6 w-6" /> : <Check className="h-6 w-6" />}
-          {isEdit ? 'Save Changes' : 'List For Sale'}
+          {isEdit ? 'Save Changes' : 'Add to Catalog'}
         </Button>
       </div>
 

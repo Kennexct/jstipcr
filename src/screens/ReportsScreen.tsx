@@ -1,0 +1,407 @@
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { ArrowLeft, Download, Printer, TrendingUp, Receipt, Wallet, FileSpreadsheet } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
+import { toast } from 'sonner';
+import { useMaster } from '../context/MasterContext';
+
+export function ReportsScreen() {
+  const navigate = useNavigate();
+  const { sales, expenses, catalogItems, tripSettings } = useMaster();
+  const [activeTab, setActiveTab] = useState<'sales' | 'expenses'>('sales');
+
+  const currencySettings = tripSettings?.currency || { code: 'SGD', manualRate: 13500 };
+
+  // Helper to resolve unit cost price in IDR if not saved in old invoices
+  const resolveItemCost = (itemName: string): number => {
+    const match = catalogItems.find(i => i.name.toLowerCase() === itemName.toLowerCase());
+    if (match) {
+      const itemCost = match.cost || 0;
+      const itemCurrency = match.currency || 'IDR';
+      const rate = currencySettings.code === itemCurrency ? (currencySettings.manualRate || 13500) : 1;
+      return Math.round(itemCost * rate);
+    }
+    return 0;
+  };
+
+  // Financial aggregates
+  const totalSalesVal = sales.reduce((acc, s) => acc + (s.total || 0), 0);
+  const totalExpensesVal = expenses.reduce((acc, e) => acc + (e.amount || 0), 0);
+  
+  // Total cost valuation across all item lines of sales
+  const totalCostVal = sales.reduce((acc, s) => {
+    const saleCost = s.items.reduce((sAcc: number, item: any) => {
+      const unitCost = item.cost || resolveItemCost(item.name);
+      return sAcc + (unitCost * item.qty);
+    }, 0);
+    return acc + saleCost;
+  }, 0);
+
+  const netProfitVal = totalSalesVal - totalExpensesVal;
+
+  const handleExportCSV = () => {
+    let headers: string[] = [];
+    let rows: any[][] = [];
+    let filename = "";
+
+    if (activeTab === 'sales') {
+      filename = `JStip_Sales_Report_${new Date().toISOString().split('T')[0]}.csv`;
+      headers = [
+        "Date", 
+        "Customer Name", 
+        "Product Name", 
+        "Qty", 
+        "Cost Price Per Item (IDR)", 
+        "Total Cost Price (IDR)", 
+        "Publish Price Per Item (IDR)", 
+        "Total Publish Price (IDR)", 
+        "Profit Margin (IDR)"
+      ];
+      
+      rows = sales.flatMap(sale => 
+        sale.items.map((item: any) => {
+          const itemCost = item.cost || resolveItemCost(item.name);
+          const totalCost = itemCost * item.qty;
+          const totalPublish = item.price * item.qty;
+          const margin = totalPublish - totalCost;
+          return [
+            sale.date || 'N/A',
+            sale.customerName,
+            item.name,
+            item.qty,
+            itemCost,
+            totalCost,
+            item.price,
+            totalPublish,
+            margin
+          ];
+        })
+      );
+    } else {
+      filename = `JStip_Expenses_Report_${new Date().toISOString().split('T')[0]}.csv`;
+      headers = ["Date", "Description", "Category", "Remarks", "Amount (IDR)"];
+      rows = expenses.map(exp => [
+        exp.date || 'N/A',
+        exp.description,
+        exp.category,
+        exp.notes || '',
+        exp.amount
+      ]);
+    }
+
+    const csvContent = "data:text/csv;charset=utf-8," 
+      + [headers, ...rows].map(row => row.map((cell: any) => `"${String(cell).replace(/"/g, '""')}"`).join(",")).join("\n");
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", filename);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    toast.success("Excel CSV Report exported successfully!");
+  };
+
+  const handlePrint = () => {
+    window.print();
+  };
+
+  return (
+    <div className="min-h-screen bg-[#f8fafc] text-slate-900 pb-16">
+      {/* Print Styles Injection */}
+      <style dangerouslySetInnerHTML={{__html: `
+        @media print {
+          body {
+            background-color: white !important;
+            color: black !important;
+            font-size: 10px !important;
+          }
+          .no-print {
+            display: none !important;
+          }
+          .print-header {
+            display: block !important;
+            margin-bottom: 20px !important;
+            text-align: center !important;
+          }
+          .print-table {
+            width: 100% !important;
+            border-collapse: collapse !important;
+            margin-top: 15px !important;
+          }
+          .print-table th, .print-table td {
+            border: 1px solid #cbd5e1 !important;
+            padding: 6px 8px !important;
+            text-align: left !important;
+          }
+          .print-table th {
+            background-color: #f1f5f9 !important;
+            font-weight: bold !important;
+          }
+        }
+      `}} />
+
+      {/* Screen Header */}
+      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b h-16 flex items-center px-4 gap-4 no-print">
+        <Button variant="ghost" size="icon" className="rounded-full" onClick={() => navigate(-1)}>
+          <ArrowLeft className="h-5 w-5" />
+        </Button>
+        <h2 className="text-lg font-black uppercase italic tracking-tight text-primary">Traveler Ledger Reports</h2>
+      </header>
+
+      {/* Main Container */}
+      <div className="max-w-md mx-auto p-4 space-y-6">
+        
+        {/* Printable Invoice Header (Hidden in UI, Visible on Print) */}
+        <div className="hidden print-header text-center space-y-1">
+          <h1 className="text-xl font-bold uppercase tracking-tight">JastipFlow Ledger Statement</h1>
+          <p className="text-xs text-slate-500 uppercase tracking-widest">Traveler Business Sourcing Records</p>
+          <p className="text-[10px] text-slate-400">Generated on {new Date().toLocaleDateString()} {new Date().toLocaleTimeString()}</p>
+          <div className="border-b-2 border-slate-900 my-4" />
+        </div>
+
+        {/* Aggregates Summary Cards */}
+        <div className="grid grid-cols-3 gap-3">
+          <Card className="border-none shadow-sm bg-white">
+            <CardContent className="p-3 space-y-1 text-left">
+              <span className="text-[8px] font-black text-slate-400 uppercase tracking-wider block">Gross Sales</span>
+              <span className="text-sm font-bold font-mono text-emerald-600 block">Rp {totalSalesVal.toLocaleString()}</span>
+            </CardContent>
+          </Card>
+          <Card className="border-none shadow-sm bg-white">
+            <CardContent className="p-3 space-y-1 text-left">
+              <span className="text-[8px] font-black text-slate-400 uppercase tracking-wider block">Expenses</span>
+              <span className="text-sm font-bold font-mono text-red-500 block">Rp {totalExpensesVal.toLocaleString()}</span>
+            </CardContent>
+          </Card>
+          <Card className="border-none shadow-sm bg-primary text-white">
+            <CardContent className="p-3 space-y-1 text-left">
+              <span className="text-[8px] font-black opacity-80 uppercase tracking-wider block">Net Margin</span>
+              <span className="text-sm font-black font-mono block">Rp {netProfitVal.toLocaleString()}</span>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Tab selection & export controls */}
+        <div className="flex items-center justify-between no-print">
+          <div className="bg-slate-200/60 p-1 rounded-2xl flex gap-1 border">
+            <button
+              onClick={() => setActiveTab('sales')}
+              className={`h-9 px-4 rounded-xl text-xs font-black uppercase transition-all flex items-center gap-1.5 ${
+                activeTab === 'sales' ? 'bg-white text-primary shadow-sm' : 'text-slate-500 hover:text-slate-800'
+              }`}
+            >
+              <TrendingUp className="h-3.5 w-3.5" /> Sales
+            </button>
+            <button
+              onClick={() => setActiveTab('expenses')}
+              className={`h-9 px-4 rounded-xl text-xs font-black uppercase transition-all flex items-center gap-1.5 ${
+                activeTab === 'expenses' ? 'bg-white text-primary shadow-sm' : 'text-slate-500 hover:text-slate-800'
+              }`}
+            >
+              <Receipt className="h-3.5 w-3.5" /> Expenses
+            </button>
+          </div>
+
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-9 w-9 rounded-xl border-slate-200"
+              onClick={handleExportCSV}
+              title="Export Excel (CSV)"
+            >
+              <FileSpreadsheet className="h-4.5 w-4.5 text-emerald-600" />
+            </Button>
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-9 w-9 rounded-xl border-slate-200"
+              onClick={handlePrint}
+              title="Print PDF"
+            >
+              <Printer className="h-4.5 w-4.5 text-primary" />
+            </Button>
+          </div>
+        </div>
+
+        {/* Sales Report Table Section */}
+        {activeTab === 'sales' && (
+          <section className="space-y-3">
+            <h3 className="text-xs font-black uppercase tracking-widest text-slate-500 pl-1 text-left print:block hidden">Sales Ledger Breakdown</h3>
+            <div className="bg-white border rounded-3xl overflow-hidden shadow-sm no-print">
+              <div className="p-4 border-b bg-slate-50/50 flex justify-between items-center">
+                <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">Recorded Sales Transactions</span>
+                <Badge variant="secondary" className="text-[9px] font-mono px-2 py-0.5 bg-slate-100">{sales.length} records</Badge>
+              </div>
+
+              {sales.length === 0 ? (
+                <div className="p-8 text-center text-slate-400 text-xs italic font-medium">No sales recorded yet.</div>
+              ) : (
+                <div className="divide-y divide-slate-100 max-h-[360px] overflow-y-auto pr-1">
+                  {sales.map((sale) => (
+                    <div key={sale.id} className="p-4 space-y-3">
+                      <div className="flex justify-between items-start">
+                        <div className="text-left">
+                          <h4 className="text-xs font-black uppercase tracking-tight text-slate-800">{sale.customerName}</h4>
+                          <span className="text-[9.5px] text-slate-400 font-bold uppercase">{sale.date || 'Today'}</span>
+                        </div>
+                        <span className="text-xs font-black text-emerald-600 font-mono">Rp {sale.total.toLocaleString()}</span>
+                      </div>
+
+                      <div className="space-y-1.5 pl-2 border-l-2 border-slate-100">
+                        {sale.items.map((item: any, idx: number) => {
+                          const unitCost = item.cost || resolveItemCost(item.name);
+                          const totalCost = unitCost * item.qty;
+                          const totalPublish = item.price * item.qty;
+                          const profit = totalPublish - totalCost;
+
+                          return (
+                            <div key={idx} className="text-[11px] font-semibold text-slate-650 text-slate-700 flex flex-col gap-0.5">
+                              <div className="flex justify-between font-bold text-slate-800 uppercase text-[10px]">
+                                <span>{item.qty}x {item.name}</span>
+                                <span>Rp {totalPublish.toLocaleString()}</span>
+                              </div>
+                              <div className="flex justify-between text-[9px] text-slate-400">
+                                <span>Cost/Item: Rp {unitCost.toLocaleString()} (Total Cost: Rp {totalCost.toLocaleString()})</span>
+                                <span className={profit >= 0 ? "text-emerald-500" : "text-red-500"}>
+                                  Margin: Rp {profit.toLocaleString()}
+                                </span>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Print Table (Only rendered when print is triggered) */}
+            <table className="hidden print-table">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Customer</th>
+                  <th>Item Name</th>
+                  <th>Qty</th>
+                  <th>Cost / Item</th>
+                  <th>Total Cost</th>
+                  <th>Publish / Item</th>
+                  <th>Total Publish</th>
+                  <th>Margin</th>
+                </tr>
+              </thead>
+              <tbody>
+                {sales.flatMap(sale => 
+                  sale.items.map((item: any, idx: number) => {
+                    const unitCost = item.cost || resolveItemCost(item.name);
+                    const totalCost = unitCost * item.qty;
+                    const totalPublish = item.price * item.qty;
+                    const margin = totalPublish - totalCost;
+                    return (
+                      <tr key={`${sale.id}-${idx}`}>
+                        <td>{sale.date || 'N/A'}</td>
+                        <td>{sale.customerName}</td>
+                        <td className="uppercase">{item.name}</td>
+                        <td className="font-mono">{item.qty}</td>
+                        <td className="font-mono">Rp {unitCost.toLocaleString()}</td>
+                        <td className="font-mono">Rp {totalCost.toLocaleString()}</td>
+                        <td className="font-mono">Rp {item.price.toLocaleString()}</td>
+                        <td className="font-mono">Rp {totalPublish.toLocaleString()}</td>
+                        <td className="font-mono font-bold">Rp {margin.toLocaleString()}</td>
+                      </tr>
+                    );
+                  })
+                )}
+                {sales.length === 0 && (
+                  <tr>
+                    <td colSpan={9} style={{textAlign: 'center', fontStyle: 'italic'}}>No sales recorded.</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </section>
+        )}
+
+        {/* Expenses Report Table Section */}
+        {activeTab === 'expenses' && (
+          <section className="space-y-3">
+            <h3 className="text-xs font-black uppercase tracking-widest text-slate-500 pl-1 text-left print:block hidden">Expenses Ledger Breakdown</h3>
+            <div className="bg-white border rounded-3xl overflow-hidden shadow-sm no-print">
+              <div className="p-4 border-b bg-slate-50/50 flex justify-between items-center">
+                <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">Operational Expenses Ledger</span>
+                <Badge variant="secondary" className="text-[9px] font-mono px-2 py-0.5 bg-slate-100">{expenses.length} records</Badge>
+              </div>
+
+              {expenses.length === 0 ? (
+                <div className="p-8 text-center text-slate-400 text-xs italic font-medium">No expenses logged yet.</div>
+              ) : (
+                <div className="divide-y divide-slate-100 max-h-[360px] overflow-y-auto pr-1">
+                  {expenses.map((exp) => (
+                    <div key={exp.id} className="p-4 flex items-center justify-between gap-4">
+                      <div className="text-left min-w-0 flex-1">
+                        <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+                          <h4 className="text-xs font-black uppercase tracking-tight text-slate-800 truncate">{exp.description}</h4>
+                          <Badge variant="ghost" className="text-[7.5px] font-black bg-red-50 text-red-600 border-none px-1 h-4 uppercase">
+                            {exp.category}
+                          </Badge>
+                        </div>
+                        {exp.notes && (
+                          <p className="text-[9.5px] text-slate-400 italic font-medium leading-none mb-1">
+                            &ldquo;{exp.notes}&rdquo;
+                          </p>
+                        )}
+                        <span className="text-[9px] text-slate-400 font-bold uppercase">{exp.date || 'Today'}</span>
+                      </div>
+                      <div className="text-right shrink-0">
+                        <span className="text-xs font-black text-red-605 text-red-600 font-mono">- Rp {exp.amount.toLocaleString()}</span>
+                        {exp.originalAmount && (
+                          <p className="text-[9px] text-slate-400 font-bold uppercase mt-0.5">
+                            {exp.originalSymbol} {exp.originalAmount.toLocaleString()}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Print Table (Only rendered when print is triggered) */}
+            <table className="hidden print-table">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Category</th>
+                  <th>Description</th>
+                  <th>Remarks / Notes</th>
+                  <th>Amount (IDR)</th>
+                </tr>
+              </thead>
+              <tbody>
+                {expenses.map((exp) => (
+                  <tr key={exp.id}>
+                    <td>{exp.date || 'N/A'}</td>
+                    <td className="uppercase">{exp.category}</td>
+                    <td className="uppercase">{exp.description}</td>
+                    <td>{exp.notes || '-'}</td>
+                    <td className="font-mono">Rp {exp.amount.toLocaleString()}</td>
+                  </tr>
+                ))}
+                {expenses.length === 0 && (
+                  <tr>
+                    <td colSpan={5} style={{textAlign: 'center', fontStyle: 'italic'}}>No expenses logged.</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </section>
+        )}
+      </div>
+    </div>
+  );
+}

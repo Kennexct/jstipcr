@@ -4,8 +4,6 @@ import {
   ArrowLeft, 
   Check, 
   MapPin, 
-  Calendar as CalendarIcon, 
-  Weight, 
   Globe,
   Settings2
 } from 'lucide-react';
@@ -17,6 +15,7 @@ import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
 import { useMaster } from '../context/MasterContext';
 import { fetchLiveExchangeRate } from '../lib/currency';
+import { cn } from '@/lib/utils';
 import { 
   Dialog,
   DialogContent,
@@ -45,6 +44,16 @@ const CURRENCIES = [
   { code: 'IDR', name: 'Indonesian Rupiah' }
 ];
 
+const COUNTRIES = [
+  { name: 'South Korea', currencyCode: 'KRW', currencySymbol: '₩', defaultRate: 11.7 },
+  { name: 'Singapore', currencyCode: 'SGD', currencySymbol: 'S$', defaultRate: 12100 },
+  { name: 'Japan', currencyCode: 'JPY', currencySymbol: '¥', defaultRate: 104.5 },
+  { name: 'Thailand', currencyCode: 'THB', currencySymbol: '฿', defaultRate: 442.0 },
+  { name: 'United States', currencyCode: 'USD', currencySymbol: '$', defaultRate: 16100 },
+  { name: 'Europe', currencyCode: 'EUR', currencySymbol: '€', defaultRate: 17400 },
+  { name: 'Indonesia', currencyCode: 'IDR', currencySymbol: 'Rp', defaultRate: 1.0 }
+];
+
 export function TripSettingsScreen() {
   const navigate = useNavigate();
   const { loading, tripSettings, saveSettings } = useMaster();
@@ -60,6 +69,9 @@ export function TripSettingsScreen() {
     updatedAt: new Date().toISOString()
   });
   const [payoutCurrency, setPayoutCurrency] = useState('IDR');
+  const [watermarkEnabled, setWatermarkEnabled] = useState(false);
+  const [watermarkImage, setWatermarkImage] = useState<string | null>(null);
+
   // Sync inputs with master context once loaded
   useEffect(() => {
     if (!loading && tripSettings) {
@@ -87,6 +99,10 @@ export function TripSettingsScreen() {
           }));
         });
       }
+      if (tripSettings.watermark) {
+        setWatermarkEnabled(!!tripSettings.watermark.enabled);
+        setWatermarkImage(tripSettings.watermark.image || null);
+      }
     }
   }, [loading, tripSettings]);
 
@@ -104,7 +120,11 @@ export function TripSettingsScreen() {
         ...settings,
         payout: payoutCurrency
       },
-      notifs: { push: true, email: false, orders: true, chat: true }
+      notifs: { push: true, email: false, orders: true, chat: true },
+      watermark: {
+        enabled: watermarkEnabled,
+        image: watermarkImage || ''
+      }
     };
     await saveSettings(updated);
     toast.success('Trip settings updated!');
@@ -128,14 +148,54 @@ export function TripSettingsScreen() {
           <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-muted-foreground ml-1">
              <MapPin className="h-3 w-3" /> Route Details
           </div>
-          <div className="space-y-4">
+          <div className="space-y-4 text-left">
             <div className="space-y-2">
-              <label className="text-[10px] font-bold text-muted-foreground ml-1">FROM</label>
+              <label className="text-[10px] font-bold text-muted-foreground ml-1">FROM (Origin City)</label>
               <Input value={origin} onChange={(e) => setOrigin(e.target.value)} className="h-12 rounded-xl bg-muted/30 border-none px-4" />
             </div>
             <div className="space-y-2">
-              <label className="text-[10px] font-bold text-muted-foreground ml-1">TO</label>
-              <Input value={destination} onChange={(e) => setDestination(e.target.value)} className="h-12 rounded-xl bg-muted/30 border-none px-4" />
+              <label className="text-[10px] font-bold text-muted-foreground ml-1">TO (Destination Country)</label>
+              <select 
+                value={destination} 
+                onChange={async (e) => {
+                  const newDest = e.target.value;
+                  setDestination(newDest);
+                  const matched = COUNTRIES.find(c => c.name === newDest);
+                  if (matched && matched.currencyCode !== 'IDR') {
+                    if (window.confirm(`Destination country changed to ${newDest}. Automatically change shopping currency to ${matched.currencyCode} and fetch live rate?`)) {
+                      toast.info(`Fetching live rate for ${matched.currencyCode}...`);
+                      try {
+                        const rate = await fetchLiveExchangeRate(matched.currencyCode);
+                        const symbol = matched.currencySymbol;
+                        const manualDefault = Math.round(rate * 1.03);
+                        setSettings({
+                          code: matched.currencyCode,
+                          symbol: symbol,
+                          realtimeRate: rate,
+                          manualRate: manualDefault,
+                          updatedAt: new Date().toISOString()
+                        });
+                        toast.success(`Currency changed to ${matched.currencyCode}. Live rate: Rp ${rate.toLocaleString()}`);
+                      } catch (err) {
+                        toast.error(`Failed to fetch live rate. Using default fallback.`);
+                        setSettings({
+                          code: matched.currencyCode,
+                          symbol: matched.currencySymbol,
+                          realtimeRate: matched.defaultRate,
+                          manualRate: Math.round(matched.defaultRate * 1.03),
+                          updatedAt: new Date().toISOString()
+                        });
+                      }
+                    }
+                  }
+                }}
+                className="w-full h-12 rounded-xl bg-muted/30 border-none px-4 font-bold text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary"
+              >
+                <option value="">Select Destination Country</option>
+                {COUNTRIES.map(c => (
+                  <option key={c.name} value={c.name}>{c.name}</option>
+                ))}
+              </select>
             </div>
           </div>
         </section>
@@ -152,7 +212,7 @@ export function TripSettingsScreen() {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div className="h-10 w-10 rounded-full bg-background flex items-center justify-center font-bold text-xs ring-4 ring-primary/5 shadow-sm">{settings.code}</div>
-                    <div>
+                    <div className="text-left">
                       <p className="text-sm font-bold">Shopping Currency</p>
                       <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-tighter">
                         {getCurrencyName(settings.code)}
@@ -175,7 +235,7 @@ export function TripSettingsScreen() {
                             className="justify-between h-12 px-4 rounded-xl font-bold"
                             onClick={async () => {
                               if (!window.confirm(`Are you sure you want to change the shopping currency to ${curr.code}? This will fetch and calculate a new exchange rate.`)) {
-                                return;
+                                  return;
                               }
                               toast.info(`Fetching live rate for ${curr.code}...`);
                               const rate = await fetchLiveExchangeRate(curr.code);
@@ -205,7 +265,7 @@ export function TripSettingsScreen() {
                 
                 <Separator className="bg-background" />
 
-                <div className="space-y-3">
+                <div className="space-y-3 text-left">
                   <div className="flex items-center justify-between">
                     <label className="text-xs font-bold text-muted-foreground uppercase tracking-tight">Manual Rate (1 {settings.code} to IDR)</label>
                     <Badge variant="outline" className="text-[10px] bg-green-50 text-green-700 border-none px-2">Realtime: {settings.realtimeRate.toLocaleString()}</Badge>
@@ -235,7 +295,7 @@ export function TripSettingsScreen() {
              <div className="flex items-center justify-between p-4 rounded-2xl bg-muted/30">
                 <div className="flex items-center gap-3">
                   <div className="h-10 w-10 rounded-full bg-background flex items-center justify-center font-bold text-xs ring-4 ring-primary/5">{payoutCurrency}</div>
-                  <div>
+                  <div className="text-left">
                     <p className="text-sm font-bold">Payout Currency</p>
                     <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-tighter">{getCurrencyName(payoutCurrency)}</p>
                   </div>
@@ -276,13 +336,88 @@ export function TripSettingsScreen() {
           </div>
         </section>
 
+        <Separator />
+
+        {/* Photo Watermark Settings */}
+        <section className="space-y-4 text-left">
+          <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-muted-foreground ml-1">
+             <Settings2 className="h-3 w-3" /> Photo Watermark
+          </div>
+          <div className="p-4 rounded-2xl bg-muted/30 space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5 text-left">
+                <p className="text-sm font-bold">Enable Photo Watermark</p>
+                <p className="text-[10px] text-muted-foreground font-medium">Overlay watermark logo on catalog product photos</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setWatermarkEnabled(!watermarkEnabled)}
+                className={cn(
+                  "h-6 w-11 rounded-full relative p-1 cursor-pointer transition-colors shrink-0",
+                  watermarkEnabled ? "bg-primary" : "bg-slate-300"
+                )}
+              >
+                <div className={cn(
+                  "h-4 w-4 bg-white rounded-full transition-all",
+                  watermarkEnabled ? "ml-auto" : "ml-0"
+                )} />
+              </button>
+            </div>
+
+            {watermarkEnabled && (
+              <div className="space-y-3 pt-2 border-t border-background">
+                <label className="text-[10px] font-bold text-muted-foreground uppercase">Upload Watermark Image</label>
+                <div className="flex items-center gap-4">
+                  {watermarkImage ? (
+                    <div className="relative h-16 w-16 rounded-xl border overflow-hidden shrink-0 bg-white shadow-sm flex items-center justify-center p-1">
+                      <img src={watermarkImage} alt="Watermark Preview" className="h-full w-full object-contain" />
+                      <button
+                        type="button"
+                        onClick={() => setWatermarkImage(null)}
+                        className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-red-500 text-white flex items-center justify-center text-[10px] shadow-md border border-white"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ) : (
+                    <label className="h-16 w-16 rounded-xl border border-dashed flex flex-col items-center justify-center cursor-pointer hover:bg-slate-50 transition-colors shrink-0 bg-background">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            const reader = new FileReader();
+                            reader.onloadend = () => {
+                              setWatermarkImage(reader.result as string);
+                              toast.success('Watermark logo selected!');
+                            };
+                            reader.readAsDataURL(file);
+                          }
+                        }}
+                      />
+                      <span className="text-[10px] font-bold text-muted-foreground">Upload</span>
+                    </label>
+                  )}
+                  <p className="text-[10px] text-muted-foreground leading-normal font-medium text-left">
+                    Upload a transparent PNG logo. When toggle is ON, this logo will be automatically overlaid on the bottom right corner of product photos.
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
+        </section>
+
+        <Separator />
+
         {/* Operational Status */}
         <section className="space-y-4">
           <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-muted-foreground ml-1">
              <Settings2 className="h-3 w-3" /> Operational Status
           </div>
           <div className="flex items-center justify-between p-4 rounded-2xl bg-primary/5 border border-primary/10">
-            <div className="space-y-1">
+            <div className="space-y-1 text-left">
               <p className="text-sm font-bold text-primary">Accepting Requests</p>
               <p className="text-[10px] text-primary/60 font-medium">Toggle this if you're no longer taking orders</p>
             </div>

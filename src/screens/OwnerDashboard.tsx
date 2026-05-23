@@ -86,6 +86,7 @@ export function OwnerDashboard() {
   const [selectedItemId, setSelectedItemId] = useState('');
   const [productSearchText, setProductSearchText] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [tempItemCost, setTempItemCost] = useState('0');
   const [tempItemPrice, setTempItemPrice] = useState('250000');
   const [tempItemLocation, setTempItemLocation] = useState('Seoul');
   const [selectedQty, setSelectedQty] = useState(1);
@@ -189,6 +190,10 @@ export function OwnerDashboard() {
       return;
     }
 
+    const itemCurrency = matchedProduct.currency || currencySettings.code;
+    const rate = currencySettings.code === itemCurrency ? (currencySettings.manualRate || 13500) : 1;
+    const costInIdr = Math.round((matchedProduct.cost || 0) * rate);
+
     const alreadyInDraftIdx = draftSaleItems.findIndex(i => i.productId === selectedItemId);
     if (alreadyInDraftIdx > -1) {
       const updated = [...draftSaleItems];
@@ -201,6 +206,7 @@ export function OwnerDashboard() {
           productId: selectedItemId,
           name: matchedProduct.name,
           price: matchedProduct.price,
+          cost: costInIdr,
           qty: selectedQty
         }
       ]);
@@ -306,41 +312,91 @@ export function OwnerDashboard() {
     <div className="min-h-screen bg-muted/5 pb-20">
       <header className="p-6 space-y-4">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Avatar className="h-10 w-10 border ring-2 ring-primary/5">
-              <AvatarFallback className="font-bold bg-primary/10 text-primary">
-                {(currentUser?.businessName || currentUser?.username || 'JF').substring(0, 2).toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
-            <div className="space-y-0.5 text-left">
-              <h2 className="text-sm font-black text-slate-800 leading-none">
-                {currentUser?.businessName || currentUser?.username}
-              </h2>
-              <div className="flex items-center gap-1">
-                <Badge variant="ghost" className="h-4 text-[7px] font-black uppercase bg-primary/10 text-primary border-none px-1 rounded-md">
-                  Star Traveler
-                </Badge>
-                <span className="text-[9px] text-muted-foreground">• Active</span>
+          <Dialog>
+            <DialogTrigger asChild>
+              <div className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-all select-none">
+                <Avatar className="h-10 w-10 border ring-2 ring-primary/5">
+                  <AvatarFallback className="font-bold bg-primary/10 text-primary">
+                    {(currentUser?.businessName || currentUser?.username || 'JF').substring(0, 2).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="space-y-0.5 text-left">
+                  <h2 className="text-sm font-black text-slate-800 leading-none">
+                    {currentUser?.businessName || currentUser?.username}
+                  </h2>
+                  <div className="flex items-center gap-1">
+                    <Badge variant="ghost" className="h-4 text-[7px] font-black uppercase bg-primary/10 text-primary border-none px-1 rounded-md">
+                      Star Traveler
+                    </Badge>
+                    <span className="text-[9px] text-muted-foreground">• Active</span>
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
+            </DialogTrigger>
+            <DialogContent className="rounded-3xl border-none max-w-[90%] md:max-w-md bg-white p-6">
+              <DialogHeader className="text-left pb-2">
+                <DialogTitle className="text-lg font-black tracking-tight uppercase italic text-primary">
+                  Merchant Profile
+                </DialogTitle>
+                <DialogDescription className="text-xs text-muted-foreground font-semibold">
+                  Detailed information about your traveler business account.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4 py-2">
+                <div className="flex items-center gap-4 p-4 rounded-2xl bg-slate-50 border">
+                  <Avatar className="h-14 w-14 border ring-4 ring-primary/10">
+                    <AvatarFallback className="font-black text-lg bg-primary/15 text-primary">
+                      {(currentUser?.businessName || currentUser?.username || 'JF').substring(0, 2).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="space-y-1">
+                    <h3 className="text-base font-black text-slate-800 leading-none">
+                      {currentUser?.businessName || currentUser?.username}
+                    </h3>
+                    <p className="text-xs font-bold text-muted-foreground">Username: @{currentUser?.username}</p>
+                    <div className="flex gap-1.5 items-center mt-1">
+                      <Badge className="h-4 text-[7px] bg-primary text-white border-none px-1.5 uppercase font-bold tracking-wider">
+                        Star Traveler
+                      </Badge>
+                      <span className="text-[10px] text-emerald-600 font-bold">• Subscription Active</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-2.5">
+                  <div className="flex justify-between items-center text-xs p-2.5 bg-muted/20 rounded-xl">
+                    <span className="font-bold text-slate-500">Account Type</span>
+                    <span className="font-black text-slate-800 uppercase tracking-tight">Traveler Merchant</span>
+                  </div>
+                  <div className="flex justify-between items-center text-xs p-2.5 bg-muted/20 rounded-xl">
+                    <span className="font-bold text-slate-500">Member Since</span>
+                    <span className="font-black text-slate-800">
+                      {currentUser?.createdAt ? new Date(currentUser.createdAt).toLocaleDateString() : '2026'}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="pt-2">
+                  <Button 
+                    onClick={() => {
+                      if (window.confirm("Are you sure you want to log out from your merchant console?")) {
+                        logout();
+                        navigate('/login');
+                      }
+                    }} 
+                    variant="outline"
+                    className="w-full h-12 rounded-2xl font-black uppercase text-xs gap-2 text-red-500 border-red-100 hover:bg-red-50"
+                  >
+                    <LogOut className="h-4.5 w-4.5" /> Sign Out
+                  </Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
+
           <div className="flex items-center gap-2">
             <Button variant="outline" size="icon" className="rounded-full h-9 w-9" onClick={() => navigate('/trip-settings')} title="Trip Settings">
-              <Settings className="h-4.5 w-4.5 text-slate-650 text-slate-600" />
-            </Button>
-            <Button 
-              variant="outline" 
-              size="icon" 
-              className="rounded-full h-9 w-9 text-red-500 hover:text-red-650 hover:text-red-600 hover:bg-red-50 border-red-100" 
-              onClick={() => {
-                if (window.confirm("Are you sure you want to log out from your merchant console?")) {
-                  logout();
-                  navigate('/login');
-                }
-              }}
-              title="Log Out"
-            >
-              <LogOut className="h-4.5 w-4.5" />
+              <Settings className="h-4.5 w-4.5 text-slate-650 text-slate-650 text-slate-600" />
             </Button>
           </div>
         </div>
@@ -375,7 +431,6 @@ export function OwnerDashboard() {
         <section className="space-y-4">
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-bold uppercase tracking-widest text-muted-foreground">Active Trip</h3>
-            <Link to="/trip-settings" className="text-xs font-bold text-primary">Settings</Link>
           </div>
           <Card className="border-none shadow-lg shadow-primary/5 overflow-hidden">
             <div className="bg-gradient-to-r from-primary to-primary/80 p-4 text-primary-foreground">
@@ -475,35 +530,45 @@ export function OwnerDashboard() {
         {/* Quick Actions */}
         <section className="space-y-4">
           <h3 className="text-sm font-bold uppercase tracking-widest text-muted-foreground">Quick Actions</h3>
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-4 gap-2">
             <button 
               onClick={() => navigate('/owner/list-item')}
-              className="flex flex-col items-center justify-center gap-2 p-3 bg-white rounded-3xl shadow-sm hover:shadow-md transition-all active:scale-95 border"
+              className="flex flex-col items-center justify-center gap-2 p-2 bg-white rounded-2xl shadow-sm hover:shadow-md transition-all active:scale-95 border"
             >
-              <div className="h-10 w-10 rounded-2xl bg-orange-50 text-orange-600 flex items-center justify-center">
-                <Plus className="h-5 w-5" />
+              <div className="h-9 w-9 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center">
+                <Plus className="h-4 w-4" />
               </div>
-              <span className="text-[10px] font-bold uppercase tracking-tight text-slate-700">Sell Item</span>
+              <span className="text-[9px] font-bold uppercase tracking-tight text-slate-700">Sell Item</span>
             </button>
             
             <button 
               onClick={() => setIsExpenseOpen(true)}
-              className="flex flex-col items-center justify-center gap-2 p-3 bg-white rounded-3xl shadow-sm hover:shadow-md transition-all active:scale-95 border"
+              className="flex flex-col items-center justify-center gap-2 p-2 bg-white rounded-2xl shadow-sm hover:shadow-md transition-all active:scale-95 border"
             >
-              <div className="h-10 w-10 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center">
-                <Receipt className="h-5 w-5" />
+              <div className="h-9 w-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
+                <Receipt className="h-4 w-4" />
               </div>
-              <span className="text-[10px] font-bold uppercase tracking-tight text-slate-700">Expenses</span>
+              <span className="text-[9px] font-bold uppercase tracking-tight text-slate-700">Expenses</span>
             </button>
             
             <button 
               onClick={() => setIsSaleOpen(true)}
-              className="flex flex-col items-center justify-center gap-2 p-3 bg-white rounded-3xl shadow-sm hover:shadow-md transition-all active:scale-95 border text-primary"
+              className="flex flex-col items-center justify-center gap-2 p-2 bg-white rounded-2xl shadow-sm hover:shadow-md transition-all active:scale-95 border text-primary"
             >
-              <div className="h-10 w-10 rounded-2xl bg-primary/10 flex items-center justify-center">
-                <ShoppingCart className="h-5 w-5" />
+              <div className="h-9 w-9 rounded-xl bg-primary/10 flex items-center justify-center">
+                <ShoppingCart className="h-4 w-4" />
               </div>
-              <span className="text-[10px] font-bold uppercase tracking-tight">Record Sale</span>
+              <span className="text-[9px] font-bold uppercase tracking-tight">Record Sale</span>
+            </button>
+
+            <button 
+              onClick={() => navigate('/reports')}
+              className="flex flex-col items-center justify-center gap-2 p-2 bg-white rounded-2xl shadow-sm hover:shadow-md transition-all active:scale-95 border text-[#0f62fe]"
+            >
+              <div className="h-9 w-9 rounded-xl bg-blue-50/70 text-[#0f62fe] flex items-center justify-center">
+                <TrendingUp className="h-4 w-4" />
+              </div>
+              <span className="text-[9px] font-bold uppercase tracking-tight text-slate-700">Reports</span>
             </button>
           </div>
         </section>
@@ -741,7 +806,18 @@ export function OwnerDashboard() {
                       <p className="text-[9px] text-slate-600 leading-normal">
                         Optionally add "{productSearchText}" directly to the travel Wishlist board so traveler can acquire it:
                       </p>
-                      <div className="grid grid-cols-2 gap-2 mt-1">
+                      <div className="grid grid-cols-3 gap-2 mt-1">
+                        <div className="space-y-0.5">
+                          <label className="text-[8px] font-bold text-slate-500 uppercase">Cost ({currencySettings.code})</label>
+                          <Input 
+                            type="number"
+                            placeholder="e.g. 15"
+                            value={tempItemCost}
+                            onChange={e => setTempItemCost(e.target.value)}
+                            inputMode="numeric"
+                            className="h-8 text-[11px] font-bold bg-white"
+                          />
+                        </div>
                         <div className="space-y-0.5">
                           <label className="text-[8px] font-bold text-slate-500 uppercase">Est Price (Rp)</label>
                           <Input 
@@ -754,9 +830,9 @@ export function OwnerDashboard() {
                           />
                         </div>
                         <div className="space-y-0.5">
-                          <label className="text-[8px] font-bold text-slate-500 uppercase">Origin Country</label>
+                          <label className="text-[8px] font-bold text-slate-500 uppercase">Origin</label>
                           <Input 
-                            placeholder="e.g. South Korea"
+                            placeholder="e.g. Seoul"
                             value={tempItemLocation}
                             onChange={e => setTempItemLocation(e.target.value)}
                             className="h-8 text-[11px] font-bold bg-white"
@@ -795,9 +871,9 @@ export function OwnerDashboard() {
                               id: newId,
                               name: productSearchText.trim(),
                               price: priceNum,
+                              cost: Number(tempItemCost) || 0,
+                              currency: currencySettings.code,
                               image: '',
-                              cost: 0,
-                              currency: 'IDR',
                               status: 'active'
                             };
                             await saveItem(newCatItem);

@@ -9,6 +9,7 @@ import { OwnerRequestDetailScreen } from './screens/OwnerRequestDetailScreen';
 import { StorefrontScreen } from './screens/StorefrontScreen';
 import { LoginScreen } from './screens/LoginScreen';
 import { SignUpScreen } from './screens/SignUpScreen';
+import { ReportsScreen } from './screens/ReportsScreen';
 import { MasterProvider, useMaster } from './context/MasterContext';
 
 function RequireAuth() {
@@ -51,6 +52,7 @@ export default function App() {
               <Route path="owner/edit-item/:id" element={<UploadItemScreen />} />
               <Route path="owner/request/:id" element={<OwnerRequestDetailScreen />} />
               <Route path="trip-settings" element={<TripSettingsScreen />} />
+              <Route path="reports" element={<ReportsScreen />} />
             </Route>
           </Route>
 
