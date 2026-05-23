@@ -49,6 +49,9 @@ export function OwnerInventoryScreen() {
   };
 
   const handleRemove = async (id: string) => {
+    if (!window.confirm("Are you sure you want to remove this item from the catalog?")) {
+      return;
+    }
     try {
       await db.removeItem(id);
       setInventory(prev => prev.filter(item => item.id !== id));

@@ -113,6 +113,9 @@ export function ProfileScreen() {
   }, [tripSettings, isSettingsOpen]);
 
   const handleSaveSettings = async () => {
+    if (!window.confirm("Are you sure you want to save these traveler configurations?")) {
+      return;
+    }
     const rate = await fetchLiveExchangeRate(shoppingCurrency);
     const updated = {
       trip: {
@@ -151,6 +154,9 @@ export function ProfileScreen() {
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      if (!window.confirm("Are you sure you want to change your profile photo?")) {
+        return;
+      }
       const reader = new FileReader();
       reader.onloadend = () => {
         const base64 = reader.result as string;
@@ -373,6 +379,7 @@ export function ProfileScreen() {
                       placeholder="e.g. 15" 
                       value={utilizationLimit}
                       onChange={e => setUtilizationLimit(e.target.value)}
+                      inputMode="numeric"
                       className="h-11 rounded-xl bg-muted/30 border-none font-bold text-sm text-slate-800" 
                     />
                   </div>
@@ -390,6 +397,9 @@ export function ProfileScreen() {
                       value={shoppingCurrency}
                       onChange={async (e) => {
                         const newCode = e.target.value;
+                        if (!window.confirm(`Are you sure you want to change the shopping currency to ${newCode}? This will fetch and calculate a new exchange rate.`)) {
+                          return;
+                        }
                         setShoppingCurrency(newCode);
                         toast.info(`Fetching live rate for ${newCode}...`);
                         const rate = await fetchLiveExchangeRate(newCode);
@@ -415,6 +425,7 @@ export function ProfileScreen() {
                         placeholder="e.g. 13.500" 
                         value={manualRate === '' ? '' : Number(manualRate.replace(/[^0-9]/g, '')).toLocaleString()}
                         onChange={e => setManualRate(e.target.value.replace(/[^0-9]/g, ''))}
+                        inputMode="numeric"
                         className="h-11 pl-10 rounded-xl bg-muted/30 border-none font-bold text-sm text-slate-800" 
                       />
                     </div>
@@ -426,7 +437,14 @@ export function ProfileScreen() {
                     </label>
                     <select 
                       value={payoutCurrency}
-                      onChange={e => setPayoutCurrency(e.target.value)}
+                      onChange={(e) => {
+                        const newCode = e.target.value;
+                        if (!window.confirm(`Are you sure you want to change the settlement payout currency to ${newCode}?`)) {
+                          return;
+                        }
+                        setPayoutCurrency(newCode);
+                        toast.success(`Payout currency updated to ${newCode}`);
+                      }}
                       className="w-full h-11 px-3 rounded-xl bg-muted/30 border-none font-bold text-sm text-slate-800 outline-none"
                     >
                       <option value="IDR">Indonesian Rupiah (IDR)</option>

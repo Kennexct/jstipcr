@@ -201,6 +201,10 @@ export function UploadItemScreen() {
       return;
     }
 
+    if (!window.confirm(isEdit ? "Are you sure you want to save changes to this catalog item?" : "Are you sure you want to list this new catalog item?")) {
+      return;
+    }
+
     const itemToSave = {
       id: id || 'item_' + Date.now(),
       name: name.trim(),
@@ -389,6 +393,7 @@ export function UploadItemScreen() {
                     className="h-14 pl-10 rounded-2xl bg-background border-none text-lg font-bold"
                     value={price}
                     onChange={(e) => setPrice(e.target.value)}
+                    inputMode="decimal"
                   />
                 </div>
                 {basePriceIdr > 0 && (
@@ -409,6 +414,7 @@ export function UploadItemScreen() {
                     className="h-14 pl-10 rounded-2xl bg-background border-2 border-primary/20 text-lg font-bold text-primary focus:border-primary"
                     value={publishPrice}
                     onChange={(e) => setPublishPrice(e.target.value)}
+                    inputMode="numeric"
                   />
                 </div>
               </div>

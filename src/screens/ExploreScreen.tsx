@@ -93,6 +93,9 @@ export function ExploreScreen() {
       toast.error('Please fill in required fields');
       return;
     }
+    if (!window.confirm(`Are you sure you want to create a new wishlist request for "${formName}" with budget Rp ${Number(formBudget.replace(/[^0-9]/g, '')).toLocaleString()}?`)) {
+      return;
+    }
     const newEntry: WishlistItem = {
       id: 'w_' + Date.now(),
       name: formName,
@@ -121,6 +124,9 @@ export function ExploreScreen() {
   const handleUpdateStatus = async (id: string, newStatus: 'find' | 'found' | 'out of stock' | 'cancel' | 'hold') => {
     const matchedItem = myWishlist.find(item => item.id === id);
     if (!matchedItem) return;
+    if (!window.confirm(`Are you sure you want to change the status of "${matchedItem.name}" to ${newStatus.toUpperCase()}?`)) {
+      return;
+    }
     const updatedItem = { ...matchedItem, status: newStatus };
 
     try {
@@ -132,7 +138,12 @@ export function ExploreScreen() {
   };
 
   const handleToggleChecklistBoughtState = (id: string) => {
-    if (boughtIds.includes(id)) {
+    const isCurrentlyBought = boughtIds.includes(id);
+    const action = isCurrentlyBought ? 'mark this item as UNBOUGHT (pending)' : 'mark this item as BOUGHT (acquired)';
+    if (!window.confirm(`Are you sure you want to ${action}?`)) {
+      return;
+    }
+    if (isCurrentlyBought) {
       toast.info('Marked item as pending purchase');
     } else {
       toast.success('Confirmed item as acquired');
@@ -421,6 +432,7 @@ export function ExploreScreen() {
                       placeholder="e.g. 450000" 
                       value={formBudget}
                       onChange={e => setFormBudget(e.target.value)}
+                      inputMode="numeric"
                       className="h-12 pl-12 rounded-xl bg-muted/30 border-none font-bold placeholder:font-normal text-sm" 
                     />
                   </div>

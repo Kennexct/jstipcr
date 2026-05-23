@@ -123,6 +123,9 @@ export function OwnerDashboard() {
       toast.error('Category already exists');
       return;
     }
+    if (!window.confirm(`Are you sure you want to add the expense category "${cleanCat}"?`)) {
+      return;
+    }
     setExpenseCategories([...expenseCategories, cleanCat]);
     setExpenseCategory(cleanCat);
     setNewCatName('');
@@ -154,6 +157,10 @@ export function OwnerDashboard() {
       originalSymbol: currentCurrency.code !== 'IDR' ? currentCurrency.symbol : undefined,
       date: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     };
+
+    if (!window.confirm(`Are you sure you want to record this expense of ${currentCurrency.symbol} ${enteredAmount.toLocaleString()} (${amountInIdr.toLocaleString()} IDR) under "${expenseCategory}"?`)) {
+      return;
+    }
 
     try {
       await saveExpense(newExpense);
@@ -237,6 +244,10 @@ export function OwnerDashboard() {
       total: totalRevenue,
       date: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     };
+
+    if (!window.confirm(`Are you sure you want to record this sale of Rp ${totalRevenue.toLocaleString()} for customer "${customerName.trim()}"?`)) {
+      return;
+    }
 
     try {
       await saveSale(newSale);
@@ -506,6 +517,7 @@ export function OwnerDashboard() {
                     placeholder={`e.g. ${expenseCurrency === 'KRW' ? '12000' : '150000'}`} 
                     value={expenseAmount}
                     onChange={e => setExpenseAmount(e.target.value)}
+                    inputMode="numeric"
                     className="h-11 pl-20 rounded-xl bg-muted/30 border-none font-bold text-sm text-slate-800" 
                   />
                 </div>
@@ -704,6 +716,7 @@ export function OwnerDashboard() {
                             placeholder="e.g. 250000"
                             value={tempItemPrice}
                             onChange={e => setTempItemPrice(e.target.value)}
+                            inputMode="numeric"
                             className="h-8 text-[11px] font-bold bg-white"
                           />
                         </div>
@@ -724,6 +737,10 @@ export function OwnerDashboard() {
                           const priceNum = parseInt(tempItemPrice) || 0;
                           if (priceNum <= 0) {
                             toast.error('Please enter a target price budget');
+                            return;
+                          }
+                          
+                          if (!window.confirm(`Are you sure you want to add "${productSearchText.trim()}" to the wishlist and select it for this sale?`)) {
                             return;
                           }
                           
@@ -785,6 +802,7 @@ export function OwnerDashboard() {
                         min="1"
                         value={selectedQty}
                         onChange={e => setSelectedQty(Math.max(1, parseInt(e.target.value) || 1))}
+                        inputMode="numeric"
                         className="h-9 text-center bg-white border font-black text-xs w-12 text-slate-800" 
                       />
                       <Button 

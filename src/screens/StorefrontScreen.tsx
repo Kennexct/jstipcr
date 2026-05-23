@@ -94,6 +94,10 @@ export function StorefrontScreen() {
       return;
     }
 
+    if (!window.confirm(`Are you sure you want to submit this sourcing request for "${item.name}" with a budget of Rp ${budgetNum.toLocaleString()}?`)) {
+      return;
+    }
+
     const newRequest = {
       id: 'wish_' + Date.now(),
       name: item.name,
@@ -309,8 +313,9 @@ export function StorefrontScreen() {
                 <span className="absolute left-4 top-1/2 -translate-y-1/2 text-xs font-black text-slate-500">Rp</span>
                 <Input 
                   placeholder="0"
-                  value={clientBudget}
-                  onChange={e => setClientBudget(e.target.value)}
+                  value={clientBudget === '' ? '' : Number(clientBudget.replace(/[^0-9]/g, '')).toLocaleString()}
+                  onChange={e => setClientBudget(e.target.value.replace(/[^0-9]/g, ''))}
+                  inputMode="numeric"
                   className="h-11 pl-10 rounded-xl bg-muted/30 border-none font-bold text-sm text-slate-850 text-slate-800" 
                 />
               </div>

@@ -91,6 +91,9 @@ export function TripSettingsScreen() {
   }, [loading, tripSettings]);
 
   const handleSave = async () => {
+    if (!window.confirm("Are you sure you want to save these trip settings?")) {
+      return;
+    }
     const updated = {
       trip: {
         origin,
@@ -171,6 +174,9 @@ export function TripSettingsScreen() {
                             variant={settings.code === curr.code ? 'default' : 'ghost'}
                             className="justify-between h-12 px-4 rounded-xl font-bold"
                             onClick={async () => {
+                              if (!window.confirm(`Are you sure you want to change the shopping currency to ${curr.code}? This will fetch and calculate a new exchange rate.`)) {
+                                return;
+                              }
                               toast.info(`Fetching live rate for ${curr.code}...`);
                               const rate = await fetchLiveExchangeRate(curr.code);
                               const symbol = CURRENCY_SYMBOLS[curr.code] || '$';
@@ -214,6 +220,7 @@ export function TripSettingsScreen() {
                           const cleaned = e.target.value.replace(/[^0-9]/g, '');
                           setSettings({...settings, manualRate: Number(cleaned) || 0});
                         }}
+                        inputMode="numeric"
                         className="h-12 pl-10 rounded-xl bg-background border-none font-bold text-lg"
                       />
                     </div>
@@ -247,7 +254,13 @@ export function TripSettingsScreen() {
                             key={curr.code}
                             variant={payoutCurrency === curr.code ? 'default' : 'ghost'}
                             className="justify-between h-12 px-4 rounded-xl font-bold"
-                            onClick={() => setPayoutCurrency(curr.code)}
+                            onClick={() => {
+                              if (!window.confirm(`Are you sure you want to set the settlement payout currency to ${curr.code}?`)) {
+                                return;
+                              }
+                              setPayoutCurrency(curr.code);
+                              toast.success(`Payout currency updated to ${curr.code}`);
+                            }}
                           >
                             <span className="flex items-center gap-3">
                                <span className="opacity-40">{curr.code}</span>

@@ -69,6 +69,11 @@ export function OwnerRequestDetailScreen() {
   const [paymentStatus, setPaymentStatus] = useState<'unpaid' | 'paid' | 'partial'>('unpaid');
 
   const updateItemStatus = (itemId: string, status: WishlistItem['status']) => {
+    const item = items.find(i => i.id === itemId);
+    const itemName = item ? item.name : 'this item';
+    if (!window.confirm(`Are you sure you want to change the status of "${itemName}" to ${status.toUpperCase().replace('_', ' ')}?`)) {
+      return;
+    }
     setItems(items.map(item => item.id === itemId ? { ...item, status, logs: [...(item.logs || []), `Status: ${status} at ${new Date().toLocaleTimeString()}`] } : item));
     toast.success(`Item status updated to ${status.replace('_', ' ')}`);
   };
@@ -80,6 +85,9 @@ export function OwnerRequestDetailScreen() {
   const handleAddItem = () => {
     if (!newItemData.name) {
       toast.error('Please enter an item name');
+      return;
+    }
+    if (!window.confirm(`Are you sure you want to add "${newItemData.name}" to this request?`)) {
       return;
     }
     const newItem: WishlistItem = {
@@ -217,6 +225,7 @@ export function OwnerRequestDetailScreen() {
                           placeholder="0.00" 
                           value={newItemData.cost || ''}
                           onChange={(e) => setNewItemData({ ...newItemData, cost: Number(e.target.value) })}
+                          inputMode="decimal"
                           className="h-14 pl-12 rounded-2xl bg-muted/30 border-none font-bold" 
                         />
                       </div>
@@ -230,6 +239,7 @@ export function OwnerRequestDetailScreen() {
                           placeholder="0" 
                           value={newItemData.price || ''}
                           onChange={(e) => setNewItemData({ ...newItemData, price: Number(e.target.value) })}
+                          inputMode="numeric"
                           className="h-14 pl-12 rounded-2xl bg-muted/30 border-none font-bold" 
                         />
                       </div>
@@ -266,7 +276,7 @@ export function OwnerRequestDetailScreen() {
                             onChange={(e) => updateItemField(item.id, 'name', e.target.value)}
                           />
                           
-                          <div className="grid grid-cols-2 gap-4">
+                           <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-1">
                               <label className="text-[8px] font-bold text-muted-foreground uppercase opacity-70">Foreign Cost ({item.currency})</label>
                               <div className="flex items-center gap-1.5 h-8 bg-blue-50/50 rounded-lg px-2 border border-blue-100">
@@ -276,6 +286,7 @@ export function OwnerRequestDetailScreen() {
                                   className="text-xs font-bold bg-transparent border-none focus:ring-0 w-full p-0 text-blue-700"
                                   defaultValue={item.cost}
                                   onChange={(e) => updateItemField(item.id, 'cost', Number(e.target.value))}
+                                  inputMode="decimal"
                                 />
                               </div>
                             </div>
@@ -288,6 +299,7 @@ export function OwnerRequestDetailScreen() {
                                   className="text-xs font-black text-primary bg-transparent border-none focus:ring-0 w-full p-0"
                                   defaultValue={item.price}
                                   onChange={(e) => updateItemField(item.id, 'price', Number(e.target.value))}
+                                  inputMode="numeric"
                                 />
                               </div>
                             </div>
@@ -304,6 +316,7 @@ export function OwnerRequestDetailScreen() {
                                   className="text-xs font-bold bg-transparent border-none focus:ring-0 w-full p-0"
                                   defaultValue={item.shippingCost}
                                   onChange={(e) => updateItemField(item.id, 'shippingCost', Number(e.target.value))}
+                                  inputMode="numeric"
                                 />
                               </div>
                             </div>
@@ -316,7 +329,17 @@ export function OwnerRequestDetailScreen() {
                           </div>
                         </div>
                         <div className="flex flex-col gap-2 shrink-0">
-                          <Button variant="ghost" size="icon" className="h-8 w-8 text-red-400 hover:bg-red-50 rounded-full" onClick={() => setItems(items.filter(i => i.id !== item.id))}>
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            className="h-8 w-8 text-red-400 hover:bg-red-50 rounded-full" 
+                            onClick={() => {
+                              if (window.confirm(`Are you sure you want to remove "${item.name}" from the request?`)) {
+                                setItems(items.filter(i => i.id !== item.id));
+                                toast.success('Removed item from request');
+                              }
+                            }}
+                          >
                             <Trash2 className="h-4 w-4" />
                           </Button>
                           {item.logs && item.logs.length > 0 && (
@@ -452,18 +475,28 @@ export function OwnerRequestDetailScreen() {
                    <Share2 className="h-3.5 w-3.5" /> SHARE INVOICE
                  </Button>
                  <Button 
-                   variant="ghost"
-                   className={`h-12 rounded-2xl font-black text-[9px] gap-1 border-none ${paymentStatus === 'partial' ? 'bg-blue-600 text-white' : 'bg-white/5 text-white'}`}
-                   onClick={() => setPaymentStatus('partial')}
-                 >
-                   <Plus className="h-3.5 w-3.5" /> PARTIAL PAY
-                 </Button>
-                 <Button 
-                   className={`h-12 rounded-2xl font-black text-[9px] gap-1 border-none transition-all ${paymentStatus === 'paid' ? 'bg-slate-800 text-slate-500' : 'bg-primary text-primary-foreground shadow-xl shadow-primary/30'}`}
-                   onClick={() => setPaymentStatus('paid')}
-                 >
-                   <Receipt className="h-3.5 w-3.5" /> FULL PAYMENT
-                 </Button>
+                    variant="ghost"
+                    className={`h-12 rounded-2xl font-black text-[9px] gap-1 border-none ${paymentStatus === 'partial' ? 'bg-blue-600 text-white' : 'bg-white/5 text-white'}`}
+                    onClick={() => {
+                      if (window.confirm("Are you sure you want to change the payment status to PARTIAL PAY?")) {
+                        setPaymentStatus('partial');
+                        toast.success('Payment status updated to partial');
+                      }
+                    }}
+                  >
+                    <Plus className="h-3.5 w-3.5" /> PARTIAL PAY
+                  </Button>
+                  <Button 
+                    className={`h-12 rounded-2xl font-black text-[9px] gap-1 border-none transition-all ${paymentStatus === 'paid' ? 'bg-slate-800 text-slate-500' : 'bg-primary text-primary-foreground shadow-xl shadow-primary/30'}`}
+                    onClick={() => {
+                      if (window.confirm("Are you sure you want to change the payment status to FULL PAYMENT (Settled)?")) {
+                        setPaymentStatus('paid');
+                        toast.success('Payment status updated to settled');
+                      }
+                    }}
+                  >
+                    <Receipt className="h-3.5 w-3.5" /> FULL PAYMENT
+                  </Button>
               </div>
             </CardContent>
             <div className="absolute top-0 right-0 w-32 h-32 bg-primary/20 rounded-full -mr-16 -mt-16 blur-3xl opacity-50" />
