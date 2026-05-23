@@ -146,11 +146,7 @@ export function UploadItemScreen() {
   const [image, setImage] = useState<string | null>(null);
   const [rawImage, setRawImage] = useState<string | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [isCameraOpen, setIsCameraOpen] = useState(false);
-  const [cameraError, setCameraError] = useState<string | null>(null);
-  const [stream, setStream] = useState<MediaStream | null>(null);
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const streamRef = useRef<MediaStream | null>(null);
+
   const [name, setName] = useState('');
   const [price, setPrice] = useState('');
   const [publishPrice, setPublishPrice] = useState('');
@@ -195,17 +191,7 @@ export function UploadItemScreen() {
   const margin = Number(publishPrice) - basePriceIdr;
   const marginPercentage = basePriceIdr > 0 ? (margin / basePriceIdr) * 100 : 0;
 
-  useEffect(() => {
-    streamRef.current = stream;
-  }, [stream]);
 
-  useEffect(() => {
-    return () => {
-      if (streamRef.current) {
-        streamRef.current.getTracks().forEach(track => track.stop());
-      }
-    };
-  }, []);
 
   const processImageWithAI = async (dataUrl: string) => {
     let finalUrl = dataUrl;
@@ -259,60 +245,7 @@ export function UploadItemScreen() {
     }
   };
 
-  const startCamera = async () => {
-    setCameraError(null);
-    try {
-      const mediaStream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: { ideal: 'environment' } },
-        audio: false
-      });
-      setStream(mediaStream);
-      if (videoRef.current) {
-        videoRef.current.srcObject = mediaStream;
-      }
-    } catch (err: any) {
-      console.error("Error accessing environment camera, falling back:", err);
-      try {
-        const mediaStream = await navigator.mediaDevices.getUserMedia({
-          video: true,
-          audio: false
-        });
-        setStream(mediaStream);
-        if (videoRef.current) {
-          videoRef.current.srcObject = mediaStream;
-        }
-      } catch (fallbackErr: any) {
-        console.error("Error accessing camera fallback:", fallbackErr);
-        setCameraError("Unable to access camera. Please check permissions or upload a file instead.");
-        toast.error("Camera access failed");
-      }
-    }
-  };
 
-  const stopCamera = () => {
-    if (stream) {
-      stream.getTracks().forEach(track => track.stop());
-      setStream(null);
-    }
-  };
-
-  const handleCapture = () => {
-    if (videoRef.current) {
-      const video = videoRef.current;
-      const canvas = document.createElement('canvas');
-      canvas.width = video.videoWidth || 640;
-      canvas.height = video.videoHeight || 640;
-      const ctx = canvas.getContext('2d');
-      if (ctx) {
-        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-        const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
-        toast.success('Photo captured!');
-        setIsCameraOpen(false);
-        stopCamera();
-        processImageWithAI(dataUrl);
-      }
-    }
-  };
 
   const handleSave = async () => {
     if (!name.trim() || !price || !publishPrice) {
@@ -370,6 +303,13 @@ export function UploadItemScreen() {
         {/* Photo Upload Section */}
         <section className="space-y-3">
           <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground ml-1">Photo Reference</label>
+          <input
+            type="file"
+            accept="image/*"
+            id="product-photo-upload"
+            className="hidden"
+            onChange={handleFileChange}
+          />
           {image ? (
             <div className="relative aspect-square w-full rounded-3xl overflow-hidden shadow-xl group">
               <img src={image} alt="Preview" className={`w-full h-full object-cover transition-all ${isAnalyzing ? 'blur-sm scale-105 brightness-50' : ''}`} />
@@ -394,9 +334,17 @@ export function UploadItemScreen() {
                 >
                   <Share2 className="h-5 w-5" />
                 </button>
+                <label 
+                  htmlFor="product-photo-upload"
+                  className="h-10 w-10 rounded-full bg-indigo-600 backdrop-blur-md text-white flex items-center justify-center cursor-pointer transition-transform hover:scale-110"
+                  title="Change Photo"
+                >
+                  <Camera className="h-5 w-5" />
+                </label>
                 <button 
                   onClick={() => setImage(null)}
                   className="h-10 w-10 rounded-full bg-black/40 backdrop-blur-md text-white flex items-center justify-center transition-transform hover:scale-110"
+                  title="Remove Photo"
                 >
                   <X className="h-5 w-5" />
                 </button>
@@ -463,11 +411,8 @@ export function UploadItemScreen() {
               )}
             </div>
           ) : (
-            <div 
-              onClick={() => {
-                setIsCameraOpen(true);
-                startCamera();
-              }}
+            <label 
+              htmlFor="product-photo-upload"
               className="w-full aspect-square border-4 border-dashed rounded-3xl flex flex-col items-center justify-center gap-6 bg-muted/20 p-6 cursor-pointer hover:bg-muted/30 hover:border-primary/50 transition-all duration-300 animate-pulse-subtle"
             >
               <div className="h-20 w-20 rounded-full bg-primary/10 flex items-center justify-center text-primary">
@@ -475,32 +420,9 @@ export function UploadItemScreen() {
               </div>
               <div className="text-center space-y-1">
                 <p className="font-bold text-sm">Add Product Photo</p>
-                <p className="text-xs text-muted-foreground">Tap anywhere to use camera, or upload a file below</p>
+                <p className="text-xs text-muted-foreground">Click to upload or take a photo using your camera</p>
               </div>
-              <div className="grid grid-cols-2 gap-3 w-full max-w-xs" onClick={(e) => e.stopPropagation()}>
-                <Button 
-                  type="button"
-                  onClick={() => {
-                    setIsCameraOpen(true);
-                    startCamera();
-                  }}
-                  className="rounded-xl font-bold text-xs h-11 bg-primary text-white flex items-center justify-center gap-1.5 shadow-md shadow-primary/10 hover:bg-primary/90"
-                >
-                  <Camera className="h-4 w-4" /> Use Camera
-                </Button>
-                <label className="cursor-pointer" onClick={(e) => e.stopPropagation()}>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={handleFileChange}
-                  />
-                  <div className="rounded-xl font-bold text-xs h-11 border-2 border-primary/20 text-primary bg-background hover:bg-muted/30 transition-colors flex items-center justify-center gap-1.5 w-full">
-                    <ImageIcon className="h-4 w-4" /> Upload File
-                  </div>
-                </label>
-              </div>
-            </div>
+            </label>
           )}
         </section>
 
@@ -596,81 +518,6 @@ export function UploadItemScreen() {
         </Button>
       </div>
 
-      {/* Camera Capture Dialog */}
-      <Dialog 
-        open={isCameraOpen} 
-        onOpenChange={(open) => {
-          setIsCameraOpen(open);
-          if (!open) {
-            stopCamera();
-          }
-        }}
-      >
-        <DialogContent className="rounded-3xl border-none max-w-[95%] sm:max-w-md bg-white p-6 flex flex-col items-center gap-4">
-          <DialogHeader className="text-left w-full">
-            <DialogTitle className="text-lg font-black tracking-tight uppercase italic text-primary flex items-center gap-2">
-              <Camera className="h-5 w-5" /> Capture Product Photo
-            </DialogTitle>
-            <DialogDescription className="text-xs text-muted-foreground font-semibold">
-              Align your product inside the frame and take a photo.
-            </DialogDescription>
-          </DialogHeader>
-
-          {/* Video Stream Container */}
-          <div className="relative w-full aspect-square bg-slate-900 rounded-2xl overflow-hidden flex items-center justify-center border border-slate-100 shadow-inner">
-            {cameraError ? (
-              <div className="p-6 text-center space-y-3">
-                <Info className="h-8 w-8 text-red-500 mx-auto" />
-                <p className="text-xs font-bold text-red-500">{cameraError}</p>
-              </div>
-            ) : !stream ? (
-              <div className="text-center space-y-3">
-                <div className="h-10 w-10 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
-                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Accessing camera...</p>
-              </div>
-            ) : null}
-
-            {/* Video element for stream preview */}
-            <video
-              ref={videoRef}
-              autoPlay
-              playsInline
-              muted
-              className={`w-full h-full object-cover ${stream ? 'block' : 'hidden'}`}
-            />
-
-            {/* Pulse Indicator */}
-            {stream && (
-              <div className="absolute top-4 left-4 bg-red-500 text-white font-bold text-[9px] uppercase tracking-widest px-2.5 py-1 rounded-full flex items-center gap-1.5 shadow-lg animate-pulse">
-                <span className="h-1.5 w-1.5 rounded-full bg-white" /> Live
-              </div>
-            )}
-          </div>
-
-          {/* Controls */}
-          <div className="flex gap-3 w-full mt-2">
-            <Button
-              type="button"
-              variant="outline"
-              className="flex-1 rounded-xl font-bold text-xs h-12"
-              onClick={() => {
-                setIsCameraOpen(false);
-                stopCamera();
-              }}
-            >
-              Cancel
-            </Button>
-            <Button
-              type="button"
-              disabled={!stream}
-              className="flex-1 rounded-xl font-bold text-xs h-12 gap-1.5 bg-primary text-white shadow-lg shadow-primary/20 hover:bg-primary/90"
-              onClick={handleCapture}
-            >
-              <Camera className="h-4 w-4" /> Take Photo
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

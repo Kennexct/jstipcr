@@ -562,7 +562,7 @@ export function OwnerDashboard() {
               <div className="h-9 w-9 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center">
                 <Plus className="h-4 w-4" />
               </div>
-              <span className="text-[9px] font-bold uppercase tracking-tight text-slate-700">Add Product Catalog</span>
+              <span className="text-[9px] font-bold uppercase tracking-tight text-slate-700">Add Product</span>
             </button>
             
             <button 
@@ -852,7 +852,8 @@ export function OwnerDashboard() {
                             status: 'find',
                             price: 0,
                             location: tripSettings?.trip?.destination || 'Seoul',
-                            image: ''
+                            image: '',
+                            note: 'created_from_sale'
                           };
                           
                           try {

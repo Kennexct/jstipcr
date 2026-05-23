@@ -368,12 +368,12 @@ export const db = {
         const rows = await postgrestRequest('jstip_merchants', { query: 'order=id.asc' });
         if (Array.isArray(rows)) {
           return rows.map((r: any) => ({
-            id: r.id,
-            username: r.username,
-            password: r.password,
+            id: r.id || '',
+            username: r.username || '',
+            password: r.password || '',
             businessName: r.business_name || r.businessName || '',
-            role: r.role,
-            paid: r.paid,
+            role: r.role || 'merchant',
+            paid: r.paid !== undefined ? r.paid : true,
             createdAt: r.created_at || r.createdAt || ''
           }));
         }
@@ -419,7 +419,8 @@ export const db = {
   },
 
   async getMerchantByUsername(username: string): Promise<any | null> {
+    if (!username) return null;
     const merchants = await this.getMerchants();
-    return merchants.find((m: any) => m.username.toLowerCase() === username.toLowerCase()) || null;
+    return merchants.find((m: any) => m && m.username && m.username.toLowerCase() === username.toLowerCase()) || null;
   }
 };

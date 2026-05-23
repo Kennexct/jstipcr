@@ -228,7 +228,7 @@ export function MasterProvider({ children }: { children: ReactNode }) {
 
         for (const item of sale.items) {
           const matchedWishlist = updatedWishlist.filter(
-            w => w.name.toLowerCase() === item.name.toLowerCase() && w.status !== 'found'
+            w => w.name.toLowerCase() === item.name.toLowerCase() && w.status !== 'found' && w.note !== 'created_from_sale'
           );
 
           for (const wishItem of matchedWishlist) {
