@@ -134,7 +134,8 @@ export const db = {
     if (isSupabaseConfigured()) {
       try {
         const query = merchantId ? `merchant_id=eq.${merchantId}&order=id.asc` : 'order=id.asc';
-        return await postgrestRequest('jstip_items', { query });
+        const rows = await postgrestRequest('jstip_items', { query });
+        if (Array.isArray(rows)) return rows;
       } catch (e) {
         console.error('Supabase get items error:', e);
       }
@@ -196,13 +197,15 @@ export const db = {
       try {
         const query = merchantId ? `merchant_id=eq.${merchantId}&order=id.desc` : 'order=id.desc';
         const list = await postgrestRequest('jstip_wishlist', { query });
-        return list.map((item: any) => {
-          let secureStatus = item.status;
-          if (secureStatus === 'searching') {
-            secureStatus = 'find';
-          }
-          return { ...item, status: secureStatus };
-        });
+        if (Array.isArray(list)) {
+          return list.map((item: any) => {
+            let secureStatus = item.status;
+            if (secureStatus === 'searching') {
+              secureStatus = 'find';
+            }
+            return { ...item, status: secureStatus };
+          });
+        }
       } catch (e) {
         console.error('Supabase get wishlist error:', e);
       }
@@ -245,7 +248,8 @@ export const db = {
     if (isSupabaseConfigured()) {
       try {
         const query = merchantId ? `merchant_id=eq.${merchantId}&order=id.desc` : 'order=id.desc';
-        return await postgrestRequest('jstip_sales', { query });
+        const rows = await postgrestRequest('jstip_sales', { query });
+        if (Array.isArray(rows)) return rows;
       } catch (e) {
         console.error('Supabase get sales error:', e);
       }
@@ -282,7 +286,8 @@ export const db = {
     if (isSupabaseConfigured()) {
       try {
         const query = merchantId ? `merchant_id=eq.${merchantId}&order=id.desc` : 'order=id.desc';
-        return await postgrestRequest('jstip_expenses', { query });
+        const rows = await postgrestRequest('jstip_expenses', { query });
+        if (Array.isArray(rows)) return rows;
       } catch (e) {
         console.error('Supabase get expenses error:', e);
       }
@@ -316,16 +321,23 @@ export const db = {
 
   // 6. Merchants (Auth & Admin)
   async getMerchants(): Promise<any[]> {
+    const defaultMerchants = [
+      { id: 'merchant_admin', username: 'admin', password: 'admin', businessName: 'JStip Administrator', role: 'admin', paid: true, createdAt: new Date().toISOString() }
+    ];
     if (isSupabaseConfigured()) {
       try {
-        return await postgrestRequest('jstip_merchants', { query: 'order=id.asc' });
+        const rows = await postgrestRequest('jstip_merchants', { query: 'order=id.asc' });
+        if (Array.isArray(rows)) {
+          const hasAdmin = rows.some((m: any) => m.username.toLowerCase() === 'admin');
+          if (!hasAdmin) {
+            return [defaultMerchants[0], ...rows];
+          }
+          return rows;
+        }
       } catch (e) {
         console.error('Supabase get merchants error:', e);
       }
     }
-    const defaultMerchants = [
-      { id: 'merchant_admin', username: 'admin', password: 'admin', businessName: 'JStip Administrator', role: 'admin', paid: true, createdAt: new Date().toISOString() }
-    ];
     return getLocal('jastip_merchants', defaultMerchants);
   },
 
