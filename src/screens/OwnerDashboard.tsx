@@ -179,6 +179,7 @@ export function OwnerDashboard() {
       notes: expenseNotes.trim() || undefined,
       originalAmount: expenseCurrency !== 'IDR' ? enteredAmount : undefined,
       originalSymbol: expenseCurrency !== 'IDR' ? (expenseCurrency === shoppingCurrencyCode ? (tripSettings?.currency?.symbol || 'S$') : getCurrencySymbol(payoutCurrencyCode)) : undefined,
+      originalCurrency: expenseCurrency,
       date: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     };
 

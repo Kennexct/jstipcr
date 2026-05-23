@@ -1,4 +1,5 @@
-import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom';
+import { useEffect } from 'react';
+import { BrowserRouter, Routes, Route, Navigate, Outlet, useLocation } from 'react-router-dom';
 import { Layout } from './components/Layout';
 import { ExploreScreen } from './screens/ExploreScreen';
 import { OwnerDashboard } from './screens/OwnerDashboard';
@@ -30,10 +31,21 @@ function RequireAuth() {
   return <Outlet />;
 }
 
+function ScrollToTop() {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+  }, [pathname]);
+
+  return null;
+}
+
 export default function App() {
   return (
     <MasterProvider>
       <BrowserRouter>
+        <ScrollToTop />
         <Routes>
           {/* Public Storefront Route */}
           <Route path="items/:id" element={<StorefrontScreen />} />

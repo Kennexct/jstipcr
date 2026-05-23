@@ -42,10 +42,25 @@ export function ReportsScreen() {
 
   const netProfitVal = totalSalesVal - totalExpensesVal;
 
+  const getOriginalCurrencyCode = (exp: any): string => {
+    if (exp.originalCurrency) return exp.originalCurrency;
+    const sym = exp.originalSymbol;
+    if (!sym) return 'IDR';
+    if (sym === 'S$') return 'SGD';
+    if (sym === '₩') return 'KRW';
+    if (sym === '¥') return 'JPY';
+    if (sym === '฿') return 'THB';
+    if (sym === '$') return 'USD';
+    if (sym === '€') return 'EUR';
+    return sym;
+  };
+
   const handleExportCSV = () => {
     let headers: string[] = [];
     let rows: any[][] = [];
     let filename = "";
+
+    const shoppingCode = currencySettings.code || 'SGD';
 
     if (activeTab === 'sales') {
       filename = `JStip_Sales_Report_${new Date().toISOString().split('T')[0]}.csv`;
@@ -54,8 +69,8 @@ export function ReportsScreen() {
         "Customer Name", 
         "Product Name", 
         "Qty", 
-        "Cost Price Per Item (IDR)", 
-        "Total Cost Price (IDR)", 
+        `Cost Price Per Item (${shoppingCode})`, 
+        `Total Cost Price (${shoppingCode})`, 
         "Publish Price Per Item (IDR)", 
         "Total Publish Price (IDR)", 
         "Profit Margin (IDR)"
@@ -63,33 +78,61 @@ export function ReportsScreen() {
       
       rows = sales.flatMap(sale => 
         sale.items.map((item: any) => {
-          const itemCost = item.cost || resolveItemCost(item.name);
-          const totalCost = itemCost * item.qty;
-          const totalPublish = item.price * item.qty;
-          const margin = totalPublish - totalCost;
+          const catalogMatch = catalogItems.find(i => i.name.toLowerCase() === item.name.toLowerCase() || i.id === item.productId);
+          
+          let costPerItemInShopping = 0;
+          if (catalogMatch) {
+            costPerItemInShopping = catalogMatch.cost || 0;
+          } else {
+            const idrCost = item.cost || resolveItemCost(item.name);
+            costPerItemInShopping = idrCost / (currencySettings.manualRate || 13500);
+          }
+
+          const formattedCostPerItem = Number(costPerItemInShopping.toFixed(2));
+          const totalCostInShopping = Number((costPerItemInShopping * item.qty).toFixed(2));
+
+          const itemCostIdr = item.cost || resolveItemCost(item.name);
+          const totalCostIdr = itemCostIdr * item.qty;
+          const totalPublishIdr = item.price * item.qty;
+          const marginIdr = totalPublishIdr - totalCostIdr;
+
           return [
             sale.date || 'N/A',
             sale.customerName,
             item.name,
             item.qty,
-            itemCost,
-            totalCost,
+            formattedCostPerItem,
+            totalCostInShopping,
             item.price,
-            totalPublish,
-            margin
+            totalPublishIdr,
+            marginIdr
           ];
         })
       );
     } else {
       filename = `JStip_Expenses_Report_${new Date().toISOString().split('T')[0]}.csv`;
-      headers = ["Date", "Description", "Category", "Remarks", "Amount (IDR)"];
-      rows = expenses.map(exp => [
-        exp.date || 'N/A',
-        exp.description,
-        exp.category,
-        exp.notes || '',
-        exp.amount
-      ]);
+      headers = [
+        "Date", 
+        "Description", 
+        "Category", 
+        "Remarks", 
+        "Amount (IDR)",
+        "Amount (Other Currency)",
+        "Currency (Other)"
+      ];
+      rows = expenses.map(exp => {
+        const otherCurrency = getOriginalCurrencyCode(exp);
+        const otherAmount = exp.originalAmount !== undefined ? exp.originalAmount : exp.amount;
+        return [
+          exp.date || 'N/A',
+          exp.description,
+          exp.category,
+          exp.notes || '',
+          exp.amount,
+          otherAmount,
+          otherCurrency
+        ];
+      });
     }
 
     const csvContent = "data:text/csv;charset=utf-8," 
