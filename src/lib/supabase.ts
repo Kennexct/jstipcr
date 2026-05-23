@@ -124,6 +124,7 @@ export const db = {
         });
       } catch (e) {
         console.error('Supabase settings save error:', e);
+        throw e;
       }
     }
     return data;
@@ -169,7 +170,6 @@ export const db = {
           currency: item.currency || 'SGD',
           image: item.image || '',
           status: item.status || 'active',
-          rawImage: item.rawImage || '',
           merchant_id: merchantId || null
         };
         await postgrestRequest('jstip_items', {
@@ -179,6 +179,7 @@ export const db = {
         });
       } catch (e) {
         console.error('Supabase save item error:', e);
+        throw e;
       }
     }
     return item;
@@ -260,6 +261,7 @@ export const db = {
         });
       } catch (e) {
         console.error('Supabase save wishlist error:', e);
+        throw e;
       }
     }
     return item;
@@ -306,6 +308,7 @@ export const db = {
         });
       } catch (e) {
         console.error('Supabase save sale error:', e);
+        throw e;
       }
     }
     return sale;
@@ -356,6 +359,7 @@ export const db = {
         });
       } catch (e) {
         console.error('Supabase save expense error:', e);
+        throw e;
       }
     }
     return expense;
@@ -413,6 +417,7 @@ export const db = {
         });
       } catch (e) {
         console.error('Supabase save merchant error:', e);
+        throw e;
       }
     }
     return merchant;

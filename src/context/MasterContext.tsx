@@ -171,8 +171,8 @@ export function MasterProvider({ children }: { children: ReactNode }) {
     try {
       await db.saveSettings(data, currentUser?.id);
       setTripSettings(data);
-    } catch (e) {
-      toast.error('Failed to save settings');
+    } catch (e: any) {
+      toast.error(`Failed to save settings: ${e.message || e}`);
       throw e;
     }
   };
@@ -186,8 +186,8 @@ export function MasterProvider({ children }: { children: ReactNode }) {
       } else {
         setCatalogItems([item, ...catalogItems]);
       }
-    } catch (e) {
-      toast.error('Failed to save catalog item');
+    } catch (e: any) {
+      toast.error(`Failed to save catalog item: ${e.message || e}`);
       throw e;
     }
   };
@@ -211,8 +211,8 @@ export function MasterProvider({ children }: { children: ReactNode }) {
       } else {
         setWishlistItems([item, ...wishlistItems]);
       }
-    } catch (e) {
-      toast.error('Failed to save wishlist item');
+    } catch (e: any) {
+      toast.error(`Failed to save wishlist item: ${e.message || e}`);
       throw e;
     }
   };
@@ -251,8 +251,8 @@ export function MasterProvider({ children }: { children: ReactNode }) {
           });
         }
       }
-    } catch (e) {
-      toast.error('Failed to log sale');
+    } catch (e: any) {
+      toast.error(`Failed to log sale: ${e.message || e}`);
       throw e;
     }
   };
