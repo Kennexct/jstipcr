@@ -167,9 +167,9 @@ export function MasterProvider({ children }: { children: ReactNode }) {
   const saveItem = async (item: any) => {
     try {
       await db.saveItem(item, currentUser?.id);
-      const isEdit = catalogItems.some(i => i.id === item.id);
+      const isEdit = catalogItems.some(i => i?.id === item.id);
       if (isEdit) {
-        setCatalogItems(catalogItems.map(i => i.id === item.id ? item : i));
+        setCatalogItems(catalogItems.map(i => i?.id === item.id ? item : i));
       } else {
         setCatalogItems([item, ...catalogItems]);
       }
@@ -182,7 +182,7 @@ export function MasterProvider({ children }: { children: ReactNode }) {
   const removeItem = async (id: string) => {
     try {
       await db.removeItem(id);
-      setCatalogItems(catalogItems.filter(i => i.id !== id));
+      setCatalogItems(catalogItems.filter(i => i?.id !== id));
     } catch (e) {
       toast.error('Failed to delete catalog item');
       throw e;
@@ -192,9 +192,9 @@ export function MasterProvider({ children }: { children: ReactNode }) {
   const saveWishlist = async (item: any) => {
     try {
       await db.saveWishlist(item, currentUser?.id);
-      const isEdit = wishlistItems.some(w => w.id === item.id);
+      const isEdit = wishlistItems.some(w => w?.id === item.id);
       if (isEdit) {
-        setWishlistItems(wishlistItems.map(w => w.id === item.id ? item : w));
+        setWishlistItems(wishlistItems.map(w => w?.id === item.id ? item : w));
       } else {
         setWishlistItems([item, ...wishlistItems]);
       }

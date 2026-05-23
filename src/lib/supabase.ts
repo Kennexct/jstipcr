@@ -161,9 +161,20 @@ export const db = {
 
     if (isSupabaseConfigured()) {
       try {
+        const dbPayload = {
+          id: item.id,
+          name: item.name,
+          price: item.price || 0,
+          cost: item.cost || 0,
+          currency: item.currency || 'SGD',
+          image: item.image || '',
+          status: item.status || 'active',
+          rawImage: item.rawImage || '',
+          merchant_id: merchantId || null
+        };
         await postgrestRequest('jstip_items', {
           method: 'POST',
-          body: item,
+          body: dbPayload,
           query: 'on_conflict=id'
         });
       } catch (e) {
@@ -231,9 +242,20 @@ export const db = {
 
     if (isSupabaseConfigured()) {
       try {
+        const dbPayload = {
+          id: item.id,
+          name: item.name,
+          requester: item.requester,
+          price: item.price || 0,
+          location: item.location || 'External Chat',
+          image: item.image || '',
+          status: item.status || 'find',
+          note: item.note || '',
+          merchant_id: merchantId || null
+        };
         await postgrestRequest('jstip_wishlist', {
           method: 'POST',
-          body: item,
+          body: dbPayload,
           query: 'on_conflict=id'
         });
       } catch (e) {
@@ -269,9 +291,17 @@ export const db = {
 
     if (isSupabaseConfigured()) {
       try {
+        const dbPayload = {
+          id: sale.id,
+          customerName: sale.customerName,
+          total: sale.total || 0,
+          date: sale.date || new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          items: sale.items || [],
+          merchant_id: merchantId || null
+        };
         await postgrestRequest('jstip_sales', {
           method: 'POST',
-          body: sale,
+          body: dbPayload,
           query: 'on_conflict=id'
         });
       } catch (e) {
@@ -307,9 +337,21 @@ export const db = {
 
     if (isSupabaseConfigured()) {
       try {
+        const dbPayload = {
+          id: expense.id,
+          description: expense.description,
+          amount: expense.amount || 0,
+          category: expense.category || 'Others',
+          notes: expense.notes || '',
+          originalAmount: expense.originalAmount || null,
+          originalSymbol: expense.originalSymbol || null,
+          originalCurrency: expense.originalCurrency || null,
+          merchant_id: merchantId || null,
+          date: expense.date || new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        };
         await postgrestRequest('jstip_expenses', {
           method: 'POST',
-          body: expense,
+          body: dbPayload,
           query: 'on_conflict=id'
         });
       } catch (e) {

@@ -105,7 +105,6 @@ export function ExploreScreen() {
   // Form states for manually recording a wishlist
   const [formName, setFormName] = useState('');
   const [formLocation, setFormLocation] = useState('');
-  const [formBudget, setFormBudget] = useState('');
   const [formCustomer, setFormCustomer] = useState('');
   const [formImage, setFormImage] = useState<string>('');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
