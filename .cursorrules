@@ -1,0 +1,43 @@
+# Traveler Hub (JastipFlow) - Cursor Rules
+
+You are an expert React, TypeScript, and Tailwind CSS developer assisting with the development of the **Traveler Hub (JastipFlow)** project.
+
+Please adhere to the following rules and instructions at all times.
+
+---
+
+## 1. Primary Source of Truth: `AI_CONTEXT.md`
+- Always read and refer to the [AI_CONTEXT.md](file:///c:/Users/admin/Downloads/jstip%20v2/AI_CONTEXT.md) in the workspace root for detailed database schemas, project structure, routing definitions, state management interfaces, and operational details.
+- Ensure any modifications or additions conform perfectly to the specifications in `AI_CONTEXT.md`.
+
+---
+
+## 2. Global State & Supabase Integration Rules
+- **DO NOT** import or use `@supabase/supabase-js` or install external Supabase SDKs. The project uses a custom, zero-dependency fetch-based wrapper defined in [supabase.ts](file:///c:/Users/admin/Downloads/jstip%20v2/src/lib/supabase.ts).
+- **CRITICAL**: Do **NOT** call the database client (`db` from `src/lib/supabase`) directly within React screens or page components for normal CRUD.
+- **ALWAYS** use the global `useMaster()` hook exported from [MasterContext.tsx](file:///c:/Users/admin/Downloads/jstip%20v2/src/context/MasterContext.tsx) to read states (`loading`, `expenses`, `sales`, `catalogItems`, `wishlistItems`, `tripSettings`) and call mutator functions (`saveSettings`, `saveItem`, `removeItem`, `saveWishlist`, `saveSale`, `saveExpense`). This prevents duplicate REST requests and ensures reactive updates across screens.
+
+---
+
+## 3. Tech Stack & Styling Guidelines
+- **Core Stack**: React 18, Vite, TypeScript, Tailwind CSS, shadcn/ui (`@/components/ui/`), Lucide React.
+- **Premium Design Aesthetics**:
+  - Maintain a beautiful, modern, dark-mode-first dashboard look.
+  - Use curated HSL colors for badges and alerts (no generic plain colors).
+  - Use glassmorphism overlays, soft borders (`border-white/10`), and subtle hover micro-animations.
+  - Implement smooth element transitions using Framer Motion (`motion.div` imported from `motion/react`).
+  - Do not use placeholders for images or icons. Use robust SVG icons or reliable external sources.
+
+---
+
+## 4. Routing & Deployment Fallbacks
+- The application is a Single Page Application (SPA) with routing declared in [App.tsx](file:///c:/Users/admin/Downloads/jstip%20v2/src/App.tsx).
+- When creating deep links or configuring routing patterns, make sure to sync with [vercel.json](file:///c:/Users/admin/Downloads/jstip%20v2/vercel.json) to avoid routing 404s upon hard refresh under Vercel hosting.
+
+---
+
+## 5. Development & Coding Practices
+- Keep components small, focused, and single-purpose.
+- Maintain type safety. Explicitly type all objects, parameters, and return types; avoid using `any` unless absolutely necessary or interfacing with pre-existing untyped payloads.
+- Preserve existing comments and docstrings.
+- Write tests or verify functionality thoroughly after any code modification.

@@ -1,0 +1,6 @@
+{
+  "name": "JStip",
+  "description": "Dedicated personal shopper (Jasa Titip) traveler-side operational dashboard and session manager.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -1,0 +1,37 @@
+# Traveler Hub (JastipFlow) - Cline / Roo Code Agentic Rules
+
+You are an agentic developer working on the **Traveler Hub (JastipFlow)** codebase.
+
+To ensure consistent implementation, maintain code quality, and avoid system errors, you MUST follow these guidelines:
+
+---
+
+## 1. Context Reference
+- **DO NOT** make assumptions about schemas, routing, or structure.
+- **ALWAYS** load and read the [AI_CONTEXT.md](file:///c:/Users/admin/Downloads/jstip%20v2/AI_CONTEXT.md) file in the workspace root. It is the absolute source of truth for:
+  - Database schema columns (`jstip_settings`, `jstip_items`, `jstip_wishlist`, `jstip_sales`, `jstip_expenses`).
+  - Active React `MasterContext` interfaces.
+  - Component hierarchy and routing details.
+
+---
+
+## 2. API & Database Operations
+- The project has a custom, zero-dependency REST wrapper located in [supabase.ts](file:///c:/Users/admin/Downloads/jstip%20v2/src/lib/supabase.ts). Do not install `@supabase/supabase-js`.
+- **CRITICAL**: Do **NOT** call the database client (`db` from `src/lib/supabase`) directly in screens for CRUD operations.
+- **ALWAYS** use the React hook `useMaster()` from [MasterContext.tsx](file:///c:/Users/admin/Downloads/jstip%20v2/src/context/MasterContext.tsx) to fetch, add, or edit items. This ensures proper local fallback (when Supabase keys are absent) and synchronizes states reactively across the storefront and dashboard views.
+
+---
+
+## 3. Styling & Presentation
+- **Theme**: Premium modern dark theme dashboard. Use Tailwind CSS + shadcn/ui.
+- **Design Rules**:
+  - Do not use plain raw colors (e.g. `bg-red-500`, `bg-blue-500`). Use curated HSL palettes.
+  - Apply glassmorphism overlays and soft borders (`border-white/10`).
+  - Animate components with Framer Motion (`motion.div` from `motion/react`).
+  - Do not use image or icon placeholders. Generate or use high-fidelity visual representations.
+
+---
+
+## 4. SPA Routing Rules
+- The application uses React Router inside [App.tsx](file:///c:/Users/admin/Downloads/jstip%20v2/src/App.tsx).
+- Ensure routing modifications align with Vercel configuration fallbacks in [vercel.json](file:///c:/Users/admin/Downloads/jstip%20v2/vercel.json).
