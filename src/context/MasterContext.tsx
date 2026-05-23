@@ -4,12 +4,16 @@ import { toast } from 'sonner';
 
 export interface MasterContextType {
   loading: boolean;
+  currentUser: any | null;
   expenses: any[];
   sales: any[];
   catalogItems: any[];
   wishlistItems: any[];
   tripSettings: any;
   boughtIds: string[];
+  login: (username: string, password: string) => Promise<any>;
+  signUp: (username: string, password: string, businessName: string) => Promise<any>;
+  logout: () => void;
   refreshData: () => Promise<void>;
   saveSettings: (settings: any) => Promise<void>;
   saveItem: (item: any) => Promise<void>;
@@ -23,6 +27,18 @@ export interface MasterContextType {
 const MasterContext = createContext<MasterContextType | undefined>(undefined);
 
 export function MasterProvider({ children }: { children: ReactNode }) {
+  const [currentUser, setCurrentUser] = useState<any | null>(() => {
+    const saved = localStorage.getItem('jastip_session');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        // ignore
+      }
+    }
+    return null;
+  });
+
   const [loading, setLoading] = useState(true);
   const [expenses, setExpenses] = useState<any[]>([]);
   const [sales, setSales] = useState<any[]>([]);
@@ -53,14 +69,71 @@ export function MasterProvider({ children }: { children: ReactNode }) {
     });
   };
 
+  const login = async (username: string, password: string) => {
+    setLoading(true);
+    try {
+      const user = await db.getMerchantByUsername(username);
+      if (!user || user.password !== password) {
+        throw new Error('Invalid username or password');
+      }
+      setCurrentUser(user);
+      localStorage.setItem('jastip_session', JSON.stringify(user));
+      toast.success(`Welcome back, ${user.businessName || user.username}!`);
+      return user;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const signUp = async (username: string, password: string, businessName: string) => {
+    setLoading(true);
+    try {
+      const existing = await db.getMerchantByUsername(username);
+      if (existing) {
+        throw new Error('Username already taken');
+      }
+      const newMerchant = {
+        id: 'merchant_' + Date.now(),
+        username,
+        password,
+        businessName,
+        role: 'merchant' as const,
+        paid: false,
+        createdAt: new Date().toISOString()
+      };
+      await db.saveMerchant(newMerchant);
+      setCurrentUser(newMerchant);
+      localStorage.setItem('jastip_session', JSON.stringify(newMerchant));
+      toast.success('Registration successful! Please settle subscription payment.');
+      return newMerchant;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const logout = () => {
+    setCurrentUser(null);
+    localStorage.removeItem('jastip_session');
+    setExpenses([]);
+    setSales([]);
+    setCatalogItems([]);
+    setWishlistItems([]);
+    toast.success('Logged out successfully');
+  };
+
   const refreshData = async () => {
+    if (!currentUser) {
+      setLoading(false);
+      return;
+    }
+    setLoading(true);
     try {
       const [loadedExpenses, loadedSales, loadedItems, loadedWishlist, loadedSettings] = await Promise.all([
-        db.getExpenses(),
-        db.getSales(),
-        db.getItems(),
-        db.getWishlist(),
-        db.getSettings()
+        db.getExpenses(currentUser.role === 'admin' ? undefined : currentUser.id),
+        db.getSales(currentUser.role === 'admin' ? undefined : currentUser.id),
+        db.getItems(currentUser.role === 'admin' ? undefined : currentUser.id),
+        db.getWishlist(currentUser.role === 'admin' ? undefined : currentUser.id),
+        db.getSettings(currentUser.role === 'admin' ? undefined : currentUser.id)
       ]);
       setExpenses(loadedExpenses || []);
       setSales(loadedSales || []);
@@ -79,11 +152,11 @@ export function MasterProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     refreshData();
-  }, []);
+  }, [currentUser]);
 
   const saveSettings = async (data: any) => {
     try {
-      await db.saveSettings(data);
+      await db.saveSettings(data, currentUser?.id);
       setTripSettings(data);
     } catch (e) {
       toast.error('Failed to save settings');
@@ -93,7 +166,7 @@ export function MasterProvider({ children }: { children: ReactNode }) {
 
   const saveItem = async (item: any) => {
     try {
-      await db.saveItem(item);
+      await db.saveItem(item, currentUser?.id);
       const isEdit = catalogItems.some(i => i.id === item.id);
       if (isEdit) {
         setCatalogItems(catalogItems.map(i => i.id === item.id ? item : i));
@@ -118,7 +191,7 @@ export function MasterProvider({ children }: { children: ReactNode }) {
 
   const saveWishlist = async (item: any) => {
     try {
-      await db.saveWishlist(item);
+      await db.saveWishlist(item, currentUser?.id);
       const isEdit = wishlistItems.some(w => w.id === item.id);
       if (isEdit) {
         setWishlistItems(wishlistItems.map(w => w.id === item.id ? item : w));
@@ -133,7 +206,7 @@ export function MasterProvider({ children }: { children: ReactNode }) {
 
   const saveSale = async (sale: any) => {
     try {
-      await db.saveSale(sale);
+      await db.saveSale(sale, currentUser?.id);
       setSales([sale, ...sales]);
 
       if (sale.items && Array.isArray(sale.items)) {
@@ -147,7 +220,7 @@ export function MasterProvider({ children }: { children: ReactNode }) {
 
           for (const wishItem of matchedWishlist) {
             const updatedWishItem = { ...wishItem, status: 'found' as const };
-            await db.saveWishlist(updatedWishItem);
+            await db.saveWishlist(updatedWishItem, currentUser?.id);
             
             updatedWishlist = updatedWishlist.map(w => w.id === wishItem.id ? updatedWishItem : w);
             newlyBoughtWishlistIds.push(`chk_wishlist_${wishItem.id}`);
@@ -173,7 +246,7 @@ export function MasterProvider({ children }: { children: ReactNode }) {
 
   const saveExpense = async (expense: any) => {
     try {
-      await db.saveExpense(expense);
+      await db.saveExpense(expense, currentUser?.id);
       setExpenses([expense, ...expenses]);
     } catch (e) {
       toast.error('Failed to save expense');
@@ -185,12 +258,16 @@ export function MasterProvider({ children }: { children: ReactNode }) {
     <MasterContext.Provider
       value={{
         loading,
+        currentUser,
         expenses,
         sales,
         catalogItems,
         wishlistItems,
         tripSettings,
         boughtIds,
+        login,
+        signUp,
+        logout,
         refreshData,
         saveSettings,
         saveItem,

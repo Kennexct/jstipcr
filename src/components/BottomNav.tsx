@@ -1,4 +1,4 @@
-import { User, LayoutDashboard, PackageSearch, TrendingUp } from 'lucide-react';
+import { LayoutDashboard, PackageSearch, TrendingUp } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 import { motion } from 'motion/react';
 
@@ -7,7 +7,6 @@ export function BottomNav() {
     { icon: LayoutDashboard, label: 'Hub', path: '/' },
     { icon: TrendingUp, label: 'Wishlist', path: '/explore' },
     { icon: PackageSearch, label: 'Catalog', path: '/owner/inventory' },
-    { icon: User, label: 'Profile', path: '/profile' },
   ];
 
   return (

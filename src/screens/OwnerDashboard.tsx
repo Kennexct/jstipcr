@@ -21,7 +21,8 @@ import {
   DollarSign,
   PlusCircle,
   PackageCheck,
-  Search
+  Search,
+  LogOut
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -54,6 +55,7 @@ export function OwnerDashboard() {
 
   const {
     loading,
+    currentUser,
     expenses,
     sales,
     catalogItems,
@@ -62,7 +64,8 @@ export function OwnerDashboard() {
     saveExpense,
     saveSale,
     saveWishlist,
-    saveItem
+    saveItem,
+    logout
   } = useMaster();
 
   // Form States for Expense Dialog
@@ -303,13 +306,43 @@ export function OwnerDashboard() {
     <div className="min-h-screen bg-muted/5 pb-20">
       <header className="p-6 space-y-4">
         <div className="flex items-center justify-between">
-          <div className="space-y-1">
-            <h2 className="text-2xl font-bold tracking-tight">Traveler Hub</h2>
-            <p className="text-sm text-muted-foreground">Manage your trips and orders</p>
+          <div className="flex items-center gap-3">
+            <Avatar className="h-10 w-10 border ring-2 ring-primary/5">
+              <AvatarFallback className="font-bold bg-primary/10 text-primary">
+                {(currentUser?.businessName || currentUser?.username || 'JF').substring(0, 2).toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+            <div className="space-y-0.5 text-left">
+              <h2 className="text-sm font-black text-slate-800 leading-none">
+                {currentUser?.businessName || currentUser?.username}
+              </h2>
+              <div className="flex items-center gap-1">
+                <Badge variant="ghost" className="h-4 text-[7px] font-black uppercase bg-primary/10 text-primary border-none px-1 rounded-md">
+                  Star Traveler
+                </Badge>
+                <span className="text-[9px] text-muted-foreground">• Active</span>
+              </div>
+            </div>
           </div>
-          <Button variant="outline" size="icon" className="rounded-full" onClick={() => navigate('/trip-settings')}>
-            <Settings className="h-5 w-5" />
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="icon" className="rounded-full h-9 w-9" onClick={() => navigate('/trip-settings')} title="Trip Settings">
+              <Settings className="h-4.5 w-4.5 text-slate-650 text-slate-600" />
+            </Button>
+            <Button 
+              variant="outline" 
+              size="icon" 
+              className="rounded-full h-9 w-9 text-red-500 hover:text-red-650 hover:text-red-600 hover:bg-red-50 border-red-100" 
+              onClick={() => {
+                if (window.confirm("Are you sure you want to log out from your merchant console?")) {
+                  logout();
+                  navigate('/login');
+                }
+              }}
+              title="Log Out"
+            >
+              <LogOut className="h-4.5 w-4.5" />
+            </Button>
+          </div>
         </div>
 
         {/* Stats Grid */}
