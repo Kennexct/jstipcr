@@ -16,6 +16,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
 import { useMaster } from '../context/MasterContext';
+import { fetchLiveExchangeRate } from '../lib/currency';
 import { 
   Dialog,
   DialogContent,
@@ -23,6 +24,16 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
+
+const CURRENCY_SYMBOLS: Record<string, string> = {
+  SGD: 'S$',
+  KRW: '₩',
+  JPY: '¥',
+  THB: '฿',
+  USD: '$',
+  EUR: '€',
+  IDR: 'Rp'
+};
 
 const CURRENCIES = [
   { code: 'SGD', name: 'Singapore Dollar' },
@@ -58,14 +69,23 @@ export function TripSettingsScreen() {
         setLimit((tripSettings.trip.weightLimit || 15).toString());
       }
       if (tripSettings.currency) {
+        const curCode = tripSettings.currency.code || 'SGD';
         setSettings({
-          code: tripSettings.currency.code || 'SGD',
+          code: curCode,
           symbol: tripSettings.currency.symbol || 'S$',
           manualRate: tripSettings.currency.manualRate || 13500,
           realtimeRate: tripSettings.currency.realtimeRate || 13050,
           updatedAt: tripSettings.currency.updatedAt || new Date().toISOString()
         });
         setPayoutCurrency(tripSettings.currency.payout || 'IDR');
+
+        // Fetch fresh rate on mount
+        fetchLiveExchangeRate(curCode).then(rate => {
+          setSettings(prev => ({
+            ...prev,
+            realtimeRate: rate
+          }));
+        });
       }
     }
   }, [loading, tripSettings]);
@@ -150,7 +170,20 @@ export function TripSettingsScreen() {
                             key={curr.code}
                             variant={settings.code === curr.code ? 'default' : 'ghost'}
                             className="justify-between h-12 px-4 rounded-xl font-bold"
-                            onClick={() => setSettings({...settings, code: curr.code})}
+                            onClick={async () => {
+                              toast.info(`Fetching live rate for ${curr.code}...`);
+                              const rate = await fetchLiveExchangeRate(curr.code);
+                              const symbol = CURRENCY_SYMBOLS[curr.code] || '$';
+                              const manualDefault = Math.round(rate * 1.03);
+                              setSettings({
+                                code: curr.code,
+                                symbol: symbol,
+                                realtimeRate: rate,
+                                manualRate: manualDefault,
+                                updatedAt: new Date().toISOString()
+                              });
+                              toast.success(`Currency changed to ${curr.code}. Live rate: Rp ${rate.toLocaleString()}`);
+                            }}
                           >
                             <span className="flex items-center gap-3">
                                <span className="opacity-40">{curr.code}</span>
@@ -175,9 +208,12 @@ export function TripSettingsScreen() {
                     <div className="relative flex-1">
                       <div className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground font-bold text-sm">Rp</div>
                       <Input 
-                        type="number" 
-                        value={settings.manualRate} 
-                        onChange={(e) => setSettings({...settings, manualRate: Number(e.target.value)})}
+                        type="text" 
+                        value={settings.manualRate === 0 ? '' : settings.manualRate.toLocaleString()} 
+                        onChange={(e) => {
+                          const cleaned = e.target.value.replace(/[^0-9]/g, '');
+                          setSettings({...settings, manualRate: Number(cleaned) || 0});
+                        }}
                         className="h-12 pl-10 rounded-xl bg-background border-none font-bold text-lg"
                       />
                     </div>

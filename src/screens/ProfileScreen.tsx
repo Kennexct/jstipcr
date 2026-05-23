@@ -37,6 +37,8 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog';
 import { toast } from 'sonner';
+import { useMaster } from '../context/MasterContext';
+import { fetchLiveExchangeRate } from '../lib/currency';
 
 const CURRENCIES_SYMBOLS: Record<string, string> = {
   SGD: 'S$',
@@ -60,6 +62,7 @@ const CURRENCY_LIST = [
 
 export function ProfileScreen() {
   const navigate = useNavigate();
+  const { loading, tripSettings, saveSettings } = useMaster();
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [avatar, setAvatar] = useState<string | null>(null);
 
@@ -86,76 +89,63 @@ export function ProfileScreen() {
     if (savedAvatar) {
       setAvatar(savedAvatar);
     }
-    // 1. Loading Trip location settings
-    const savedTrip = localStorage.getItem('jastip_trip_settings');
-    if (savedTrip) {
-      try {
-        const parsed = JSON.parse(savedTrip);
-        setOrigin(parsed.origin || 'Seoul');
-        setDestination(parsed.destination || 'Jakarta');
-        setUtilizationLimit(parsed.weightLimit?.toString() || '15');
-      } catch (e) {
-        console.error(e);
+  }, []);
+
+  useEffect(() => {
+    if (tripSettings) {
+      if (tripSettings.trip) {
+        setOrigin(tripSettings.trip.origin || 'Seoul');
+        setDestination(tripSettings.trip.destination || 'Jakarta');
+        setUtilizationLimit((tripSettings.trip.weightLimit || 15).toString());
+      }
+      if (tripSettings.currency) {
+        setShoppingCurrency(tripSettings.currency.code || 'SGD');
+        setManualRate((tripSettings.currency.manualRate || 13500).toString());
+        setPayoutCurrency(tripSettings.currency.payout || 'IDR');
+      }
+      if (tripSettings.notifs) {
+        setNotifPush(tripSettings.notifs.push !== false);
+        setNotifEmail(tripSettings.notifs.email === true);
+        setNotifOrders(tripSettings.notifs.orders !== false);
+        setNotifChat(tripSettings.notifs.chat !== false);
       }
     }
+  }, [tripSettings, isSettingsOpen]);
 
-    // 2. Loading Currency Settings
-    const savedCurrency = localStorage.getItem('jastip_currency_settings');
-    if (savedCurrency) {
-      try {
-        const parsed = JSON.parse(savedCurrency);
-        setShoppingCurrency(parsed.code || 'SGD');
-        setManualRate(parsed.manualRate?.toString() || '13500');
-        setPayoutCurrency(parsed.payoutCurrency || 'IDR');
-      } catch (e) {
-        console.error(e);
+  const handleSaveSettings = async () => {
+    const rate = await fetchLiveExchangeRate(shoppingCurrency);
+    const updated = {
+      trip: {
+        origin,
+        destination,
+        weightLimit: parseInt(utilizationLimit) || 15,
+        date: '22 May 2026'
+      },
+      currency: {
+        code: shoppingCurrency,
+        symbol: CURRENCIES_SYMBOLS[shoppingCurrency] || '$',
+        manualRate: Number(manualRate.replace(/[^0-9]/g, '')) || 13500,
+        realtimeRate: rate,
+        payout: payoutCurrency,
+        updatedAt: new Date().toISOString()
+      },
+      notifs: {
+        push: notifPush,
+        email: notifEmail,
+        orders: notifOrders,
+        chat: notifChat
       }
+    };
+
+    try {
+      await saveSettings(updated);
+      toast.success('Traveler configurations updated!', {
+        description: 'Trip routing context and exchange rates refreshed in real-time.'
+      });
+      setIsSettingsOpen(false);
+    } catch (e) {
+      toast.error('Failed to save settings');
     }
-
-    // 3. Loading Notifications Settings
-    const savedNotifs = localStorage.getItem('jastip_notification_settings');
-    if (savedNotifs) {
-      try {
-        const parsed = JSON.parse(savedNotifs);
-        setNotifPush(parsed.push !== false);
-        setNotifEmail(parsed.email === true);
-        setNotifOrders(parsed.orders !== false);
-        setNotifChat(parsed.chat !== false);
-      } catch (e) {
-        console.error(e);
-      }
-    }
-  }, [isSettingsOpen]);
-
-  const handleSaveSettings = () => {
-    // Match active values and write to localStorage
-    localStorage.setItem('jastip_trip_settings', JSON.stringify({
-      origin,
-      destination,
-      weightLimit: parseInt(utilizationLimit) || 15,
-      date: '22 May 2026',
-    }));
-
-    localStorage.setItem('jastip_currency_settings', JSON.stringify({
-      code: shoppingCurrency,
-      symbol: CURRENCIES_SYMBOLS[shoppingCurrency] || '$',
-      manualRate: Number(manualRate) || 13500,
-      realtimeRate: shoppingCurrency === 'KRW' ? 11.2 : 13050,
-      payoutCurrency,
-      updatedAt: new Date().toISOString()
-    }));
-
-    localStorage.setItem('jastip_notification_settings', JSON.stringify({
-      push: notifPush,
-      email: notifEmail,
-      orders: notifOrders,
-      chat: notifChat
-    }));
-
-    toast.success('Traveler configurations updated!', {
-      description: 'Trip routing context and exchange rates refreshed in real-time.'
-    });
-    setIsSettingsOpen(false);
   };
 
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -398,8 +388,15 @@ export function ProfileScreen() {
                     </label>
                     <select 
                       value={shoppingCurrency}
-                      onChange={e => setShoppingCurrency(e.target.value)}
-                      className="w-full h-11 px-3 rounded-xl bg-muted/30 border-none font-bold text-sm text-slate-850 text-slate-800 outline-none"
+                      onChange={async (e) => {
+                        const newCode = e.target.value;
+                        setShoppingCurrency(newCode);
+                        toast.info(`Fetching live rate for ${newCode}...`);
+                        const rate = await fetchLiveExchangeRate(newCode);
+                        setManualRate(Math.round(rate * 1.03).toString());
+                        toast.success(`Fetched live rate: Rp ${rate.toLocaleString()}`);
+                      }}
+                      className="w-full h-11 px-3 rounded-xl bg-muted/30 border-none font-bold text-sm text-slate-800 outline-none"
                     >
                       {CURRENCY_LIST.map((c) => (
                         <option key={c.code} value={c.code}>{c.name}</option>
@@ -414,10 +411,10 @@ export function ProfileScreen() {
                     <div className="relative">
                       <span className="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-sm text-slate-500">Rp</span>
                       <Input 
-                        type="number" 
-                        placeholder="e.g. 13500" 
-                        value={manualRate}
-                        onChange={e => setManualRate(e.target.value)}
+                        type="text" 
+                        placeholder="e.g. 13.500" 
+                        value={manualRate === '' ? '' : Number(manualRate.replace(/[^0-9]/g, '')).toLocaleString()}
+                        onChange={e => setManualRate(e.target.value.replace(/[^0-9]/g, ''))}
                         className="h-11 pl-10 rounded-xl bg-muted/30 border-none font-bold text-sm text-slate-800" 
                       />
                     </div>
