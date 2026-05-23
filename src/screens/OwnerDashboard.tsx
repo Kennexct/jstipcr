@@ -100,8 +100,6 @@ export function OwnerDashboard() {
       setProductSearchText('');
       setDraftSaleItems([]);
       setSelectedQty(1);
-      setTempItemCost('0');
-      setTempItemPrice('0');
     }
   }, [isSaleOpen]);
 
@@ -564,7 +562,7 @@ export function OwnerDashboard() {
               <div className="h-9 w-9 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center">
                 <Plus className="h-4 w-4" />
               </div>
-              <span className="text-[9px] font-bold uppercase tracking-tight text-slate-700">Sell Item</span>
+              <span className="text-[9px] font-bold uppercase tracking-tight text-slate-700">Add Product Catalog</span>
             </button>
             
             <button 

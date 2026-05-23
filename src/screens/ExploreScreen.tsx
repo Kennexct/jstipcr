@@ -154,6 +154,30 @@ export function ExploreScreen() {
     }
   };
 
+  const handleDetailImageUpload = async (e: ChangeEvent<HTMLInputElement>) => {
+    if (!selectedDetailItem) return;
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = async () => {
+        const base64Image = reader.result as string;
+        const updatedItem = {
+          ...selectedDetailItem,
+          image: base64Image
+        };
+        
+        try {
+          await saveWishlist(updatedItem);
+          setSelectedDetailItem(updatedItem);
+          toast.success('Photo added to wishlist item successfully!');
+        } catch (err) {
+          toast.error('Failed to upload photo');
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleUpdateStatus = async (id: string, newStatus: 'find' | 'found' | 'out of stock' | 'cancel' | 'hold') => {
     const matchedItem = myWishlist.find(item => item.id === id);
     if (!matchedItem) return;
@@ -811,23 +835,35 @@ export function ExploreScreen() {
                 </DialogDescription>
               </DialogHeader>
 
-              {/* Product picture rendering */}
-              {selectedDetailItem.image ? (
-                <div className="w-full h-44 rounded-2xl overflow-hidden border">
-                  <img src={selectedDetailItem.image} className="h-full w-full object-cover" alt={selectedDetailItem.name} referrerPolicy="no-referrer" />
-                </div>
-              ) : (
-                <div className="w-full h-28 rounded-2xl border border-dashed flex flex-col items-center justify-center p-4 bg-muted/10 text-muted-foreground gap-1 text-center">
-                  <Package className="h-8 w-8 opacity-35 text-primary" />
-                  <span className="text-[10px] font-black uppercase tracking-wider">No rich preview image</span>
-                  <span className="text-[9px] opacity-60 font-semibold">Registered through external instant message text request channels.</span>
-                </div>
-              )}
+              {/* Product picture rendering (Clickable to upload/take photo) */}
+              <div className="space-y-1">
+                <input 
+                  type="file" 
+                  accept="image/*" 
+                  id="detail-image-upload" 
+                  className="hidden" 
+                  onChange={handleDetailImageUpload} 
+                />
+                {selectedDetailItem.image ? (
+                  <label htmlFor="detail-image-upload" className="cursor-pointer block relative group w-full h-44 rounded-2xl overflow-hidden border">
+                    <img src={selectedDetailItem.image} className="h-full w-full object-cover" alt={selectedDetailItem.name} referrerPolicy="no-referrer" />
+                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 text-white font-bold text-xs uppercase">
+                      <Camera className="h-4 w-4" /> Change Photo
+                    </div>
+                  </label>
+                ) : (
+                  <label htmlFor="detail-image-upload" className="cursor-pointer block w-full h-28 rounded-2xl border border-dashed hover:bg-slate-50 transition-colors flex flex-col items-center justify-center p-4 bg-muted/10 text-muted-foreground gap-1.5 text-center">
+                    <Camera className="h-7 w-7 opacity-65 text-primary animate-pulse" />
+                    <span className="text-[10px] font-black uppercase tracking-wider text-slate-700">Add Photo reference</span>
+                    <span className="text-[8px] opacity-60 font-semibold">Click to upload or take a photo</span>
+                  </label>
+                )}
+              </div>
 
-              {/* Meta specifications bento board - Editable Target Budget */}
+              {/* Meta specifications bento board - Editable Cost Price */}
               <div className="p-4 rounded-2xl bg-slate-50 border space-y-2 text-left">
                 <div className="flex items-center justify-between">
-                  <label className="text-[9px] font-black text-slate-550 text-slate-500 uppercase tracking-widest leading-none">Target Budget</label>
+                  <label className="text-[9px] font-black text-slate-550 text-slate-500 uppercase tracking-widest leading-none">Cost Price</label>
                   <span className="text-[8px] font-bold text-slate-400">Click currency to cycle</span>
                 </div>
                 <div className="flex gap-2">
@@ -866,9 +902,9 @@ export function ExploreScreen() {
                       try {
                         await saveWishlist(updatedItem);
                         setSelectedDetailItem(updatedItem);
-                        toast.success(`Target budget updated to Rp ${finalIdrPrice.toLocaleString()}!`);
+                        toast.success(`Cost Price updated to Rp ${finalIdrPrice.toLocaleString()}!`);
                       } catch (err) {
-                        toast.error('Failed to update target budget');
+                        toast.error('Failed to update Cost Price');
                       }
                     }}
                   >
