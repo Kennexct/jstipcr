@@ -15,28 +15,14 @@ import {
   DialogTitle,
   DialogDescription,
 } from '@/components/ui/dialog';
-import { db } from '../lib/supabase';
+import { useMaster } from '../context/MasterContext';
 
 export function OwnerInventoryScreen() {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedItem, setSelectedItem] = useState<any | null>(null);
-  const [inventory, setInventory] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    async function loadInventory() {
-      try {
-        const items = await db.getItems();
-        setInventory(items);
-      } catch (e) {
-        console.error('Failed to load inventory:', e);
-      } finally {
-        setLoading(false);
-      }
-    }
-    loadInventory();
-  }, []);
+  
+  const { catalogItems: inventory, removeItem, loading } = useMaster();
 
   const handleShareCatalog = () => {
     toast.success('Public catalog link copied!', {
@@ -53,8 +39,7 @@ export function OwnerInventoryScreen() {
       return;
     }
     try {
-      await db.removeItem(id);
-      setInventory(prev => prev.filter(item => item.id !== id));
+      await removeItem(id);
       toast.success('Item removed from catalog');
     } catch (e) {
       toast.error('Failed to remove item. Please try again.');

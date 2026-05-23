@@ -300,16 +300,20 @@ export function ExploreScreen() {
     sales.forEach(sale => {
       if (sale.items && Array.isArray(sale.items)) {
         sale.items.forEach((it: any, index: number) => {
-          salesItems.push({
-            id: `chk_sale_${sale.id}_${it.productId || index}`,
-            name: it.name,
-            qty: it.qty || 1,
-            price: it.price,
-            requester: sale.customerName,
-            location: 'Checkout Desk',
-            type: 'sale' as const,
-            sourceLabel: 'Logged Invoice Sale'
-          });
+          // If a wishlist task with the same product name is already in the checklist, skip duplicating it as a sale item
+          const isWishlistDuplicate = wishlistFound.some(w => w.name.toLowerCase() === it.name.toLowerCase());
+          if (!isWishlistDuplicate) {
+            salesItems.push({
+              id: `chk_sale_${sale.id}_${it.productId || index}`,
+              name: it.name,
+              qty: it.qty || 1,
+              price: it.price,
+              requester: sale.customerName,
+              location: 'Checkout Desk',
+              type: 'sale' as const,
+              sourceLabel: 'Logged Invoice Sale'
+            });
+          }
         });
       }
     });

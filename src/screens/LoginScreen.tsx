@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { toast } from 'sonner';
+import { getCleanErrorMessage } from '../lib/error';
 
 export function LoginScreen() {
   const navigate = useNavigate();
@@ -27,7 +28,7 @@ export function LoginScreen() {
       await login(username.trim(), password);
       navigate('/');
     } catch (err: any) {
-      toast.error(err.message || 'Login failed');
+      toast.error(getCleanErrorMessage(err));
     } finally {
       setSubmitting(false);
     }

@@ -31,7 +31,17 @@ const CURRENCY_SYMBOLS: Record<string, string> = {
   THB: '฿',
   USD: '$',
   EUR: '€',
-  IDR: 'Rp'
+  IDR: 'Rp',
+  MYR: 'RM',
+  AUD: 'A$',
+  GBP: '£',
+  CNY: '¥',
+  HKD: 'HK$',
+  TWD: 'NT$',
+  CAD: 'C$',
+  PHP: '₱',
+  VND: '₫',
+  INR: '₹'
 };
 
 const CURRENCIES = [
@@ -41,17 +51,37 @@ const CURRENCIES = [
   { code: 'THB', name: 'Thai Baht' },
   { code: 'USD', name: 'US Dollar' },
   { code: 'EUR', name: 'Euro' },
-  { code: 'IDR', name: 'Indonesian Rupiah' }
+  { code: 'IDR', name: 'Indonesian Rupiah' },
+  { code: 'MYR', name: 'Malaysian Ringgit' },
+  { code: 'AUD', name: 'Australian Dollar' },
+  { code: 'GBP', name: 'British Pound' },
+  { code: 'CNY', name: 'Chinese Yuan' },
+  { code: 'HKD', name: 'Hong Kong Dollar' },
+  { code: 'TWD', name: 'New Taiwan Dollar' },
+  { code: 'CAD', name: 'Canadian Dollar' },
+  { code: 'PHP', name: 'Philippine Peso' },
+  { code: 'VND', name: 'Vietnamese Dong' },
+  { code: 'INR', name: 'Indian Rupee' }
 ];
 
 const COUNTRIES = [
-  { name: 'South Korea', currencyCode: 'KRW', currencySymbol: '₩', defaultRate: 11.7 },
   { name: 'Singapore', currencyCode: 'SGD', currencySymbol: 'S$', defaultRate: 12100 },
+  { name: 'South Korea', currencyCode: 'KRW', currencySymbol: '₩', defaultRate: 11.7 },
   { name: 'Japan', currencyCode: 'JPY', currencySymbol: '¥', defaultRate: 104.5 },
   { name: 'Thailand', currencyCode: 'THB', currencySymbol: '฿', defaultRate: 442.0 },
   { name: 'United States', currencyCode: 'USD', currencySymbol: '$', defaultRate: 16100 },
   { name: 'Europe', currencyCode: 'EUR', currencySymbol: '€', defaultRate: 17400 },
-  { name: 'Indonesia', currencyCode: 'IDR', currencySymbol: 'Rp', defaultRate: 1.0 }
+  { name: 'Indonesia', currencyCode: 'IDR', currencySymbol: 'Rp', defaultRate: 1.0 },
+  { name: 'Malaysia', currencyCode: 'MYR', currencySymbol: 'RM', defaultRate: 3600 },
+  { name: 'Australia', currencyCode: 'AUD', currencySymbol: 'A$', defaultRate: 10600 },
+  { name: 'United Kingdom', currencyCode: 'GBP', currencySymbol: '£', defaultRate: 20300 },
+  { name: 'China', currencyCode: 'CNY', currencySymbol: '¥', defaultRate: 2200 },
+  { name: 'Hong Kong', currencyCode: 'HKD', currencySymbol: 'HK$', defaultRate: 2050 },
+  { name: 'Taiwan', currencyCode: 'TWD', currencySymbol: 'NT$', defaultRate: 495 },
+  { name: 'Canada', currencyCode: 'CAD', currencySymbol: 'C$', defaultRate: 11700 },
+  { name: 'Philippines', currencyCode: 'PHP', currencySymbol: '₱', defaultRate: 275 },
+  { name: 'Vietnam', currencyCode: 'VND', currencySymbol: '₫', defaultRate: 0.65 },
+  { name: 'India', currencyCode: 'INR', currencySymbol: '₹', defaultRate: 192 }
 ];
 
 export function TripSettingsScreen() {
@@ -150,43 +180,58 @@ export function TripSettingsScreen() {
           </div>
           <div className="space-y-4 text-left">
             <div className="space-y-2">
-              <label className="text-[10px] font-bold text-muted-foreground ml-1">FROM (Origin City)</label>
-              <Input value={origin} onChange={(e) => setOrigin(e.target.value)} className="h-12 rounded-xl bg-muted/30 border-none px-4" />
+              <label className="text-[10px] font-bold text-muted-foreground ml-1">FROM (Origin Country)</label>
+              <select 
+                value={origin} 
+                onChange={async (e) => {
+                  const newOrigin = e.target.value;
+                  setOrigin(newOrigin);
+                  const matched = COUNTRIES.find(c => c.name === newOrigin);
+                  if (matched) {
+                    toast.info(`Origin country changed to ${newOrigin}. Changing shopping currency to ${matched.currencyCode} and fetching rate...`);
+                    try {
+                      const rate = await fetchLiveExchangeRate(matched.currencyCode);
+                      const symbol = matched.currencySymbol;
+                      const manualDefault = Math.round(rate * 1.03);
+                      setSettings({
+                        code: matched.currencyCode,
+                        symbol: symbol,
+                        realtimeRate: rate,
+                        manualRate: manualDefault,
+                        updatedAt: new Date().toISOString()
+                      });
+                      toast.success(`Shopping currency updated to ${matched.currencyCode} (Rate: Rp ${rate.toLocaleString()})`);
+                    } catch (err) {
+                      setSettings({
+                        code: matched.currencyCode,
+                        symbol: matched.currencySymbol,
+                        realtimeRate: matched.defaultRate,
+                        manualRate: Math.round(matched.defaultRate * 1.03),
+                        updatedAt: new Date().toISOString()
+                      });
+                      toast.warning(`Set fallback rate for ${matched.currencyCode}`);
+                    }
+                  }
+                }}
+                className="w-full h-12 rounded-xl bg-muted/30 border-none px-4 font-bold text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary"
+              >
+                <option value="">Select Origin Country</option>
+                {COUNTRIES.map(c => (
+                  <option key={c.name} value={c.name}>{c.name}</option>
+                ))}
+              </select>
             </div>
             <div className="space-y-2">
               <label className="text-[10px] font-bold text-muted-foreground ml-1">TO (Destination Country)</label>
               <select 
                 value={destination} 
-                onChange={async (e) => {
+                onChange={(e) => {
                   const newDest = e.target.value;
                   setDestination(newDest);
                   const matched = COUNTRIES.find(c => c.name === newDest);
-                  if (matched && matched.currencyCode !== 'IDR') {
-                    if (window.confirm(`Destination country changed to ${newDest}. Automatically change shopping currency to ${matched.currencyCode} and fetch live rate?`)) {
-                      toast.info(`Fetching live rate for ${matched.currencyCode}...`);
-                      try {
-                        const rate = await fetchLiveExchangeRate(matched.currencyCode);
-                        const symbol = matched.currencySymbol;
-                        const manualDefault = Math.round(rate * 1.03);
-                        setSettings({
-                          code: matched.currencyCode,
-                          symbol: symbol,
-                          realtimeRate: rate,
-                          manualRate: manualDefault,
-                          updatedAt: new Date().toISOString()
-                        });
-                        toast.success(`Currency changed to ${matched.currencyCode}. Live rate: Rp ${rate.toLocaleString()}`);
-                      } catch (err) {
-                        toast.error(`Failed to fetch live rate. Using default fallback.`);
-                        setSettings({
-                          code: matched.currencyCode,
-                          symbol: matched.currencySymbol,
-                          realtimeRate: matched.defaultRate,
-                          manualRate: Math.round(matched.defaultRate * 1.03),
-                          updatedAt: new Date().toISOString()
-                        });
-                      }
-                    }
+                  if (matched) {
+                    setPayoutCurrency(matched.currencyCode);
+                    toast.success(`Destination country changed to ${newDest}. Payout currency set to ${matched.currencyCode}.`);
                   }
                 }}
                 className="w-full h-12 rounded-xl bg-muted/30 border-none px-4 font-bold text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary"

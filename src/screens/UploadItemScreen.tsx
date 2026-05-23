@@ -65,6 +65,77 @@ const applyWatermark = (originalImageSrc: string, watermarkImageSrc: string): Pr
   });
 };
 
+const drawPriceLabelOnImage = (originalImageSrc: string, priceText: string): Promise<string> => {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = img.width;
+      canvas.height = img.height;
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.drawImage(img, 0, 0);
+        
+        const canvasScale = Math.min(canvas.width, canvas.height);
+        const fontSize = Math.max(14, Math.round(canvasScale * 0.035));
+        const paddingX = Math.round(fontSize * 0.8);
+        const paddingY = Math.round(fontSize * 0.4);
+        const borderRadius = Math.round(fontSize * 0.5);
+        
+        ctx.font = `bold ${fontSize}px system-ui, -apple-system, sans-serif`;
+        
+        const textMetrics = ctx.measureText(priceText);
+        const textWidth = textMetrics.width;
+        const textHeight = fontSize;
+        
+        const pillWidth = textWidth + paddingX * 2;
+        const pillHeight = textHeight + paddingY * 2;
+        
+        const margin = Math.max(10, Math.round(canvasScale * 0.04));
+        const pillX = canvas.width - pillWidth - margin;
+        const pillY = margin;
+        
+        ctx.save();
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
+        ctx.shadowBlur = 10;
+        ctx.shadowOffsetX = 0;
+        ctx.shadowOffsetY = 4;
+        
+        ctx.fillStyle = '#4f46e5';
+        ctx.beginPath();
+        if (ctx.roundRect) {
+          ctx.roundRect(pillX, pillY, pillWidth, pillHeight, borderRadius);
+        } else {
+          ctx.rect(pillX, pillY, pillWidth, pillHeight);
+        }
+        ctx.fill();
+        
+        ctx.shadowColor = 'transparent';
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = Math.max(2, Math.round(fontSize * 0.08));
+        ctx.stroke();
+        
+        ctx.fillStyle = '#ffffff';
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'middle';
+        const textX = pillX + paddingX;
+        const textY = pillY + paddingY + textHeight / 2;
+        ctx.fillText(priceText, textX, textY);
+        
+        ctx.restore();
+        resolve(canvas.toDataURL('image/jpeg', 0.85));
+      } else {
+        resolve(originalImageSrc);
+      }
+    };
+    img.onerror = () => {
+      resolve(originalImageSrc);
+    };
+    img.src = originalImageSrc;
+  });
+};
+
 export function UploadItemScreen() {
   const navigate = useNavigate();
   const { id } = useParams();
@@ -73,6 +144,7 @@ export function UploadItemScreen() {
   const { loading, catalogItems, tripSettings, saveItem } = useMaster();
 
   const [image, setImage] = useState<string | null>(null);
+  const [rawImage, setRawImage] = useState<string | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [isCameraOpen, setIsCameraOpen] = useState(false);
   const [cameraError, setCameraError] = useState<string | null>(null);
@@ -110,6 +182,7 @@ export function UploadItemScreen() {
         const item = catalogItems.find((i: any) => i.id === id);
         if (item) {
           setImage(item.image);
+          setRawImage(item.rawImage || item.image || null);
           setName(item.name);
           setPrice(item.cost.toString());
           setPublishPrice(item.price.toString());
@@ -144,6 +217,7 @@ export function UploadItemScreen() {
       }
     }
     setImage(finalUrl);
+    setRawImage(finalUrl);
     if (!isAiConfigured() || isEdit) return;
 
     setIsAnalyzing(true);
@@ -250,13 +324,25 @@ export function UploadItemScreen() {
       return;
     }
 
+    let finalImage = image || '';
+    const baseImage = rawImage || image || '';
+    if (baseImage) {
+      try {
+        const formattedPrice = `Rp ${Number(publishPrice).toLocaleString()}`;
+        finalImage = await drawPriceLabelOnImage(baseImage, formattedPrice);
+      } catch (e) {
+        console.error('Failed to draw price badge:', e);
+      }
+    }
+
     const itemToSave = {
       id: id || 'item_' + Date.now(),
       name: name.trim(),
       price: Number(publishPrice),
       cost: Number(price),
       currency: settings.code,
-      image: image || '',
+      image: finalImage,
+      rawImage: baseImage,
       status: 'active'
     };
 

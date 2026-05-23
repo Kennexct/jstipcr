@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { toast } from 'sonner';
+import { getCleanErrorMessage } from '../lib/error';
 
 export function SignUpScreen() {
   const navigate = useNavigate();
@@ -28,7 +29,7 @@ export function SignUpScreen() {
       await signUp(username.trim(), password, businessName.trim());
       navigate('/');
     } catch (err: any) {
-      toast.error(err.message || 'Registration failed');
+      toast.error(getCleanErrorMessage(err));
     } finally {
       setSubmitting(false);
     }

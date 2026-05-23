@@ -87,7 +87,7 @@ export function OwnerDashboard() {
   const [productSearchText, setProductSearchText] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [tempItemCost, setTempItemCost] = useState('0');
-  const [tempItemPrice, setTempItemPrice] = useState('250000');
+  const [tempItemPrice, setTempItemPrice] = useState('0');
   const [tempItemLocation, setTempItemLocation] = useState('Seoul');
   const [selectedQty, setSelectedQty] = useState(1);
   const [draftSaleItems, setDraftSaleItems] = useState<any[]>([]);
@@ -110,11 +110,30 @@ export function OwnerDashboard() {
     updatedAt: new Date().toISOString()
   };
 
+  const shoppingCurrencyCode = tripSettings?.currency?.code || 'SGD';
+  const payoutCurrencyCode = tripSettings?.currency?.payout || 'IDR';
+
+  useEffect(() => {
+    if (shoppingCurrencyCode) {
+      setExpenseCurrency(shoppingCurrencyCode);
+    }
+  }, [shoppingCurrencyCode]);
+
   const handleCycleExpenseCurrency = () => {
-    const idx = EXPENSE_CURRENCIES.findIndex(c => c.code === expenseCurrency);
-    const nextIdx = (idx + 1) % EXPENSE_CURRENCIES.length;
-    setExpenseCurrency(EXPENSE_CURRENCIES[nextIdx].code);
-    toast.info(`Switched operational expense currency to ${EXPENSE_CURRENCIES[nextIdx].code} (${EXPENSE_CURRENCIES[nextIdx].symbol})`);
+    const nextCurrency = expenseCurrency === shoppingCurrencyCode ? payoutCurrencyCode : shoppingCurrencyCode;
+    setExpenseCurrency(nextCurrency);
+    toast.info(`Switched operational expense currency to ${nextCurrency}`);
+  };
+
+  const getCurrencySymbol = (code: string) => {
+    if (code === 'IDR') return 'Rp';
+    if (code === 'SGD') return 'S$';
+    if (code === 'KRW') return '₩';
+    if (code === 'JPY') return '¥';
+    if (code === 'THB') return '฿';
+    if (code === 'USD') return '$';
+    if (code === 'EUR') return '€';
+    return '$';
   };
 
   const handleAddCategory = () => {
@@ -148,8 +167,9 @@ export function OwnerDashboard() {
       return;
     }
 
-    const currentCurrency = EXPENSE_CURRENCIES.find(c => c.code === expenseCurrency) || EXPENSE_CURRENCIES[0];
-    const amountInIdr = Math.round(enteredAmount * currentCurrency.rate);
+    const amountInIdr = expenseCurrency === shoppingCurrencyCode
+      ? Math.round(enteredAmount * (tripSettings?.currency?.manualRate || 13500))
+      : enteredAmount;
 
     const newExpense = {
       id: 'exp_' + Date.now(),
@@ -157,18 +177,18 @@ export function OwnerDashboard() {
       amount: amountInIdr,
       category: expenseCategory,
       notes: expenseNotes.trim() || undefined,
-      originalAmount: currentCurrency.code !== 'IDR' ? enteredAmount : undefined,
-      originalSymbol: currentCurrency.code !== 'IDR' ? currentCurrency.symbol : undefined,
+      originalAmount: expenseCurrency !== 'IDR' ? enteredAmount : undefined,
+      originalSymbol: expenseCurrency !== 'IDR' ? (expenseCurrency === shoppingCurrencyCode ? (tripSettings?.currency?.symbol || 'S$') : getCurrencySymbol(payoutCurrencyCode)) : undefined,
       date: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     };
 
-    if (!window.confirm(`Are you sure you want to record this expense of ${currentCurrency.symbol} ${enteredAmount.toLocaleString()} (${amountInIdr.toLocaleString()} IDR) under "${expenseCategory}"?`)) {
+    if (!window.confirm(`Are you sure you want to record this expense of ${expenseCurrency} ${enteredAmount.toLocaleString()} (${amountInIdr.toLocaleString()} IDR) under "${expenseCategory}"?`)) {
       return;
     }
 
     try {
       await saveExpense(newExpense);
-      toast.success(`Recorded ${currentCurrency.symbol} ${enteredAmount.toLocaleString()} (${amountInIdr.toLocaleString()} IDR) under ${expenseCategory}`);
+      toast.success(`Recorded ${expenseCurrency} ${enteredAmount.toLocaleString()} (${amountInIdr.toLocaleString()} IDR) under ${expenseCategory}`);
       
       // Reset
       setExpenseDesc('');
@@ -608,7 +628,7 @@ export function OwnerDashboard() {
                     className="absolute left-3 top-1/2 -translate-y-1/2 font-black text-xs text-primary bg-primary/10 hover:bg-primary/20 px-2.5 py-1.5 rounded-lg transition-all flex items-center gap-1 active:scale-90"
                     title="Click to switch currency"
                   >
-                    <span>{EXPENSE_CURRENCIES.find(c => c.code === expenseCurrency)?.symbol || '₩'}</span>
+                    <span>{expenseCurrency === shoppingCurrencyCode ? (tripSettings?.currency?.symbol || 'S$') : (payoutCurrencyCode === 'IDR' ? 'Rp' : getCurrencySymbol(payoutCurrencyCode))}</span>
                     <span className="text-[9px] font-bold opacity-80">{expenseCurrency}</span>
                   </button>
                   <Input 
@@ -619,11 +639,17 @@ export function OwnerDashboard() {
                     className="h-11 pl-20 rounded-xl bg-muted/30 border-none font-bold text-sm text-slate-800" 
                   />
                 </div>
-                {expenseCurrency !== 'IDR' && (
-                  <p className="text-[9px] text-muted-foreground font-semibold px-1">
-                    Approx. <span className="font-bold text-primary">Rp {Math.round((parseInt(expenseAmount.replace(/[^0-9]/g, '')) || 0) * (EXPENSE_CURRENCIES.find(c => c.code === expenseCurrency)?.rate || 1)).toLocaleString()}</span> IDR (1 {expenseCurrency} = Rp {EXPENSE_CURRENCIES.find(c => c.code === expenseCurrency)?.rate})
-                  </p>
-                )}
+                {expenseCurrency !== 'IDR' && (() => {
+                  const rate = expenseCurrency === shoppingCurrencyCode 
+                    ? (tripSettings?.currency?.manualRate || 13500) 
+                    : 1;
+                  const parsedAmount = parseInt(expenseAmount.replace(/[^0-9]/g, '')) || 0;
+                  return (
+                    <p className="text-[9px] text-slate-500 font-semibold px-1 text-left">
+                      Approx. <span className="font-bold text-indigo-600">Rp {Math.round(parsedAmount * rate).toLocaleString()}</span> IDR (1 {expenseCurrency} = Rp {rate.toLocaleString()})
+                    </p>
+                  );
+                })()}
               </div>
 
               <div className="space-y-1.5">
@@ -806,12 +832,12 @@ export function OwnerDashboard() {
                       <p className="text-[9px] text-slate-600 leading-normal">
                         Optionally add "{productSearchText}" directly to the travel Wishlist board so traveler can acquire it:
                       </p>
-                      <div className="grid grid-cols-3 gap-2 mt-1">
+                      <div className="grid grid-cols-2 gap-2 mt-1">
                         <div className="space-y-0.5">
                           <label className="text-[8px] font-bold text-slate-500 uppercase">Cost ({currencySettings.code})</label>
                           <Input 
                             type="number"
-                            placeholder="e.g. 15"
+                            placeholder="0"
                             value={tempItemCost}
                             onChange={e => setTempItemCost(e.target.value)}
                             inputMode="numeric"
@@ -822,19 +848,10 @@ export function OwnerDashboard() {
                           <label className="text-[8px] font-bold text-slate-500 uppercase">Est Price (Rp)</label>
                           <Input 
                             type="number"
-                            placeholder="e.g. 250000"
+                            placeholder="0"
                             value={tempItemPrice}
                             onChange={e => setTempItemPrice(e.target.value)}
                             inputMode="numeric"
-                            className="h-8 text-[11px] font-bold bg-white"
-                          />
-                        </div>
-                        <div className="space-y-0.5">
-                          <label className="text-[8px] font-bold text-slate-500 uppercase">Origin</label>
-                          <Input 
-                            placeholder="e.g. Seoul"
-                            value={tempItemLocation}
-                            onChange={e => setTempItemLocation(e.target.value)}
                             className="h-8 text-[11px] font-bold bg-white"
                           />
                         </div>
@@ -860,30 +877,30 @@ export function OwnerDashboard() {
                             requester: customerName.trim() || 'Alya Putri',
                             status: 'find',
                             price: priceNum,
-                            location: tempItemLocation.trim() || 'Seoul',
+                            location: tripSettings?.trip?.destination || 'Seoul',
                             image: ''
                           };
                           
                           try {
                              await saveWishlist(newWish);
                             
-                            const newCatItem = {
-                              id: newId,
-                              name: productSearchText.trim(),
-                              price: priceNum,
-                              cost: Number(tempItemCost) || 0,
-                              currency: currencySettings.code,
-                              image: '',
-                              status: 'active'
-                            };
-                            await saveItem(newCatItem);
-                            setSelectedItemId(newId);
-                            
-                            toast.success(`"${productSearchText}" added to Wishlist and selected!`);
-                          } catch (e) {
-                            console.error('Failed to save wishlist item:', e);
-                            toast.error('Failed to save item to wishlist');
-                          }
+                             const newCatItem = {
+                               id: newId,
+                               name: productSearchText.trim(),
+                               price: priceNum,
+                               cost: Number(tempItemCost) || 0,
+                               currency: currencySettings.code,
+                               image: '',
+                               status: 'active'
+                             };
+                             await saveItem(newCatItem);
+                             setSelectedItemId(newId);
+                             
+                             toast.success(`"${productSearchText}" added to Wishlist and selected!`);
+                           } catch (e) {
+                             console.error('Failed to save wishlist item:', e);
+                             toast.error('Failed to save item to wishlist');
+                           }
                         }}
                         className="w-full h-8 text-[9px] font-black uppercase tracking-wider bg-indigo-600 text-white hover:bg-indigo-700 mt-1"
                       >
