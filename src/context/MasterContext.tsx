@@ -98,13 +98,13 @@ export function MasterProvider({ children }: { children: ReactNode }) {
         password,
         businessName,
         role: 'merchant' as const,
-        paid: false,
+        paid: true,
         createdAt: new Date().toISOString()
       };
       await db.saveMerchant(newMerchant);
       setCurrentUser(newMerchant);
       localStorage.setItem('jastip_session', JSON.stringify(newMerchant));
-      toast.success('Registration successful! Please settle subscription payment.');
+      toast.success(`Account created successfully! Welcome, ${businessName || username}!`);
       return newMerchant;
     } finally {
       setLoading(false);
@@ -129,11 +129,11 @@ export function MasterProvider({ children }: { children: ReactNode }) {
     setLoading(true);
     try {
       const [loadedExpenses, loadedSales, loadedItems, loadedWishlist, loadedSettings] = await Promise.all([
-        db.getExpenses(currentUser.role === 'admin' ? undefined : currentUser.id),
-        db.getSales(currentUser.role === 'admin' ? undefined : currentUser.id),
-        db.getItems(currentUser.role === 'admin' ? undefined : currentUser.id),
-        db.getWishlist(currentUser.role === 'admin' ? undefined : currentUser.id),
-        db.getSettings(currentUser.role === 'admin' ? undefined : currentUser.id)
+        db.getExpenses(currentUser.id),
+        db.getSales(currentUser.id),
+        db.getItems(currentUser.id),
+        db.getWishlist(currentUser.id),
+        db.getSettings(currentUser.id)
       ]);
       setExpenses(loadedExpenses || []);
       setSales(loadedSales || []);

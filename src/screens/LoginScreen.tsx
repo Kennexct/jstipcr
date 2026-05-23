@@ -24,14 +24,8 @@ export function LoginScreen() {
     
     setSubmitting(true);
     try {
-      const user = await login(username.trim(), password);
-      if (user.role === 'admin') {
-        navigate('/admin');
-      } else if (!user.paid) {
-        navigate('/inactive');
-      } else {
-        navigate('/');
-      }
+      await login(username.trim(), password);
+      navigate('/');
     } catch (err: any) {
       toast.error(err.message || 'Login failed');
     } finally {
@@ -98,9 +92,7 @@ export function LoginScreen() {
               Create Account
             </Link>
           </p>
-          <p className="text-[9px] text-muted-foreground italic">
-            Tip: Log in with username <span className="font-bold text-slate-700">admin</span> / password <span className="font-bold text-slate-700">admin</span> to test admin console.
-          </p>
+
         </div>
       </div>
     </div>

@@ -26,7 +26,7 @@ export function SignUpScreen() {
     setSubmitting(true);
     try {
       await signUp(username.trim(), password, businessName.trim());
-      navigate('/inactive');
+      navigate('/');
     } catch (err: any) {
       toast.error(err.message || 'Registration failed');
     } finally {

@@ -9,11 +9,9 @@ import { OwnerRequestDetailScreen } from './screens/OwnerRequestDetailScreen';
 import { StorefrontScreen } from './screens/StorefrontScreen';
 import { LoginScreen } from './screens/LoginScreen';
 import { SignUpScreen } from './screens/SignUpScreen';
-import { SubscriptionInactiveScreen } from './screens/SubscriptionInactiveScreen';
-import { AdminDashboardScreen } from './screens/AdminDashboardScreen';
 import { MasterProvider, useMaster } from './context/MasterContext';
 
-function RequireAuth({ allowedRole, checkSubscription }: { allowedRole?: 'merchant' | 'admin'; checkSubscription?: boolean }) {
+function RequireAuth() {
   const { currentUser, loading } = useMaster();
 
   if (loading) {
@@ -26,14 +24,6 @@ function RequireAuth({ allowedRole, checkSubscription }: { allowedRole?: 'mercha
 
   if (!currentUser) {
     return <Navigate to="/login" replace />;
-  }
-
-  if (allowedRole && currentUser.role !== allowedRole) {
-    return <Navigate to={currentUser.role === 'admin' ? '/admin' : '/'} replace />;
-  }
-
-  if (checkSubscription && currentUser.role === 'merchant' && !currentUser.paid) {
-    return <Navigate to="/inactive" replace />;
   }
 
   return <Outlet />;
@@ -52,7 +42,7 @@ export default function App() {
           <Route path="signup" element={<SignUpScreen />} />
 
           {/* Protect merchant routes */}
-          <Route element={<RequireAuth checkSubscription={true} allowedRole="merchant" />}>
+          <Route element={<RequireAuth />}>
             <Route path="/" element={<Layout />}>
               <Route index element={<OwnerDashboard />} />
               <Route path="explore" element={<ExploreScreen />} />
@@ -62,16 +52,6 @@ export default function App() {
               <Route path="owner/request/:id" element={<OwnerRequestDetailScreen />} />
               <Route path="trip-settings" element={<TripSettingsScreen />} />
             </Route>
-          </Route>
-
-          {/* Protected lockout screen */}
-          <Route element={<RequireAuth allowedRole="merchant" />}>
-            <Route path="inactive" element={<SubscriptionInactiveScreen />} />
-          </Route>
-
-          {/* Protect admin routes */}
-          <Route element={<RequireAuth allowedRole="admin" />}>
-            <Route path="admin" element={<AdminDashboardScreen />} />
           </Route>
 
           {/* Catch all */}

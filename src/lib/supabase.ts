@@ -319,26 +319,19 @@ export const db = {
     return expense;
   },
 
-  // 6. Merchants (Auth & Admin)
+  // 6. Merchants (Auth)
   async getMerchants(): Promise<any[]> {
-    const defaultMerchants = [
-      { id: 'merchant_admin', username: 'admin', password: 'admin', businessName: 'JStip Administrator', role: 'admin', paid: true, createdAt: new Date().toISOString() }
-    ];
     if (isSupabaseConfigured()) {
       try {
         const rows = await postgrestRequest('jstip_merchants', { query: 'order=id.asc' });
         if (Array.isArray(rows)) {
-          const hasAdmin = rows.some((m: any) => m.username.toLowerCase() === 'admin');
-          if (!hasAdmin) {
-            return [defaultMerchants[0], ...rows];
-          }
           return rows;
         }
       } catch (e) {
         console.error('Supabase get merchants error:', e);
       }
     }
-    return getLocal('jastip_merchants', defaultMerchants);
+    return getLocal('jastip_merchants', []);
   },
 
   async saveMerchant(merchant: any) {
