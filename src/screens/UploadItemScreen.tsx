@@ -328,15 +328,21 @@ export function UploadItemScreen() {
               )}
             </div>
           ) : (
-            <div className="w-full aspect-square border-4 border-dashed rounded-3xl flex flex-col items-center justify-center gap-6 bg-muted/20 p-6">
+            <div 
+              onClick={() => {
+                setIsCameraOpen(true);
+                startCamera();
+              }}
+              className="w-full aspect-square border-4 border-dashed rounded-3xl flex flex-col items-center justify-center gap-6 bg-muted/20 p-6 cursor-pointer hover:bg-muted/30 hover:border-primary/50 transition-all duration-300 animate-pulse-subtle"
+            >
               <div className="h-20 w-20 rounded-full bg-primary/10 flex items-center justify-center text-primary">
                 <Camera className="h-10 w-10" />
               </div>
               <div className="text-center space-y-1">
                 <p className="font-bold text-sm">Add Product Photo</p>
-                <p className="text-xs text-muted-foreground">Take a picture or choose a file</p>
+                <p className="text-xs text-muted-foreground">Tap anywhere to use camera, or upload a file below</p>
               </div>
-              <div className="grid grid-cols-2 gap-3 w-full max-w-xs">
+              <div className="grid grid-cols-2 gap-3 w-full max-w-xs" onClick={(e) => e.stopPropagation()}>
                 <Button 
                   type="button"
                   onClick={() => {
@@ -347,7 +353,7 @@ export function UploadItemScreen() {
                 >
                   <Camera className="h-4 w-4" /> Use Camera
                 </Button>
-                <label className="cursor-pointer">
+                <label className="cursor-pointer" onClick={(e) => e.stopPropagation()}>
                   <input
                     type="file"
                     accept="image/*"
