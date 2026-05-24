@@ -12,6 +12,7 @@ import { LoginScreen } from './screens/LoginScreen';
 import { SignUpScreen } from './screens/SignUpScreen';
 import { ReportsScreen } from './screens/ReportsScreen';
 import { MasterProvider, useMaster } from './context/MasterContext';
+import { Toaster } from 'sonner';
 
 function RequireAuth() {
   const { currentUser, loading } = useMaster();
@@ -71,6 +72,7 @@ export default function App() {
           {/* Catch all */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
+        <Toaster position="top-center" />
       </BrowserRouter>
     </MasterProvider>
   );

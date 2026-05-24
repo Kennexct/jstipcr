@@ -105,13 +105,13 @@ export function ExploreScreen() {
     : (parseInt(editBudgetAmount.replace(/[^0-9]/g, '')) || 0);
 
   const handleCycleBudgetCurrency = () => {
-    const sequence = ['IDR', shoppingCurrencyCode, 'USD'];
+    const sequence = [payoutCurrencyCode, shoppingCurrencyCode];
     const nextIdx = (sequence.indexOf(editBudgetCurrency) + 1) % sequence.length;
     setEditBudgetCurrency(sequence[nextIdx]);
   };
 
   const handleCycleSellCurrency = () => {
-    const sequence = ['IDR', shoppingCurrencyCode, 'USD'];
+    const sequence = [payoutCurrencyCode, shoppingCurrencyCode];
     const nextIdx = (sequence.indexOf(editSellCurrency) + 1) % sequence.length;
     setEditSellCurrency(sequence[nextIdx]);
   };
@@ -919,6 +919,8 @@ export function ExploreScreen() {
                     </button>
                     <Input 
                       type="text" 
+                      inputMode="numeric"
+                      pattern="[0-9]*"
                       value={editBudgetAmount}
                       onChange={(e) => setEditBudgetAmount(e.target.value.replace(/[^0-9]/g, ''))}
                       className="h-10 pl-16 rounded-xl bg-white border-slate-200 font-bold text-xs font-mono"
@@ -977,6 +979,8 @@ export function ExploreScreen() {
                     </button>
                     <Input 
                       type="text" 
+                      inputMode="numeric"
+                      pattern="[0-9]*"
                       value={editSellAmount}
                       onChange={(e) => setEditSellAmount(e.target.value.replace(/[^0-9]/g, ''))}
                       className="h-10 pl-16 rounded-xl bg-white border-emerald-200 font-bold text-xs font-mono text-emerald-900 focus-visible:ring-emerald-500"
