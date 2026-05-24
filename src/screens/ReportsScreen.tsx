@@ -73,7 +73,8 @@ export function ReportsScreen() {
         `Total Cost Price (${shoppingCode})`, 
         "Publish Price Per Item (IDR)", 
         "Total Publish Price (IDR)", 
-        "Profit Margin (IDR)"
+        "Profit Margin (IDR)",
+        "Source Category"
       ];
       
       rows = sales.flatMap(sale => 
@@ -105,7 +106,8 @@ export function ReportsScreen() {
             totalCostInShopping,
             item.price,
             totalPublishIdr,
-            marginIdr
+            marginIdr,
+            item.sourceCategory || 'Catalog'
           ];
         })
       );
@@ -304,7 +306,12 @@ export function ReportsScreen() {
                           return (
                             <div key={idx} className="text-[11px] font-semibold text-slate-650 text-slate-700 flex flex-col gap-0.5">
                               <div className="flex justify-between font-bold text-slate-800 uppercase text-[10px]">
-                                <span>{item.qty}x {item.name}</span>
+                                <span>
+                                  {item.qty}x {item.name}
+                                  {item.sourceCategory === 'Wishlist' && (
+                                    <Badge variant="secondary" className="ml-2 text-[8px] px-1 py-0 h-3 bg-purple-100 text-purple-700">Wishlist</Badge>
+                                  )}
+                                </span>
                                 <span>Rp {totalPublish.toLocaleString()}</span>
                               </div>
                               <div className="flex justify-between text-[9px] text-slate-400">
@@ -330,6 +337,7 @@ export function ReportsScreen() {
                   <th>Date</th>
                   <th>Customer</th>
                   <th>Item Name</th>
+                  <th>Source</th>
                   <th>Qty</th>
                   <th>Cost / Item</th>
                   <th>Total Cost</th>
@@ -350,6 +358,7 @@ export function ReportsScreen() {
                         <td>{sale.date || 'N/A'}</td>
                         <td>{sale.customerName}</td>
                         <td className="uppercase">{item.name}</td>
+                        <td className="uppercase">{item.sourceCategory || 'Catalog'}</td>
                         <td className="font-mono">{item.qty}</td>
                         <td className="font-mono">Rp {unitCost.toLocaleString()}</td>
                         <td className="font-mono">Rp {totalCost.toLocaleString()}</td>

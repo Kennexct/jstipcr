@@ -227,7 +227,7 @@ export const db = {
             if (secureStatus === 'searching') {
               secureStatus = 'find';
             }
-            return { ...item, status: secureStatus };
+            return { ...item, status: secureStatus, sellPrice: item.sell_price || 0 };
           });
         }
       } catch (e) {
@@ -266,6 +266,7 @@ export const db = {
           name: item.name,
           requester: item.requester,
           price: item.price || 0,
+          sell_price: item.sellPrice || 0,
           location: item.location || 'External Chat',
           image: item.image || '',
           status: item.status || 'find',

@@ -45,6 +45,7 @@ export interface WishlistItem {
   requester: string;
   status: 'find' | 'found' | 'out of stock' | 'cancel' | 'hold';
   price: number;
+  sellPrice?: number;
   location: string;
   image?: string;
 }
@@ -55,6 +56,7 @@ export function ExploreScreen() {
     sales,
     wishlistItems: myWishlist,
     saveWishlist,
+    saveSale,
     boughtIds,
     toggleBoughtId,
     tripSettings
@@ -84,11 +86,16 @@ export function ExploreScreen() {
 
   const [editBudgetAmount, setEditBudgetAmount] = useState('');
   const [editBudgetCurrency, setEditBudgetCurrency] = useState('IDR');
+  
+  const [editSellAmount, setEditSellAmount] = useState('');
+  const [editSellCurrency, setEditSellCurrency] = useState('IDR');
 
   useEffect(() => {
     if (selectedDetailItem) {
       setEditBudgetAmount((selectedDetailItem.price || 0).toString());
       setEditBudgetCurrency('IDR');
+      setEditSellAmount((selectedDetailItem.sellPrice || 0).toString());
+      setEditSellCurrency('IDR');
     }
   }, [selectedDetailItem]);
 
@@ -98,8 +105,15 @@ export function ExploreScreen() {
     : (parseInt(editBudgetAmount.replace(/[^0-9]/g, '')) || 0);
 
   const handleCycleBudgetCurrency = () => {
-    const nextCurrency = editBudgetCurrency === shoppingCurrencyCode ? payoutCurrencyCode : shoppingCurrencyCode;
-    setEditBudgetCurrency(nextCurrency);
+    const sequence = ['IDR', shoppingCurrencyCode, 'USD'];
+    const nextIdx = (sequence.indexOf(editBudgetCurrency) + 1) % sequence.length;
+    setEditBudgetCurrency(sequence[nextIdx]);
+  };
+
+  const handleCycleSellCurrency = () => {
+    const sequence = ['IDR', shoppingCurrencyCode, 'USD'];
+    const nextIdx = (sequence.indexOf(editSellCurrency) + 1) % sequence.length;
+    setEditSellCurrency(sequence[nextIdx]);
   };
 
   // Form states for manually recording a wishlist
@@ -194,12 +208,40 @@ export function ExploreScreen() {
     }
   };
 
-  const handleToggleChecklistBoughtState = (id: string) => {
+  const handleToggleCustomChecklist = async (id: string, type: 'wishlist' | 'sale') => {
     const isCurrentlyBought = boughtIds.includes(id);
-    const action = isCurrentlyBought ? 'mark this item as UNBOUGHT (pending)' : 'mark this item as BOUGHT (acquired)';
+    const action = isCurrentlyBought ? 'uncheck this item' : 'confirm this item as bought';
     if (!window.confirm(`Are you sure you want to ${action}?`)) {
       return;
     }
+
+    // Auto generate sales record when a wishlist item is checked
+    if (!isCurrentlyBought && type === 'wishlist') {
+      const matchedWishlist = myWishlist.find(w => `chk_wishlist_${w.id}` === id);
+      if (matchedWishlist) {
+        try {
+          const sellPrice = matchedWishlist.sellPrice || matchedWishlist.price;
+          const newSale = {
+            id: 'sale_' + Date.now(),
+            customerName: matchedWishlist.requester,
+            total: sellPrice,
+            date: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            items: [{
+              productId: matchedWishlist.id,
+              name: matchedWishlist.name,
+              price: sellPrice,
+              qty: 1,
+              cost: matchedWishlist.price,
+              sourceCategory: 'Wishlist'
+            }]
+          };
+          if (saveSale) await saveSale(newSale);
+        } catch (e) {
+          console.error("Failed to generate automatic sale", e);
+        }
+      }
+    }
+
     if (isCurrentlyBought) {
       toast.info('Marked item as pending purchase');
     } else {
@@ -916,6 +958,59 @@ export function ExploreScreen() {
                     Approx. <span className="font-bold text-indigo-600">Rp {computedPriceInIdr.toLocaleString()}</span> IDR (1 {editBudgetCurrency} = Rp {conversionRate.toLocaleString()})
                   </p>
                 )}
+              </div>
+              
+              {/* Meta specifications bento board - Editable Sell Price */}
+              <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-100 space-y-2 text-left">
+                <div className="flex items-center justify-between">
+                  <label className="text-[9px] font-black text-emerald-700 uppercase tracking-widest leading-none">Sell Price</label>
+                  <span className="text-[8px] font-bold text-emerald-600">Final price for customer</span>
+                </div>
+                <div className="flex gap-2">
+                  <div className="relative flex-1">
+                    <button
+                      type="button"
+                      onClick={handleCycleSellCurrency}
+                      className="absolute left-3 top-1/2 -translate-y-1/2 font-black text-[10px] text-emerald-700 bg-emerald-200/50 hover:bg-emerald-200 px-2 py-1 rounded transition-all flex items-center gap-0.5 active:scale-95"
+                      title="Click to switch currency"
+                    >
+                      <span>{getCurrencySymbol(editSellCurrency)}</span>
+                      <span className="text-[8px] opacity-80">{editSellCurrency}</span>
+                    </button>
+                    <Input 
+                      type="text" 
+                      value={editSellAmount}
+                      onChange={(e) => setEditSellAmount(e.target.value.replace(/[^0-9]/g, ''))}
+                      className="h-10 pl-16 rounded-xl bg-white border-emerald-200 font-bold text-xs font-mono text-emerald-900 focus-visible:ring-emerald-500"
+                    />
+                  </div>
+                  <Button
+                    size="sm"
+                    className="h-10 rounded-xl px-3 font-bold text-xs uppercase bg-emerald-600 hover:bg-emerald-700 text-white"
+                    onClick={async () => {
+                      if (!selectedDetailItem) return;
+                      const parsedAmount = parseInt(editSellAmount.replace(/[^0-9]/g, '')) || 0;
+                      const finalIdrPrice = editSellCurrency === shoppingCurrencyCode
+                        ? Math.round(parsedAmount * conversionRate)
+                        : parsedAmount;
+                      
+                      const updatedItem = {
+                        ...selectedDetailItem,
+                        sellPrice: finalIdrPrice
+                      };
+                      
+                      try {
+                        await saveWishlist(updatedItem);
+                        setSelectedDetailItem(updatedItem);
+                        toast.success(`Sell Price updated to Rp ${finalIdrPrice.toLocaleString()}!`);
+                      } catch (err) {
+                        toast.error('Failed to update Sell Price');
+                      }
+                    }}
+                  >
+                    Save
+                  </Button>
+                </div>
               </div>
 
               {/* Detail inline quick state modifiers */}

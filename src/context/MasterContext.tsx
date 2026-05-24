@@ -2,6 +2,18 @@ import { createContext, useContext, useState, useEffect, ReactNode } from 'react
 import { db, isSupabaseConfigured } from '../lib/supabase';
 import { toast } from 'sonner';
 
+export interface WishlistItem {
+  id: string;
+  name: string;
+  requester: string;
+  price: number;
+  sellPrice?: number;
+  location: string;
+  image?: string;
+  status: 'find' | 'found' | 'out of stock' | 'cancel' | 'hold';
+  note?: string;
+}
+
 export interface MasterContextType {
   loading: boolean;
   currentUser: any | null;
