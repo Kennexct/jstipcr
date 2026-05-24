@@ -426,9 +426,7 @@ export function ExploreScreen() {
     return boughtIds.includes(itemId);
   };
 
-  const handleToggleCustomChecklist = (itemId: string, itemType: 'wishlist' | 'sale') => {
-    handleToggleChecklistBoughtState(itemId);
-  };
+
 
   // Calculate stats for checklist completed items
   const checkedCount = checklistItems.filter(item => isItemChecked(item.id, item.type)).length;
