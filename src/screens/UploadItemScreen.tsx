@@ -411,17 +411,9 @@ export function UploadItemScreen() {
               )}
             </div>
           ) : (
-            <label 
-              htmlFor="product-photo-upload"
-              className="w-full aspect-square border-4 border-dashed rounded-3xl flex flex-col items-center justify-center gap-6 bg-muted/20 p-6 cursor-pointer hover:bg-muted/30 hover:border-primary/50 transition-all duration-300 animate-pulse-subtle"
-            >
-              <div className="h-20 w-20 rounded-full bg-primary/10 flex items-center justify-center text-primary">
-                <Camera className="h-10 w-10" />
-              </div>
-              <div className="text-center space-y-1">
-                <p className="font-bold text-sm">Add Product Photo</p>
-                <p className="text-xs text-muted-foreground">Click to upload or take a photo using your camera</p>
-              </div>
+            <label htmlFor="product-photo-upload" className="cursor-pointer flex flex-col items-center justify-center w-full h-32 rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50 hover:bg-slate-100 transition-colors">
+              <Camera className="h-6 w-6 text-slate-400 mb-2" />
+              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Add Photo Reference</span>
             </label>
           )}
         </section>

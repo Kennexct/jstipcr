@@ -15,7 +15,8 @@ const SUPABASE_URL = getEnvValue('VITE_SUPABASE_URL') || '';
 const SUPABASE_ANON_KEY = getEnvValue('VITE_SUPABASE_ANON_KEY') || '';
 
 export const isSupabaseConfigured = () => {
-  return SUPABASE_URL.trim() !== '' && SUPABASE_ANON_KEY.trim() !== '';
+  const isKeyValid = SUPABASE_ANON_KEY.trim().startsWith('ey');
+  return SUPABASE_URL.trim() !== '' && SUPABASE_ANON_KEY.trim() !== '' && isKeyValid;
 };
 
 console.log(

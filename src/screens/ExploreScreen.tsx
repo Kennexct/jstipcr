@@ -87,7 +87,7 @@ export function ExploreScreen() {
 
   useEffect(() => {
     if (selectedDetailItem) {
-      setEditBudgetAmount(selectedDetailItem.price.toString());
+      setEditBudgetAmount((selectedDetailItem.price || 0).toString());
       setEditBudgetCurrency('IDR');
     }
   }, [selectedDetailItem]);
