@@ -178,17 +178,16 @@ export function MasterProvider({ children }: { children: ReactNode }) {
   };
 
   const saveItem = async (item: any) => {
+    // Optimistic UI update
+    setCatalogItems(prev => {
+      const isEdit = prev.some(i => i.id === item.id);
+      return isEdit ? prev.map(i => i.id === item.id ? item : i) : [item, ...prev];
+    });
     try {
       await db.saveItem(item, currentUser?.id);
-      const isEdit = catalogItems.some(i => i?.id === item.id);
-      if (isEdit) {
-        setCatalogItems(catalogItems.map(i => i?.id === item.id ? item : i));
-      } else {
-        setCatalogItems([item, ...catalogItems]);
-      }
-    } catch (e: any) {
-      toast.error(`Failed to save catalog item: ${e.message || e}`);
-      throw e;
+    } catch (err) {
+      console.error('Failed to save catalog item to db:', err);
+      toast.error('Saved locally. Cloud sync failed.');
     }
   };
 
@@ -202,48 +201,50 @@ export function MasterProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const saveWishlist = async (item: any) => {
+  const saveWishlist = async (wish: any) => {
+    // Optimistic UI update
+    setWishlistItems(prev => {
+      const isEdit = prev.some(w => w.id === wish.id);
+      return isEdit ? prev.map(w => w.id === wish.id ? wish : w) : [wish, ...prev];
+    });
     try {
-      await db.saveWishlist(item, currentUser?.id);
-      const isEdit = wishlistItems.some(w => w?.id === item.id);
-      if (isEdit) {
-        setWishlistItems(wishlistItems.map(w => w?.id === item.id ? item : w));
-      } else {
-        setWishlistItems([item, ...wishlistItems]);
-      }
-    } catch (e: any) {
-      toast.error(`Failed to save wishlist item: ${e.message || e}`);
-      throw e;
+      await db.saveWishlist(wish, currentUser?.id);
+    } catch (err) {
+      console.error('Failed to save wishlist to db:', err);
+      toast.error('Saved locally. Cloud sync failed.');
     }
   };
 
   const saveSale = async (sale: any) => {
+    // Optimistic UI update
+    setSales(prev => [sale, ...prev]);
+
     try {
       await db.saveSale(sale, currentUser?.id);
-      setSales([sale, ...sales]);
 
+      // Automatically update the Wishlist items to 'found' if they are linked
       if (sale.items && Array.isArray(sale.items)) {
-        let updatedWishlist = [...wishlistItems];
-        const newlyBoughtWishlistIds: string[] = [];
+        const newlyBoughtWishlistIds = sale.items
+          .filter((item: any) => item.productId && (item.productId.startsWith('w_') || item.productId.startsWith('wish_')))
+          .map((item: any) => item.productId);
 
-        for (const item of sale.items) {
+        if (newlyBoughtWishlistIds.length > 0) {
+          // Find wishlist items in current state
+          let updatedWishlist = [...wishlistItems];
+          
           const matchedWishlist = updatedWishlist.filter(
-            w => w.name.toLowerCase() === item.name.toLowerCase() && w.status !== 'found' && w.note !== 'created_from_sale'
+            w => newlyBoughtWishlistIds.includes(w.id) && w.status !== 'found'
           );
 
           for (const wishItem of matchedWishlist) {
             const updatedWishItem = { ...wishItem, status: 'found' as const };
-            await db.saveWishlist(updatedWishItem, currentUser?.id);
-            
+            await db.saveWishlist(updatedWishItem, currentUser?.id).catch(e => console.error('Failed to auto-update wishlist cloud sync:', e));
+            // Replace in local state
             updatedWishlist = updatedWishlist.map(w => w.id === wishItem.id ? updatedWishItem : w);
-            newlyBoughtWishlistIds.push(`chk_wishlist_${wishItem.id}`);
-            
-            toast.success(`Wishlist item "${wishItem.name}" automatically marked as FOUND & BOUGHT!`);
           }
-        }
-
-        if (newlyBoughtWishlistIds.length > 0) {
+          
           setWishlistItems(updatedWishlist);
+          
           setBoughtIds(prev => {
             const updated = Array.from(new Set([...prev, ...newlyBoughtWishlistIds]));
             localStorage.setItem('jastip_checklist_bought_states', JSON.stringify(updated));
@@ -251,19 +252,23 @@ export function MasterProvider({ children }: { children: ReactNode }) {
           });
         }
       }
-    } catch (e: any) {
-      toast.error(`Failed to log sale: ${e.message || e}`);
-      throw e;
+    } catch (err) {
+      console.error('Failed to save sale to db:', err);
+      toast.error('Saved locally. Cloud sync failed.');
     }
   };
 
   const saveExpense = async (expense: any) => {
+    // Optimistic UI update
+    setExpenses(prev => {
+      const isEdit = prev.some(e => e.id === expense.id);
+      return isEdit ? prev.map(e => e.id === expense.id ? expense : e) : [expense, ...prev];
+    });
     try {
       await db.saveExpense(expense, currentUser?.id);
-      setExpenses([expense, ...expenses]);
-    } catch (e) {
-      toast.error('Failed to save expense');
-      throw e;
+    } catch (err) {
+      console.error('Failed to save expense to db:', err);
+      toast.error('Saved locally. Cloud sync failed.');
     }
   };
 
