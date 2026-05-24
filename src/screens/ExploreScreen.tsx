@@ -92,9 +92,9 @@ export function ExploreScreen() {
 
   useEffect(() => {
     if (selectedDetailItem) {
-      setEditBudgetAmount((selectedDetailItem.price || 0).toString());
+      setEditBudgetAmount(selectedDetailItem.price ? selectedDetailItem.price.toString() : '');
       setEditBudgetCurrency('IDR');
-      setEditSellAmount((selectedDetailItem.sellPrice || 0).toString());
+      setEditSellAmount(selectedDetailItem.sellPrice ? selectedDetailItem.sellPrice.toString() : '');
       setEditSellCurrency('IDR');
     }
   }, [selectedDetailItem]);
@@ -921,9 +921,10 @@ export function ExploreScreen() {
                       type="text" 
                       inputMode="numeric"
                       pattern="[0-9]*"
+                      placeholder="0"
                       value={editBudgetAmount}
                       onChange={(e) => setEditBudgetAmount(e.target.value.replace(/[^0-9]/g, ''))}
-                      className="h-10 pl-16 rounded-xl bg-white border-slate-200 font-bold text-xs font-mono"
+                      className="h-10 pl-16 rounded-xl bg-white border-slate-200 font-bold text-xs font-mono text-base md:text-sm"
                     />
                   </div>
                   <Button
@@ -981,9 +982,10 @@ export function ExploreScreen() {
                       type="text" 
                       inputMode="numeric"
                       pattern="[0-9]*"
+                      placeholder="0"
                       value={editSellAmount}
                       onChange={(e) => setEditSellAmount(e.target.value.replace(/[^0-9]/g, ''))}
-                      className="h-10 pl-16 rounded-xl bg-white border-emerald-200 font-bold text-xs font-mono text-emerald-900 focus-visible:ring-emerald-500"
+                      className="h-10 pl-16 rounded-xl bg-white border-emerald-200 font-bold text-xs font-mono text-emerald-900 focus-visible:ring-emerald-500 text-base md:text-sm"
                     />
                   </div>
                   <Button

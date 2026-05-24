@@ -46,7 +46,11 @@ async function postgrestRequest(
   };
 
   if (method === 'POST' || method === 'PATCH') {
-    headers['Prefer'] = options.preferSingle ? 'return=representation,holding=none' : 'return=representation';
+    let preferHeader = options.preferSingle ? 'return=representation,holding=none' : 'return=representation';
+    if (options.query && options.query.includes('on_conflict')) {
+      preferHeader += ',resolution=merge-duplicates';
+    }
+    headers['Prefer'] = preferHeader;
   }
 
   const res = await fetch(url, {
