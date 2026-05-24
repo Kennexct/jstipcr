@@ -77,6 +77,13 @@ export function MasterProvider({ children }: { children: ReactNode }) {
     setBoughtIds((prev) => {
       const updated = prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id];
       localStorage.setItem('jastip_checklist_bought_states', JSON.stringify(updated));
+      
+      // Auto-sync to cloud settings
+      if (currentUser) {
+        db.saveSettings({ ...tripSettings, boughtIds: updated }, currentUser.id)
+          .catch(err => console.error("Failed to sync checklist states to cloud:", err));
+      }
+      
       return updated;
     });
   };
@@ -166,6 +173,10 @@ export function MasterProvider({ children }: { children: ReactNode }) {
       setWishlistItems(loadedWishlist || []);
       if (loadedSettings) {
         setTripSettings(loadedSettings);
+        if (loadedSettings.boughtIds && Array.isArray(loadedSettings.boughtIds)) {
+          setBoughtIds(loadedSettings.boughtIds);
+          localStorage.setItem('jastip_checklist_bought_states', JSON.stringify(loadedSettings.boughtIds));
+        }
       }
     } catch (e) {
       console.error('Failed to reload master dashboard data:', e);

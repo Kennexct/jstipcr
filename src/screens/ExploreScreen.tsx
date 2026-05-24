@@ -900,121 +900,122 @@ export function ExploreScreen() {
                 )}
               </div>
 
-              {/* Meta specifications bento board - Editable Cost Price */}
-              <div className="p-4 rounded-2xl bg-slate-50 border space-y-2 text-left">
-                <div className="flex items-center justify-between">
-                  <label className="text-[9px] font-black text-slate-550 text-slate-500 uppercase tracking-widest leading-none">Cost Price</label>
-                  <span className="text-[8px] font-bold text-slate-400">Click currency to cycle</span>
-                </div>
-                <div className="flex gap-2">
-                  <div className="relative flex-1">
+              {/* Pricing & Currency - Matches Add to Catalog Style */}
+              <div className="space-y-4">
+                <div className="flex items-center justify-between ml-1">
+                  <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Pricing & Currency</label>
+                  <div className="flex items-center gap-2">
                     <button
                       type="button"
                       onClick={handleCycleBudgetCurrency}
-                      className="absolute left-3 top-1/2 -translate-y-1/2 font-black text-[10px] text-primary bg-primary/10 hover:bg-primary/20 px-2 py-1 rounded transition-all flex items-center gap-0.5 active:scale-95 animate-pulse"
+                      className="text-[10px] font-black text-primary bg-primary/10 hover:bg-primary/20 px-2 py-1 rounded transition-all active:scale-95 animate-pulse"
                       title="Click to switch currency"
                     >
-                      <span>{getCurrencySymbol(editBudgetCurrency)}</span>
-                      <span className="text-[8px] opacity-80">{editBudgetCurrency}</span>
+                      Cycle Currency: {editBudgetCurrency}
                     </button>
-                    <Input 
-                      type="text" 
-                      inputMode="numeric"
-                      pattern="[0-9]*"
-                      placeholder="0"
-                      value={editBudgetAmount}
-                      onChange={(e) => setEditBudgetAmount(e.target.value.replace(/[^0-9]/g, ''))}
-                      className="h-10 pl-16 rounded-xl bg-white border-slate-200 font-bold text-xs font-mono text-base md:text-sm"
-                    />
                   </div>
-                  <Button
-                    size="sm"
-                    className="h-10 rounded-xl px-3 font-bold text-xs uppercase"
-                    onClick={async () => {
-                      if (!selectedDetailItem) return;
-                      const parsedAmount = parseInt(editBudgetAmount.replace(/[^0-9]/g, '')) || 0;
-                      const finalIdrPrice = editBudgetCurrency === shoppingCurrencyCode
-                        ? Math.round(parsedAmount * conversionRate)
-                        : parsedAmount;
-                      
-                      const updatedItem = {
-                        ...selectedDetailItem,
-                        price: finalIdrPrice
-                      };
-                      
-                      try {
-                        await saveWishlist(updatedItem);
-                        setSelectedDetailItem(updatedItem);
-                        toast.success(`Cost Price updated to Rp ${finalIdrPrice.toLocaleString()}!`);
-                      } catch (err) {
-                        toast.error('Failed to update Cost Price');
+                </div>
+                
+                <Card className="border-none bg-muted/30 overflow-hidden">
+                  <CardContent className="p-5 space-y-6">
+                    {/* Cost Price */}
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-bold text-muted-foreground uppercase px-1">Cost Price ({editBudgetCurrency})</label>
+                      <div className="relative">
+                        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground font-bold">{getCurrencySymbol(editBudgetCurrency)}</div>
+                        <Input 
+                          type="text"
+                          inputMode="numeric"
+                          pattern="[0-9]*"
+                          placeholder="0"
+                          value={editBudgetAmount}
+                          onChange={(e) => setEditBudgetAmount(e.target.value.replace(/[^0-9]/g, ''))}
+                          onBlur={async () => {
+                            if (!selectedDetailItem) return;
+                            const parsedAmount = parseInt(editBudgetAmount.replace(/[^0-9]/g, '')) || 0;
+                            const finalIdrPrice = editBudgetCurrency === shoppingCurrencyCode
+                              ? Math.round(parsedAmount * conversionRate)
+                              : parsedAmount;
+                            
+                            if (finalIdrPrice !== (selectedDetailItem.price || 0)) {
+                              const updatedItem = { ...selectedDetailItem, price: finalIdrPrice };
+                              try {
+                                await saveWishlist(updatedItem);
+                                setSelectedDetailItem(updatedItem);
+                                toast.success(`Cost Price saved automatically`);
+                              } catch (err) {
+                                toast.error('Failed to update Cost Price');
+                              }
+                            }
+                          }}
+                          className="h-14 pl-10 rounded-2xl bg-background border-none text-lg font-bold"
+                        />
+                      </div>
+                      {computedPriceInIdr > 0 && editBudgetCurrency !== 'IDR' && (
+                        <p className="text-[10px] font-medium text-muted-foreground px-1 uppercase">
+                          = Rp {computedPriceInIdr.toLocaleString()} (Cost Base)
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Sell Price */}
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-bold text-primary uppercase px-1">Sell Price (IDR)</label>
+                      <div className="relative">
+                        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-primary font-bold">Rp</div>
+                        <Input 
+                          type="text"
+                          inputMode="numeric"
+                          pattern="[0-9]*"
+                          placeholder="Selling Price to Customer" 
+                          value={editSellAmount}
+                          onChange={(e) => setEditSellAmount(e.target.value.replace(/[^0-9]/g, ''))}
+                          onBlur={async () => {
+                            if (!selectedDetailItem) return;
+                            const parsedAmount = parseInt(editSellAmount.replace(/[^0-9]/g, '')) || 0;
+                            
+                            if (parsedAmount !== (selectedDetailItem.sellPrice || 0)) {
+                              const updatedItem = { ...selectedDetailItem, sellPrice: parsedAmount };
+                              try {
+                                await saveWishlist(updatedItem);
+                                setSelectedDetailItem(updatedItem);
+                                toast.success(`Sell Price saved automatically`);
+                              } catch (err) {
+                                toast.error('Failed to update Sell Price');
+                              }
+                            }
+                          }}
+                          className="h-14 pl-10 rounded-2xl bg-background border-2 border-primary/20 text-lg font-bold text-primary focus:border-primary"
+                        />
+                      </div>
+                    </div>
+                    
+                    {/* Margin Card */}
+                    {(() => {
+                      const sellNum = parseInt(editSellAmount.replace(/[^0-9]/g, '')) || 0;
+                      if (sellNum > 0) {
+                        const margin = sellNum - computedPriceInIdr;
+                        const marginPercentage = computedPriceInIdr > 0 ? (margin / computedPriceInIdr) * 100 : 0;
+                        return (
+                          <div className={`p-4 rounded-2xl border flex items-center justify-between transition-colors ${margin > 0 ? 'bg-green-50 border-green-100' : 'bg-red-50 border-red-100'}`}>
+                            <div className="space-y-0.5">
+                              <p className={`text-[10px] font-bold uppercase ${margin > 0 ? 'text-green-700' : 'text-red-700'}`}>
+                                Expected Gross Margin
+                              </p>
+                              <p className={`text-xl font-black ${margin > 0 ? 'text-green-900' : 'text-red-900'}`}>
+                                Rp {margin.toLocaleString()}
+                              </p>
+                            </div>
+                            <div className={`px-3 py-1 rounded-full text-xs font-bold ${margin > 0 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                              {marginPercentage > 0 ? '+' : ''}{marginPercentage.toFixed(1)}%
+                            </div>
+                          </div>
+                        );
                       }
-                    }}
-                  >
-                    Save
-                  </Button>
-                </div>
-                {editBudgetCurrency !== 'IDR' && (
-                  <p className="text-[8.5px] text-slate-550 text-slate-500 font-semibold px-0.5">
-                    Approx. <span className="font-bold text-indigo-600">Rp {computedPriceInIdr.toLocaleString()}</span> IDR (1 {editBudgetCurrency} = Rp {conversionRate.toLocaleString()})
-                  </p>
-                )}
-              </div>
-              
-              {/* Meta specifications bento board - Editable Sell Price */}
-              <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-100 space-y-2 text-left">
-                <div className="flex items-center justify-between">
-                  <label className="text-[9px] font-black text-emerald-700 uppercase tracking-widest leading-none">Sell Price</label>
-                  <span className="text-[8px] font-bold text-emerald-600">Final price for customer</span>
-                </div>
-                <div className="flex gap-2">
-                  <div className="relative flex-1">
-                    <button
-                      type="button"
-                      onClick={handleCycleSellCurrency}
-                      className="absolute left-3 top-1/2 -translate-y-1/2 font-black text-[10px] text-emerald-700 bg-emerald-200/50 hover:bg-emerald-200 px-2 py-1 rounded transition-all flex items-center gap-0.5 active:scale-95"
-                      title="Click to switch currency"
-                    >
-                      <span>{getCurrencySymbol(editSellCurrency)}</span>
-                      <span className="text-[8px] opacity-80">{editSellCurrency}</span>
-                    </button>
-                    <Input 
-                      type="text" 
-                      inputMode="numeric"
-                      pattern="[0-9]*"
-                      placeholder="0"
-                      value={editSellAmount}
-                      onChange={(e) => setEditSellAmount(e.target.value.replace(/[^0-9]/g, ''))}
-                      className="h-10 pl-16 rounded-xl bg-white border-emerald-200 font-bold text-xs font-mono text-emerald-900 focus-visible:ring-emerald-500 text-base md:text-sm"
-                    />
-                  </div>
-                  <Button
-                    size="sm"
-                    className="h-10 rounded-xl px-3 font-bold text-xs uppercase bg-emerald-600 hover:bg-emerald-700 text-white"
-                    onClick={async () => {
-                      if (!selectedDetailItem) return;
-                      const parsedAmount = parseInt(editSellAmount.replace(/[^0-9]/g, '')) || 0;
-                      const finalIdrPrice = editSellCurrency === shoppingCurrencyCode
-                        ? Math.round(parsedAmount * conversionRate)
-                        : parsedAmount;
-                      
-                      const updatedItem = {
-                        ...selectedDetailItem,
-                        sellPrice: finalIdrPrice
-                      };
-                      
-                      try {
-                        await saveWishlist(updatedItem);
-                        setSelectedDetailItem(updatedItem);
-                        toast.success(`Sell Price updated to Rp ${finalIdrPrice.toLocaleString()}!`);
-                      } catch (err) {
-                        toast.error('Failed to update Sell Price');
-                      }
-                    }}
-                  >
-                    Save
-                  </Button>
-                </div>
+                      return null;
+                    })()}
+                  </CardContent>
+                </Card>
               </div>
 
               {/* Detail inline quick state modifiers */}
