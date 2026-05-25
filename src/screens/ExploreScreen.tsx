@@ -284,32 +284,32 @@ export function ExploreScreen() {
   const renderWishlistItem = (item: WishlistItem, i: number, opacityClass: string = "") => {
     return (
       <Card 
-        className={cn("border border-slate-100 shadow-sm overflow-visible bg-white hover:shadow-md transition-shadow cursor-pointer", opacityClass)}
+        className={cn("fintech-card overflow-visible cursor-pointer", opacityClass)}
         onClick={() => setSelectedDetailItem(item)}
       >
-        <CardContent className="p-4 flex items-center justify-between gap-3 overflow-visible">
-          <div className="flex items-center gap-3.5 min-w-0 flex-1">
+        <CardContent className="p-4 flex items-center justify-between gap-4 overflow-visible">
+          <div className="flex items-center gap-4 min-w-0 flex-1">
             
             {/* Image Thumbnail */}
-            <div className="h-12 w-12 rounded-2xl flex items-center justify-center shrink-0 overflow-hidden bg-muted/30 border relative">
+            <div className="h-14 w-14 rounded-full flex items-center justify-center shrink-0 overflow-hidden bg-[#f2f5f7] border relative">
               {item.image ? (
                 <img src={item.image} className="h-full w-full object-cover" alt={item.name} referrerPolicy="no-referrer" />
               ) : (
-                <Package className="h-5 w-5 text-muted-foreground" />
+                <Package className="h-6 w-6 text-slate-400" />
               )}
             </div>
 
             {/* Specifics */}
             <div className="space-y-1 min-w-0 flex-1">
-              <h4 className="text-xs font-black leading-tight uppercase italic tracking-tighter text-slate-800 truncate">
+              <h4 className="text-sm font-bold text-[#163300] truncate">
                 {item.name}
               </h4>
-              <div className="flex flex-wrap items-center gap-1.5 text-[9px] font-bold text-muted-foreground uppercase tracking-tight">
-                <span className="text-primary font-black">{item.requester}</span>
+              <div className="flex flex-wrap items-center gap-1.5 text-xs font-semibold text-slate-500">
+                <span className="text-[#163300]">{item.requester}</span>
                 <span className="opacity-40">•</span>
-                <span className="tabular-nums font-black text-slate-700">Rp {item.price.toLocaleString()}</span>
+                <span className="font-bold text-[#163300]">Rp {item.price.toLocaleString()}</span>
                 <span className="opacity-40">•</span>
-                <span className="flex items-center gap-0.5"><MapPinIcon className="h-2.5 w-2.5" />{item.location}</span>
+                <span className="flex items-center gap-0.5"><MapPinIcon className="h-3 w-3" />{item.location}</span>
               </div>
             </div>
           </div>
@@ -454,12 +454,12 @@ export function ExploreScreen() {
       {/* Traveler Header */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <div className="space-y-0.5">
-            <h2 className="text-2xl font-black uppercase italic tracking-tighter">
+          <div className="space-y-1">
+            <h2 className="text-3xl font-black text-[#163300] tracking-tight">
               Wishlist & Tasks
             </h2>
-            <p className="text-xs text-muted-foreground font-semibold">
-              Manage custom requests, unlock client pipelines, and audit active deal files.
+            <p className="text-sm text-slate-500 font-medium">
+              Manage custom requests and track checklist fulfillment.
             </p>
           </div>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
@@ -726,38 +726,34 @@ export function ExploreScreen() {
       {viewMode === 'checklist' && (
         <div className="space-y-6">
           {/* Checklist header state */}
-          <Card className="border-none bg-gradient-to-br from-slate-900 to-slate-800 text-white shadow-xl rounded-3xl overflow-hidden relative">
+          <Card className="border-none bg-[#163300] text-white shadow-xl rounded-3xl overflow-hidden relative">
             <div className="absolute right-0 bottom-0 opacity-10 translate-x-6 translate-y-6">
-              <ListTodo className="h-40 w-40" />
+              <ListTodo className="h-40 w-40 text-[#9fe870]" />
             </div>
-            <CardContent className="p-5 space-y-4">
-              <div className="space-y-1">
-                <span className="bg-primary/20 text-primary border border-primary/30 px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-widest inline-block leading-none">
+            <CardContent className="p-6 space-y-4 relative z-10">
+              <div className="space-y-2">
+                <span className="bg-[#9fe870] text-[#163300] px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest inline-block leading-none">
                   Checkout Audit Docket
                 </span>
-                <h3 className="text-xl font-black uppercase italic tracking-tighter">
+                <h3 className="text-2xl font-black tracking-tight">
                   End-of-Trip Checklist
                 </h3>
-                <p className="text-slate-300 text-[10px] font-semibold leading-relaxed">
-                  Verify purchase logs before baggage packaging. Combine items from active sales invoices and found wishlists.
+                <p className="text-slate-300 text-xs font-medium leading-relaxed max-w-[85%]">
+                  Verify purchase logs before baggage packaging. Combines items from sales invoices and found wishlists.
                 </p>
               </div>
 
               {/* Progress visual section */}
-              <div className="space-y-1.5 pt-1">
-                <div className="flex items-center justify-between text-xs font-black uppercase tracking-tight">
+              <div className="space-y-2 pt-2">
+                <div className="flex items-center justify-between text-xs font-bold uppercase tracking-tight">
                   <span className="text-slate-400">Checkout Audit Progress</span>
-                  <span className="text-primary font-bold">{checkedCount} / {totalChecklistCount} Items Done</span>
+                  <span className="text-[#9fe870] font-black">{checkedCount} / {totalChecklistCount} Items Done</span>
                 </div>
-                <div className="h-2.5 w-full bg-slate-700/60 rounded-full overflow-hidden">
+                <div className="h-3 w-full bg-slate-800 rounded-full overflow-hidden">
                   <div 
-                    className="h-full bg-primary transition-all duration-500 rounded-full"
+                    className="h-full bg-[#9fe870] transition-all duration-500 rounded-full"
                     style={{ width: `${completionPercentage}%` }}
                   />
-                </div>
-                <div className="flex justify-between text-[8px] text-slate-500 font-black uppercase tracking-widest pt-0.5">
-                  <span>Departure packing</span>
-                  <span>{completionPercentage}% complete</span>
                 </div>
               </div>
             </CardContent>
@@ -792,38 +788,41 @@ export function ExploreScreen() {
                       <Card 
                         onClick={() => handleToggleCustomChecklist(item.id, item.type)}
                         className={cn(
-                          "border border-slate-100 shadow-sm cursor-pointer hover:border-primary/20 transition-all rounded-2xl select-none",
-                          checked ? "bg-emerald-50/20 border-emerald-100 opacity-80" : "bg-white"
+                          "fintech-card cursor-pointer hover:border-[#9fe870] transition-all select-none p-4",
+                          checked ? "bg-slate-50 opacity-60 border-transparent shadow-none" : ""
                         )}
                       >
-                        <CardContent className="p-3.5 flex items-center justify-between gap-3">
-                          <div className="flex items-center gap-3.5 min-w-0 flex-1">
+                        <div className="flex items-center justify-between gap-4">
+                          <div className="flex items-center gap-4 min-w-0 flex-1">
                             
                             {/* Visual toggle checkbox */}
                             <div className="shrink-0 transition-transform active:scale-90">
                               {checked ? (
-                                <CheckSquare className="h-5.5 w-5.5 text-emerald-600 fill-emerald-50" />
+                                <CheckSquare className="h-6 w-6 text-[#163300] fill-[#9fe870]" />
                               ) : (
-                                <Square className="h-5.5 w-5.5 text-slate-300" />
+                                <Square className="h-6 w-6 text-slate-300" />
                               )}
                             </div>
 
                             {/* Item name and descriptors */}
-                            <div className="space-y-0.5 min-w-0 flex-1">
+                            <div className="space-y-1 min-w-0 flex-1">
                               <h4 className={cn(
-                                "text-xs font-bold leading-tight uppercase italic tracking-tighter truncate text-slate-800",
+                                "text-sm font-bold text-[#163300] truncate",
                                 checked ? "line-through text-slate-400" : ""
                               )}>
                                 {item.name}
                               </h4>
-                              <div className="flex flex-wrap items-center gap-1.5 text-[9px] font-bold text-muted-foreground uppercase tracking-tight">
-                                <Badge className="text-[7.5px] font-black h-4 px-1.2 uppercase border bg-slate-50 text-slate-500 shrink-0">
-                                  {item.type === 'sale' ? '🧾 INVOICE SALE' : '💎 Wishlist found'}
-                                </Badge>
+                              <div className="flex flex-wrap items-center gap-2 text-xs font-semibold text-slate-500">
+                                <span className={cn(
+                                  "px-2 py-0.5 rounded text-[10px] font-bold uppercase",
+                                  item.type === 'sale' ? "bg-blue-50 text-blue-700" : "bg-purple-50 text-purple-700"
+                                )}>
+                                  {item.type === 'sale' ? 'Invoice' : 'Wishlist'}
+                                </span>
                                 <span className="opacity-40">•</span>
-                                <span className="font-blue font-black text-rose-500">Qty {item.qty}x</span>
+                                <span className="font-bold text-[#163300]">Qty {item.qty}</span>
                                 <span className="opacity-40">•</span>
-                                <span className="text-slate-750 text-slate-700">Client: {item.requester}</span>
+                                <span>Client: {item.requester}</span>
                               </div>
                             </div>
 
@@ -842,7 +841,8 @@ export function ExploreScreen() {
                             )}
                             <p className="text-[8px] text-slate-400 font-bold uppercase mt-0.5">Sourced: {item.location}</p>
                           </div>
-                        </CardContent>
+                          </div>
+                        </div>
                       </Card>
                     </motion.div>
                   );
