@@ -1,10 +1,12 @@
 import { useState, ChangeEvent, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { 
   Search, 
   Filter, 
   Plus, 
   Package, 
+  ArrowLeft,
   DollarSign, 
   MapPin as MapPinIcon, 
   Clock, 
@@ -51,6 +53,7 @@ export interface WishlistItem {
 }
 
 export function ExploreScreen() {
+  const navigate = useNavigate();
   const {
     loading,
     sales,
@@ -457,21 +460,17 @@ export function ExploreScreen() {
   const foundWishlist = filteredMyWishlist.filter(item => item.status === 'found');
 
   return (
-    <div className="p-4 space-y-6 pb-24">
-      {/* Traveler Header */}
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <div className="space-y-1">
-            <h2 className="text-3xl font-black text-[#163300] tracking-tight">
-              Wishlist & Tasks
-            </h2>
-            <p className="text-sm text-slate-500 font-medium">
-              Manage custom requests and track checklist fulfillment.
-            </p>
-          </div>
+    <div className="min-h-screen bg-[#f2f5f7] pb-24">
+      {/* Sticky Header mimicking Inventory Screen */}
+      <header className="sticky top-0 z-50 bg-[#f2f5f7] px-4 pt-8 pb-4 flex items-center justify-between gap-3">
+        <Button variant="ghost" size="icon" className="rounded-full bg-white shadow-sm hover:bg-slate-50 shrink-0" onClick={() => navigate('/')}>
+          <ArrowLeft className="h-5 w-5 text-[#163300]" />
+        </Button>
+        <h2 className="text-xl font-black text-[#163300] tracking-tight flex-1">Wishlist & Tasks</h2>
+        <div className="flex items-center gap-2 shrink-0">
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger className={cn(buttonVariants({ variant: 'default', size: 'sm' }), "h-9 rounded-xl font-bold text-[10px] gap-1.5 shadow-lg shadow-primary/15 shrink-0")}>
-              <Plus className="h-3.5 w-3.5" /> RECORD REQUEST
+            <DialogTrigger className="flex h-10 w-10 items-center justify-center rounded-full bg-[#163300] text-white hover:bg-[#1f4700] shrink-0 outline-none">
+              <Plus className="h-5 w-5" />
             </DialogTrigger>
             <DialogContent className="rounded-3xl border-none max-w-[95%] md:max-w-md bg-white p-6">
               <DialogHeader className="text-left">
@@ -560,9 +559,10 @@ export function ExploreScreen() {
             </DialogContent>
           </Dialog>
         </div>
-      </div>
+      </header>
 
-      {/* SUB MENU: SLIDING PILL SWITCH */}
+      <div className="p-4 space-y-4">
+        {/* SUB MENU: SLIDING PILL SWITCH */}
       <div className="bg-slate-100 p-1.5 rounded-2xl flex gap-1.5">
         <button
           type="button"
