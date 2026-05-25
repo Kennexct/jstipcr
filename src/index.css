@@ -1,95 +1,33 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-    --font-heading: 'Space Grotesk', sans-serif;
-    --font-sans: 'Space Grotesk', sans-serif;
+    --font-heading: 'Inter', sans-serif;
+    --font-sans: 'Inter', sans-serif;
 
-    /* OPTION A: MIDNIGHT GLASS - COLOR INVERSION SYSTEM */
-    /* By mapping light colors to dark values, we instantly convert the entire app to dark mode without modifying React files */
-    --color-white: #0a0a0e;       /* Base cards become dark */
-    --color-black: #ffffff;       /* Black text/icons become white */
+    /* Base mappings for Wise Fintech Theme */
+    --color-background: #f2f5f7;
+    --color-foreground: #163300;
+    --color-card: #ffffff;
+    --color-card-foreground: #163300;
+    --color-border: #e2e8f0;
+    --color-input: #e2e8f0;
+    --color-ring: #9fe870;
+    --color-muted: #f8fafc;
+    --color-muted-foreground: #475569;
+    --color-popover: #ffffff;
+    --color-popover-foreground: #163300;
+    --color-accent: #f1f5f9;
+    --color-accent-foreground: #163300;
 
-    /* Slate palette inverted */
-    --color-slate-50: #101216;
-    --color-slate-100: #1a1d24;
-    --color-slate-200: #2a2e38;
-    --color-slate-300: #3a404c;
-    --color-slate-400: #94a3b8;
-    --color-slate-500: #cbd5e1;
-    --color-slate-600: #e2e8f0;
-    --color-slate-700: #f1f5f9;
-    --color-slate-800: #f8fafc;
-    --color-slate-900: #ffffff;
-    --color-slate-950: #ffffff;
-
-    /* Primary color is Electric Cyan */
-    --color-primary: #00e5ff;
-    --color-primary-foreground: #000000;
-
-    /* Emerald inversion */
-    --color-emerald-50: #022c22;
-    --color-emerald-100: #064e3b;
-    --color-emerald-200: #065f46;
-    --color-emerald-500: #10b981;
-    --color-emerald-600: #34d399;
-    --color-emerald-700: #6ee7b7;
-    --color-emerald-800: #a7f3d0;
-    --color-emerald-900: #d1fae5;
-
-    /* Blue inversion */
-    --color-blue-50: #172554;
-    --color-blue-100: #1e3a8a;
-    --color-blue-500: #3b82f6;
-    --color-blue-600: #60a5fa;
-
-    /* Indigo inversion */
-    --color-indigo-50: #312e81;
-    --color-indigo-100: #3730a3;
-    --color-indigo-500: #6366f1;
-    --color-indigo-600: #818cf8;
-    --color-indigo-700: #a5b4fc;
-    --color-indigo-800: #c7d2fe;
-    --color-indigo-900: #e0e7ff;
-
-    /* Red inversion */
-    --color-red-50: #450a0a;
-    --color-red-100: #7f1d1d;
-    --color-red-500: #f87171;
-    --color-red-600: #fca5a5;
-
-    /* Amber inversion */
-    --color-amber-50: #451a03;
-    --color-amber-100: #78350f;
-    --color-amber-200: #92400e;
-    --color-amber-500: #f59e0b;
-    --color-amber-800: #fcd34d;
-    --color-amber-900: #fde68a;
-
-    /* Orange inversion */
-    --color-orange-50: #431407;
-    --color-orange-100: #7c2d12;
-    --color-orange-500: #fb923c;
-    --color-orange-600: #fdba74;
-
-    /* Base mappings */
-    --color-background: #050508;
-    --color-foreground: #f8fafc;
-    --color-card: #0a0a0e;
-    --color-card-foreground: #f8fafc;
-    --color-border: #1a1d24;
-    --color-input: #1a1d24;
-    --color-ring: #00e5ff;
-    --color-muted: #1a1d24;
-    --color-muted-foreground: #94a3b8;
-    --color-popover: #0a0a0e;
-    --color-popover-foreground: #f8fafc;
-    --color-accent: #1a1d24;
-    --color-accent-foreground: #f8fafc;
+    --color-primary: #9fe870;
+    --color-primary-foreground: #163300;
+    --color-secondary: #163300;
+    --color-secondary-foreground: #ffffff;
 
     --radius-sm: calc(var(--radius) * 0.6);
     --radius-md: calc(var(--radius) * 0.8);
@@ -101,25 +39,25 @@
 }
 
 :root {
-    --background: oklch(0.15 0.02 260); /* Deep Obsidian */
-    --foreground: oklch(0.98 0 0);
-    --card: oklch(0.18 0.02 260);
-    --card-foreground: oklch(0.98 0 0);
-    --popover: oklch(0.18 0.02 260);
-    --popover-foreground: oklch(0.98 0 0);
-    --primary: oklch(0.85 0.15 220); /* Electric Cyan */
-    --primary-foreground: oklch(0.15 0.02 260);
-    --secondary: oklch(0.22 0.02 260);
-    --secondary-foreground: oklch(0.98 0 0);
-    --muted: oklch(0.22 0.02 260);
-    --muted-foreground: oklch(0.7 0.02 260);
-    --accent: oklch(0.22 0.02 260);
-    --accent-foreground: oklch(0.98 0 0);
+    --background: oklch(0.97 0.01 240); /* #f2f5f7 */
+    --foreground: oklch(0.2 0.05 140); /* #163300 */
+    --card: oklch(1 0 0); /* #ffffff */
+    --card-foreground: oklch(0.2 0.05 140);
+    --popover: oklch(1 0 0);
+    --popover-foreground: oklch(0.2 0.05 140);
+    --primary: oklch(0.88 0.16 130); /* #9fe870 */
+    --primary-foreground: oklch(0.2 0.05 140);
+    --secondary: oklch(0.2 0.05 140); /* #163300 */
+    --secondary-foreground: oklch(1 0 0);
+    --muted: oklch(0.96 0.01 240);
+    --muted-foreground: oklch(0.4 0.02 240);
+    --accent: oklch(0.96 0.01 240);
+    --accent-foreground: oklch(0.2 0.05 140);
     --destructive: oklch(0.6 0.2 20);
-    --border: oklch(0.25 0.02 260);
-    --input: oklch(0.25 0.02 260);
-    --ring: oklch(0.85 0.15 220);
-    --radius: 1rem;
+    --border: oklch(0.92 0.01 240);
+    --input: oklch(0.92 0.01 240);
+    --ring: oklch(0.88 0.16 130);
+    --radius: 1.25rem;
 }
 
 @layer base {
@@ -127,25 +65,18 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground selection:bg-primary/30 selection:text-primary;
-    background-image: radial-gradient(circle at 50% -20%, rgba(0, 229, 255, 0.15) 0%, rgba(5, 5, 8, 1) 60%);
-    background-attachment: fixed;
+    @apply bg-background text-foreground selection:bg-primary/30 selection:text-primary-foreground;
   }
   html {
     @apply font-sans;
   }
 }
 
-/* Glassmorphism Classes for Midnight Glass */
-.glass-panel {
-  @apply bg-white/5 backdrop-blur-xl border border-white/10 shadow-xl;
+/* FinTech Specific Utility Classes */
+.fintech-card {
+  @apply bg-white rounded-3xl border border-slate-100 shadow-[0_2px_10px_-4px_rgba(0,0,0,0.05)] transition-shadow hover:shadow-[0_8px_30px_-4px_rgba(0,0,0,0.05)];
 }
 
-/* Neon Glow for Primary Buttons */
-.neon-glow {
-  box-shadow: 0 0 20px -5px rgba(0, 229, 255, 0.5);
-  transition: all 0.3s ease;
-}
-.neon-glow:hover {
-  box-shadow: 0 0 30px 0px rgba(0, 229, 255, 0.7);
+.pill-button {
+  @apply rounded-full font-bold transition-transform active:scale-95 flex items-center justify-center gap-2;
 }
