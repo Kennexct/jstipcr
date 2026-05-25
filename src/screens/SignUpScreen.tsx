@@ -27,7 +27,7 @@ export function SignUpScreen() {
     setSubmitting(true);
     try {
       await signUp(username.trim(), password, businessName.trim());
-      navigate('/');
+      navigate('/trip-settings');
     } catch (err: any) {
       toast.error(getCleanErrorMessage(err));
     } finally {
@@ -39,14 +39,14 @@ export function SignUpScreen() {
     <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md space-y-6">
         <div className="text-center space-y-2">
-          <div className="h-12 w-12 rounded-2xl bg-primary flex items-center justify-center text-white mx-auto shadow-lg shadow-primary/20">
+          <div className="h-12 w-12 rounded-2xl bg-[#163300] flex items-center justify-center text-[#9fe870] mx-auto shadow-sm">
             <Shield className="h-6 w-6" />
           </div>
-          <h2 className="text-2xl font-black uppercase italic tracking-tighter text-slate-800">Register Merchant</h2>
-          <p className="text-xs text-muted-foreground uppercase font-bold tracking-widest">Join JastipFlow Network</p>
+          <h2 className="text-2xl font-black tracking-tight text-[#163300]">Register Merchant</h2>
+          <p className="text-xs text-slate-500 uppercase font-bold tracking-widest">Join JastipFlow Network</p>
         </div>
 
-        <Card className="border-none shadow-xl bg-white rounded-3xl overflow-hidden">
+        <Card className="border-none bg-white rounded-3xl overflow-hidden fintech-card">
           <CardContent className="p-6">
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-1.5 text-left">
@@ -92,7 +92,7 @@ export function SignUpScreen() {
               <Button 
                 type="submit" 
                 disabled={submitting}
-                className="w-full h-12 rounded-2xl font-black uppercase italic shadow-lg shadow-primary/20 gap-2 mt-2"
+                className="pill-button w-full h-14 bg-[#163300] text-white hover:bg-[#1f4700] gap-2 mt-4"
               >
                 {submitting ? 'Registering...' : 'Register Account'}
               </Button>

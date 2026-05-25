@@ -158,7 +158,7 @@ export function TripSettingsScreen() {
     };
     await saveSettings(updated);
     toast.success('Trip settings updated!');
-    navigate(-1);
+    navigate('/');
   };
 
   const getCurrencyName = (code: string) => CURRENCIES.find(c => c.code === code)?.name || code;
@@ -166,7 +166,7 @@ export function TripSettingsScreen() {
   return (
     <div className="min-h-screen bg-background pb-10">
       <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-xl border-b h-16 flex items-center px-4 gap-4">
-        <Button variant="ghost" size="icon" className="rounded-full" onClick={() => navigate(-1)}>
+        <Button variant="ghost" size="icon" className="rounded-full" onClick={() => navigate('/')}>
           <ArrowLeft className="h-5 w-5" />
         </Button>
         <h2 className="text-lg font-bold">Trip Settings</h2>
