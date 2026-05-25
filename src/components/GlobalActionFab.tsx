@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ShoppingCart, Receipt, Zap, Plus, Search, Trash2, X, PlusCircle, PackageCheck } from 'lucide-react';
+import { Banknote, Wallet, Zap, Plus, Search, Trash2, X, PlusCircle, PackageCheck } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -236,7 +236,7 @@ export function GlobalActionFab() {
                   onClick={() => setIsExpenseOpen(true)}
                   className="h-12 w-12 rounded-full shadow-lg bg-blue-50 hover:bg-blue-100 text-blue-600 border border-blue-200"
                 >
-                  <Receipt className="h-5 w-5" />
+                  <Wallet className="h-5 w-5" />
                 </Button>
               </div>
               <div className="flex items-center gap-3 justify-end group">
@@ -248,7 +248,7 @@ export function GlobalActionFab() {
                   onClick={() => setIsSaleOpen(true)}
                   className="h-12 w-12 rounded-full shadow-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-600 border border-emerald-200"
                 >
-                  <ShoppingCart className="h-5 w-5" />
+                  <Banknote className="h-5 w-5" />
                 </Button>
               </div>
             </motion.div>
@@ -272,7 +272,7 @@ export function GlobalActionFab() {
         <DialogContent className="rounded-3xl border-none max-w-[95%] md:max-w-md bg-white p-6">
           <DialogHeader className="text-left pb-2">
             <DialogTitle className="text-lg font-black tracking-tight uppercase italic text-primary flex items-center gap-2">
-              <Receipt className="h-5 w-5" /> Record Operational Expense
+              <Wallet className="h-5 w-5" /> Record Operational Expense
             </DialogTitle>
           </DialogHeader>
 
@@ -342,7 +342,7 @@ export function GlobalActionFab() {
         <DialogContent className="rounded-3xl border-none max-w-[95%] md:max-w-md bg-white p-6 max-h-[85vh] overflow-y-auto">
           <DialogHeader className="text-left pb-2">
             <DialogTitle className="text-lg font-black tracking-tight uppercase italic text-primary flex items-center gap-2">
-              <ShoppingCart className="h-5 w-5" /> Record Customer Sale
+              <Banknote className="h-5 w-5" /> Record Customer Sale
             </DialogTitle>
           </DialogHeader>
 
