@@ -146,6 +146,7 @@ export function UploadItemScreen() {
   const [image, setImage] = useState<string | null>(null);
   const [rawImage, setRawImage] = useState<string | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [name, setName] = useState('');
   const [price, setPrice] = useState('');
@@ -248,6 +249,7 @@ export function UploadItemScreen() {
 
 
   const handleSave = async () => {
+    if (isSubmitting) return;
     if (!name.trim() || !price || !publishPrice) {
       toast.error('Please fill in all fields');
       return;
@@ -257,6 +259,7 @@ export function UploadItemScreen() {
       return;
     }
 
+    setIsSubmitting(true);
     let finalImage = image || '';
     const baseImage = rawImage || image || '';
     if (baseImage) {
@@ -287,6 +290,8 @@ export function UploadItemScreen() {
       navigate(-1);
     } catch (e) {
       toast.error('Failed to save item. Please try again.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -503,10 +508,9 @@ export function UploadItemScreen() {
         <Button 
           className="w-full h-14 rounded-2xl font-bold text-lg gap-3 shadow-xl shadow-primary/20"
           onClick={handleSave}
-          disabled={!image || !price || !name}
+          disabled={isSubmitting || !image || !price || !name}
         >
-          {isEdit ? <Save className="h-6 w-6" /> : <Check className="h-6 w-6" />}
-          {isEdit ? 'Save Changes' : 'Add to Catalog'}
+          {isSubmitting ? 'Saving...' : (isEdit ? <><Save className="h-6 w-6" /> Save Changes</> : <><Check className="h-6 w-6" /> Add to Catalog</>)}
         </Button>
       </div>
 

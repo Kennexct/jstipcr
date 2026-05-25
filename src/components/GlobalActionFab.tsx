@@ -32,6 +32,7 @@ export function GlobalActionFab() {
   const [showNewCatField, setShowNewCatField] = useState(false);
   const [newCatName, setNewCatName] = useState('');
   const [isExpenseOpen, setIsExpenseOpen] = useState(false);
+  const [isSubmittingExpense, setIsSubmittingExpense] = useState(false);
 
   // Form States for Sale Dialog
   const [customerName, setCustomerName] = useState('');
@@ -42,6 +43,7 @@ export function GlobalActionFab() {
   const [selectedQty, setSelectedQty] = useState(1);
   const [draftSaleItems, setDraftSaleItems] = useState<any[]>([]);
   const [isSaleOpen, setIsSaleOpen] = useState(false);
+  const [isSubmittingSale, setIsSubmittingSale] = useState(false);
 
   useEffect(() => {
     if (isSaleOpen) {
@@ -105,7 +107,10 @@ export function GlobalActionFab() {
   };
 
   const handleSaveExpense = async () => {
+    if (isSubmittingExpense) return;
     if (!expenseDesc.trim() || !expenseAmount) return;
+    
+    setIsSubmittingExpense(true);
     const enteredAmount = parseInt(expenseAmount.replace(/[^0-9]/g, '')) || 0;
     const amountInIdr = expenseCurrency === shoppingCurrencyCode
       ? Math.round(enteredAmount * (tripSettings?.currency?.manualRate || 13500))
@@ -131,6 +136,8 @@ export function GlobalActionFab() {
       setIsExpenseOpen(false);
     } catch (e) {
       toast.error('Failed to save expense');
+    } finally {
+      setIsSubmittingExpense(false);
     }
   };
 
@@ -169,7 +176,9 @@ export function GlobalActionFab() {
   };
 
   const handleSaveSale = async () => {
+    if (isSubmittingSale) return;
     if (!customerName.trim()) return;
+    
     let finalDraft = [...draftSaleItems];
     if (finalDraft.length === 0) {
       const matchedProduct = catalogItems.find(p => p.id === selectedItemId);
@@ -186,6 +195,7 @@ export function GlobalActionFab() {
       }
     }
 
+    setIsSubmittingSale(true);
     const totalRevenue = finalDraft.reduce((acc, item) => acc + (item.price * item.qty), 0);
     const newSale = {
       id: 'sale_' + Date.now(),
@@ -201,6 +211,8 @@ export function GlobalActionFab() {
       setIsSaleOpen(false);
     } catch (e) {
       toast.error('Failed to log sale');
+    } finally {
+      setIsSubmittingSale(false);
     }
   };
 
@@ -313,8 +325,12 @@ export function GlobalActionFab() {
             </div>
 
             <div className="pt-2">
-              <Button className="w-full h-12 rounded-2xl font-black uppercase" onClick={handleSaveExpense}>
-                Save Expense
+              <Button 
+                className="w-full h-12 rounded-2xl font-black uppercase" 
+                onClick={handleSaveExpense}
+                disabled={isSubmittingExpense}
+              >
+                {isSubmittingExpense ? 'Saving...' : 'Save Expense'}
               </Button>
             </div>
           </div>
@@ -422,8 +438,12 @@ export function GlobalActionFab() {
             )}
 
             <div className="pt-1">
-              <Button className="w-full h-12 rounded-2xl font-black uppercase" onClick={handleSaveSale}>
-                Submit Sale Record
+              <Button 
+                className="w-full h-12 rounded-2xl font-black uppercase" 
+                onClick={handleSaveSale}
+                disabled={isSubmittingSale}
+              >
+                {isSubmittingSale ? 'Submitting...' : 'Submit Sale Record'}
               </Button>
             </div>
           </div>

@@ -122,6 +122,7 @@ export function ExploreScreen() {
   const [formCustomer, setFormCustomer] = useState('');
   const [formImage, setFormImage] = useState<string>('');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -137,11 +138,15 @@ export function ExploreScreen() {
   };
 
   const handleCreateWishlist = async () => {
+    if (isSubmitting) return;
     if (!formName) {
-      toast.error('Please fill in product name');
+      toast.error('Please enter the product name');
       return;
     }
+    
+    setIsSubmitting(true);
     if (!window.confirm(`Are you sure you want to create a new wishlist request for "${formName}"?`)) {
+      setIsSubmitting(false);
       return;
     }
     const newEntry: WishlistItem = {
@@ -165,6 +170,8 @@ export function ExploreScreen() {
       setFormImage('');
     } catch (e) {
       toast.error('Failed to create wishlist item. Please try again.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -541,8 +548,12 @@ export function ExploreScreen() {
                 </div>
 
                 <div className="pt-2">
-                  <Button className="pill-button w-full h-14 bg-[#163300] text-white hover:bg-[#1f4700]" onClick={handleCreateWishlist}>
-                    Record Request
+                  <Button 
+                    className="pill-button w-full h-14 bg-[#163300] text-white hover:bg-[#1f4700]" 
+                    onClick={handleCreateWishlist}
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting ? 'Recording...' : 'Record Request'}
                   </Button>
                 </div>
               </div>

@@ -101,6 +101,7 @@ export function TripSettingsScreen() {
   const [payoutCurrency, setPayoutCurrency] = useState('IDR');
   const [watermarkEnabled, setWatermarkEnabled] = useState(false);
   const [watermarkImage, setWatermarkImage] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Sync inputs with master context once loaded
   useEffect(() => {
@@ -137,9 +138,12 @@ export function TripSettingsScreen() {
   }, [loading, tripSettings]);
 
   const handleSave = async () => {
+    if (isSubmitting) return;
     if (!window.confirm("Are you sure you want to save these trip settings?")) {
       return;
     }
+    
+    setIsSubmitting(true);
     const updated = {
       trip: {
         origin,
@@ -156,9 +160,15 @@ export function TripSettingsScreen() {
         image: watermarkImage || ''
       }
     };
-    await saveSettings(updated);
-    toast.success('Trip settings updated!');
-    navigate('/');
+    try {
+      await saveSettings(updated);
+      toast.success('Trip settings updated!');
+      navigate('/');
+    } catch (e) {
+      toast.error('Failed to save settings');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const getCurrencyName = (code: string) => CURRENCIES.find(c => c.code === code)?.name || code;
@@ -472,9 +482,13 @@ export function TripSettingsScreen() {
           </div>
         </section>
 
-        <Button className="w-full h-14 rounded-2xl font-bold gap-3 shadow-lg shadow-primary/20" onClick={handleSave}>
+        <Button 
+          className="w-full h-14 rounded-2xl font-bold gap-3 shadow-lg shadow-primary/20" 
+          onClick={handleSave}
+          disabled={isSubmitting}
+        >
           <Check className="h-5 w-5" />
-          Save Settings
+          {isSubmitting ? 'Saving...' : 'Save Settings'}
         </Button>
       </div>
     </div>
