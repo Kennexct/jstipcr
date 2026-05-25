@@ -841,7 +841,6 @@ export function ExploreScreen() {
                             )}
                             <p className="text-[8px] text-slate-400 font-bold uppercase mt-0.5">Sourced: {item.location}</p>
                           </div>
-                          </div>
                         </div>
                       </Card>
                     </motion.div>
