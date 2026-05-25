@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Banknote, Wallet, Zap, Plus, Search, Trash2, X, PlusCircle, PackageCheck } from 'lucide-react';
+import { Banknote, Wallet, Zap, Plus, Search, Trash2, X, PlusCircle, PackageCheck, Package, CheckCircle2 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -356,26 +356,25 @@ export function GlobalActionFab() {
               />
             </div>
 
-            <div className="p-3 rounded-2xl bg-amber-50/20 border-2 border-dashed border-amber-100 space-y-3">
-              <p className="text-[9px] font-black uppercase text-amber-800">Select Catalog Product</p>
+            <div className="p-4 rounded-3xl bg-[#f2f5f7] border-none space-y-3">
+              <p className="text-[10px] font-black uppercase text-slate-500 tracking-widest">Select Catalog Product</p>
               <div className="relative">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                 <Input 
-                  placeholder="Type name to select..." 
+                  placeholder="Search product by name..." 
                   value={productSearchText}
                   onChange={(e) => {
                     const val = e.target.value;
                     setProductSearchText(val);
                     setShowSuggestions(true);
-                    const match = catalogItems.find(p => p.name.toLowerCase() === val.trim().toLowerCase());
-                    if (match) setSelectedItemId(match.id);
                   }}
                   onFocus={() => setShowSuggestions(true)}
-                  className="h-10 rounded-xl bg-white border font-bold text-xs" 
+                  className="h-12 pl-11 rounded-2xl bg-white border-none font-bold text-xs shadow-sm" 
                 />
               </div>
 
               {showSuggestions && (
-                <div className="max-h-32 overflow-y-auto border rounded-lg p-1 bg-white">
+                <div className="max-h-56 overflow-y-auto rounded-2xl p-1.5 bg-white space-y-1 shadow-sm mt-1 border border-slate-100">
                   {catalogItems.filter(i => i.name.toLowerCase().includes(productSearchText.toLowerCase())).map(item => (
                     <button
                       type="button"
@@ -386,32 +385,54 @@ export function GlobalActionFab() {
                         setShowSuggestions(false);
                       }}
                       className={cn(
-                        "w-full text-left px-2 py-1.5 text-xs font-bold rounded flex justify-between",
-                        selectedItemId === item.id ? "bg-primary/5 text-primary" : "text-slate-700 hover:bg-slate-50"
+                        "w-full text-left p-2 rounded-xl flex items-center gap-3 transition-colors",
+                        selectedItemId === item.id ? "bg-[#163300] text-white" : "hover:bg-slate-50 bg-white border border-transparent"
                       )}
                     >
-                      <span>{item.name}</span>
-                      <span>Rp {item.price.toLocaleString()}</span>
+                      <div className="h-12 w-12 rounded-lg bg-[#f2f5f7] flex-shrink-0 overflow-hidden flex items-center justify-center">
+                        {item.image ? (
+                           <img src={item.image} alt={item.name} className="h-full w-full object-cover" />
+                        ) : (
+                           <Package className="h-5 w-5 text-slate-300" />
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-xs font-bold truncate pr-2">{item.name}</div>
+                        <div className={cn("text-[10px] font-medium mt-0.5", selectedItemId === item.id ? "text-[#9fe870]" : "text-slate-500")}>
+                          Rp {item.price.toLocaleString()}
+                        </div>
+                      </div>
+                      {selectedItemId === item.id && (
+                        <CheckCircle2 className="h-5 w-5 text-[#9fe870] shrink-0 mr-1" />
+                      )}
                     </button>
                   ))}
+                  {catalogItems.filter(i => i.name.toLowerCase().includes(productSearchText.toLowerCase())).length === 0 && (
+                     <div className="p-4 text-center text-xs font-medium text-slate-400">No matching products found</div>
+                  )}
                 </div>
               )}
 
-              <div className="flex items-end justify-between gap-3">
-                <div className="space-y-1 flex-1">
-                  <label className="text-[9px] font-bold text-slate-500">Order Quantity</label>
-                  <div className="flex items-center gap-1.5">
-                    <Button type="button" variant="outline" size="icon" className="h-9 w-9 rounded-lg" onClick={() => setSelectedQty(Math.max(1, selectedQty - 1))}>
-                      <X className="h-3 w-3 rotate-45" />
+              <div className="flex items-end justify-between gap-3 pt-2">
+                <div className="space-y-1.5 flex-1">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">Quantity</label>
+                  <div className="flex items-center gap-1.5 bg-white p-1 rounded-2xl w-fit shadow-sm">
+                    <Button type="button" variant="ghost" size="icon" className="h-10 w-10 rounded-xl hover:bg-slate-100" onClick={() => setSelectedQty(Math.max(1, selectedQty - 1))}>
+                      <X className="h-4 w-4" />
                     </Button>
-                    <Input type="number" value={selectedQty} onChange={e => setSelectedQty(Math.max(1, parseInt(e.target.value) || 1))} className="h-9 w-12 text-center" />
-                    <Button type="button" variant="outline" size="icon" className="h-9 w-9 rounded-lg" onClick={() => setSelectedQty(selectedQty + 1)}>
-                      <Plus className="h-3 w-3" />
+                    <Input type="number" value={selectedQty} onChange={e => setSelectedQty(Math.max(1, parseInt(e.target.value) || 1))} className="h-10 w-12 text-center border-none font-black text-sm bg-transparent" />
+                    <Button type="button" variant="ghost" size="icon" className="h-10 w-10 rounded-xl hover:bg-slate-100" onClick={() => setSelectedQty(selectedQty + 1)}>
+                      <Plus className="h-4 w-4" />
                     </Button>
                   </div>
                 </div>
-                <Button type="button" variant="outline" onClick={handleAddDraftItem} className="h-9 rounded-xl font-bold text-xs">
-                  <PlusCircle className="h-3.5 w-3.5 mr-1" /> Add Item
+                <Button 
+                  type="button" 
+                  onClick={handleAddDraftItem} 
+                  disabled={!selectedItemId}
+                  className="h-12 rounded-2xl font-black text-xs gap-2 shadow-xl bg-[#9fe870] text-[#163300] hover:bg-[#8ade5f] px-5"
+                >
+                  <PlusCircle className="h-4 w-4" /> Add Item
                 </Button>
               </div>
             </div>
