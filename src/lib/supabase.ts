@@ -96,21 +96,31 @@ const setLocal = (key: string, data: any) => {
 export const db = {
   // 1. Settings (Trip and Currency)
   async getSettings(merchantId?: string) {
+    const suffix = merchantId ? `_${merchantId}` : '';
+    const defaultSettings = { 
+      trip: { origin: 'Seoul', destination: 'Jakarta', weightLimit: 15 },
+      currency: { code: 'SGD', symbol: 'S$', manualRate: 13500, realtimeRate: 13050, updatedAt: new Date().toISOString() },
+      notifs: { push: true, email: false, orders: true, chat: true }
+    };
+    
     if (isSupabaseConfigured() && merchantId) {
       try {
         const rows = await postgrestRequest('jstip_settings', { query: `merchant_id=eq.${merchantId}` });
-        if (rows && rows.length > 0) {
-          return rows[0].settings_data;
+        if (Array.isArray(rows)) {
+          if (rows.length > 0) {
+            return rows[0].settings_data;
+          }
+          // Supabase successfully returned empty. Do not fallback to local storage.
+          return defaultSettings;
         }
       } catch (e) {
         console.error('Supabase settings load error:', e);
       }
     }
-    // Fallback
-    const suffix = merchantId ? `_${merchantId}` : '';
-    const trip = getLocal(`jastip_trip_settings${suffix}`, { origin: 'Seoul', destination: 'Jakarta', weightLimit: 15 });
-    const currency = getLocal(`jastip_currency_settings${suffix}`, { code: 'SGD', symbol: 'S$', manualRate: 13500, realtimeRate: 13050, updatedAt: new Date().toISOString() });
-    const notifs = getLocal(`jastip_notification_settings${suffix}`, { push: true, email: false, orders: true, chat: true });
+    // Fallback only if offline/not configured
+    const trip = getLocal(`jastip_trip_settings${suffix}`, defaultSettings.trip);
+    const currency = getLocal(`jastip_currency_settings${suffix}`, defaultSettings.currency);
+    const notifs = getLocal(`jastip_notification_settings${suffix}`, defaultSettings.notifs);
     return { trip, currency, notifs };
   },
 
@@ -137,27 +147,21 @@ export const db = {
 
   // 2. Catalog Items
   async getItems(merchantId?: string): Promise<any[]> {
-    let remoteItems: any[] = [];
     if (isSupabaseConfigured()) {
       try {
-        const query = merchantId ? `merchant_id=eq.${merchantId}&order=id.asc` : 'order=id.asc';
-        const rows = await postgrestRequest('jstip_items', { query });
-        if (Array.isArray(rows)) remoteItems = rows;
+        const query = merchantId ? `merchant_id=eq.${merchantId}&order=id.desc` : 'order=id.desc';
+        const list = await postgrestRequest('jstip_items', { query });
+        if (Array.isArray(list)) {
+          // Cloud is the single source of truth. Sync to local and return immediately.
+          setLocal('jastip_items', list);
+          return list;
+        }
       } catch (e) {
         console.error('Supabase get items error:', e);
       }
     }
     const allItems = getLocal('jastip_items', []);
-    const localFiltered = merchantId ? allItems.filter((i: any) => i.merchantId === merchantId) : allItems;
-    
-    // Merge
-    const merged = [...remoteItems];
-    for (const li of localFiltered) {
-      if (!merged.some(ri => ri.id === li.id)) {
-        merged.push(li);
-      }
-    }
-    return merged;
+    return merchantId ? allItems.filter((i: any) => i.merchantId === merchantId) : allItems;
   },
 
   async saveItem(item: any, merchantId?: string) {
@@ -226,26 +230,22 @@ export const db = {
         const query = merchantId ? `merchant_id=eq.${merchantId}&order=id.desc` : 'order=id.desc';
         const list = await postgrestRequest('jstip_wishlist', { query });
         if (Array.isArray(list)) {
-          remoteList = list.map((item: any) => {
+          const remoteList = list.map((item: any) => {
             let secureStatus = item.status;
             if (secureStatus === 'searching') {
               secureStatus = 'find';
             }
             return { ...item, status: secureStatus, sellPrice: item.sell_price || 0 };
           });
+          setLocal('jastip_wishlist_items', remoteList);
+          return remoteList;
         }
       } catch (e) {
         console.error('Supabase get wishlist error:', e);
       }
     }
     const allList = getLocal('jastip_wishlist_items', []);
-    const localFiltered = merchantId ? allList.filter((i: any) => i.merchantId === merchantId) : allList;
-    
-    const merged = [...remoteList];
-    for (const li of localFiltered) {
-      if (!merged.some(ri => ri.id === li.id)) merged.push(li);
-    }
-    return merged;
+    return merchantId ? allList.filter((i: any) => i.merchantId === merchantId) : allList;
   },
 
   async saveWishlist(item: any, merchantId?: string) {
@@ -292,24 +292,20 @@ export const db = {
 
   // 4. Sales Records
   async getSales(merchantId?: string): Promise<any[]> {
-    let remoteSales: any[] = [];
     if (isSupabaseConfigured()) {
       try {
         const query = merchantId ? `merchant_id=eq.${merchantId}&order=id.desc` : 'order=id.desc';
-        const rows = await postgrestRequest('jstip_sales', { query });
-        if (Array.isArray(rows)) remoteSales = rows;
+        const list = await postgrestRequest('jstip_sales', { query });
+        if (Array.isArray(list)) {
+          setLocal('jastip_sales', list);
+          return list;
+        }
       } catch (e) {
         console.error('Supabase get sales error:', e);
       }
     }
-    const allSales = getLocal('jastip_sales', []);
-    const localFiltered = merchantId ? allSales.filter((s: any) => s.merchantId === merchantId) : allSales;
-    
-    const merged = [...remoteSales];
-    for (const ls of localFiltered) {
-      if (!merged.some(rs => rs.id === ls.id)) merged.push(ls);
-    }
-    return merged;
+    const allList = getLocal('jastip_sales', []);
+    return merchantId ? allList.filter((s: any) => s.merchantId === merchantId) : allList;
   },
 
   async saveSale(sale: any, merchantId?: string) {
@@ -346,24 +342,26 @@ export const db = {
 
   // 5. Operational Expenses
   async getExpenses(merchantId?: string): Promise<any[]> {
-    let remoteExpenses: any[] = [];
     if (isSupabaseConfigured()) {
       try {
         const query = merchantId ? `merchant_id=eq.${merchantId}&order=id.desc` : 'order=id.desc';
-        const rows = await postgrestRequest('jstip_expenses', { query });
-        if (Array.isArray(rows)) remoteExpenses = rows;
+        const list = await postgrestRequest('jstip_expenses', { query });
+        if (Array.isArray(list)) {
+          const remoteList = list.map((item: any) => ({
+            ...item,
+            originalAmount: item.originalAmount || item.original_amount,
+            originalSymbol: item.originalSymbol || item.original_symbol,
+            originalCurrency: item.originalCurrency || item.original_currency,
+          }));
+          setLocal('jastip_expenses', remoteList);
+          return remoteList;
+        }
       } catch (e) {
         console.error('Supabase get expenses error:', e);
       }
     }
-    const allExpenses = getLocal('jastip_expenses', []);
-    const localFiltered = merchantId ? allExpenses.filter((e: any) => e.merchantId === merchantId) : allExpenses;
-    
-    const merged = [...remoteExpenses];
-    for (const le of localFiltered) {
-      if (!merged.some(re => re.id === le.id)) merged.push(le);
-    }
-    return merged;
+    const allList = getLocal('jastip_expenses', []);
+    return merchantId ? allList.filter((e: any) => e.merchantId === merchantId) : allList;
   },
 
   async saveExpense(expense: any, merchantId?: string) {
