@@ -74,6 +74,16 @@ export function OwnerDashboard() {
   const netEarnings = totalSales - totalExpenses;
   const expectedRevenue = wishlistItems.reduce((acc, item) => acc + (item.price || 0), 0);
 
+  // Combine and sort activities (newest first based on timestamp in ID)
+  const allActivities = [
+    ...sales.map(s => ({ ...s, type: 'sale' as const })),
+    ...expenses.map(e => ({ ...e, type: 'expense' as const }))
+  ].sort((a, b) => {
+    const timeA = parseInt(a.id.split('_')[1] || '0');
+    const timeB = parseInt(b.id.split('_')[1] || '0');
+    return timeB - timeA;
+  });
+
   const activeTrip = {
     origin: tripSettings?.trip?.origin || 'Seoul',
     destination: tripSettings?.trip?.destination || 'Jakarta',
@@ -187,11 +197,11 @@ export function OwnerDashboard() {
       <section className="px-6 py-4">
         <div className="flex items-center gap-3 overflow-x-auto pb-4 scrollbar-hide -mx-6 px-6">
           <Button 
-            onClick={() => navigate('/inventory')}
+            onClick={() => navigate('/owner/inventory')}
             className="pill-button h-14 px-6 bg-[#9fe870] text-[#163300] hover:bg-[#8ade60] shadow-sm shrink-0"
           >
             <Package className="h-5 w-5" />
-            Inventory
+            Catalog
           </Button>
           <Button 
             onClick={() => navigate('/explore')}
@@ -221,8 +231,8 @@ export function OwnerDashboard() {
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1">
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Weight</p>
-              <p className="font-black text-[#163300] text-lg">{activeTrip.weightUsed} <span className="text-sm font-semibold text-slate-500">/ {activeTrip.weightLimit}kg</span></p>
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Manual Rate</p>
+              <p className="font-black text-[#163300] text-lg">Rp {tripSettings?.currency?.manualRate?.toLocaleString() || '13,500'}</p>
             </div>
             <div className="space-y-1 text-right">
               <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Orders</p>
@@ -236,43 +246,47 @@ export function OwnerDashboard() {
           <h3 className="text-sm font-bold text-[#163300] px-1">Recent Activity</h3>
           
           <div className="space-y-3">
-            {/* Show Sales */}
-            {sales.slice(0, 3).map((sale) => (
-              <div key={sale.id} className="flex items-center justify-between p-4 fintech-card">
-                <div className="flex items-center gap-4">
-                  <div className="h-12 w-12 rounded-full bg-[#9fe870]/20 flex items-center justify-center shrink-0">
-                    <ShoppingCart className="h-5 w-5 text-[#163300]" />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <h4 className="text-sm font-bold text-[#163300] truncate">Sale: {sale.customerName}</h4>
-                    <p className="text-xs font-semibold text-slate-500 truncate">
-                      {sale.items.map((it: any) => `${it.qty}x ${it.name}`).join(', ')}
-                    </p>
-                  </div>
-                </div>
-                <div className="text-right shrink-0">
-                  <p className="text-sm font-black text-[#163300]">+Rp {sale.total.toLocaleString()}</p>
-                  <p className="text-xs font-semibold text-slate-400">{sale.date}</p>
-                </div>
-              </div>
-            ))}
-
-            {/* Show Expenses */}
-            {expenses.slice(0, 3).map((expense) => (
-              <div key={expense.id} className="flex items-center justify-between p-4 fintech-card">
-                <div className="flex items-center gap-4">
-                  <div className="h-12 w-12 rounded-full bg-slate-100 flex items-center justify-center shrink-0">
-                    <Receipt className="h-5 w-5 text-slate-600" />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <h4 className="text-sm font-bold text-[#163300] truncate">{expense.description}</h4>
-                    <p className="text-xs font-semibold text-slate-500 truncate">{expense.category}</p>
-                  </div>
-                </div>
-                <div className="text-right shrink-0">
-                  <p className="text-sm font-black text-[#163300]">-Rp {expense.amount.toLocaleString()}</p>
-                  <p className="text-xs font-semibold text-slate-400">{expense.date}</p>
-                </div>
+            {allActivities.length === 0 && (
+              <p className="text-xs font-semibold text-slate-400 text-center py-4">No recent activity.</p>
+            )}
+            
+            {allActivities.slice(0, 5).map((activity) => (
+              <div key={activity.id} className="flex items-center justify-between p-4 fintech-card">
+                {activity.type === 'sale' ? (
+                  <>
+                    <div className="flex items-center gap-4">
+                      <div className="h-12 w-12 rounded-full bg-[#9fe870]/20 flex items-center justify-center shrink-0">
+                        <ShoppingCart className="h-5 w-5 text-[#163300]" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <h4 className="text-sm font-bold text-[#163300] truncate">Sale: {activity.customerName}</h4>
+                        <p className="text-xs font-semibold text-slate-500 truncate">
+                          {activity.items?.map((it: any) => `${it.qty}x ${it.name}`).join(', ')}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="text-right shrink-0">
+                      <p className="text-sm font-black text-[#163300]">+Rp {activity.total?.toLocaleString()}</p>
+                      <p className="text-xs font-semibold text-slate-400">{activity.date}</p>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="flex items-center gap-4">
+                      <div className="h-12 w-12 rounded-full bg-slate-100 flex items-center justify-center shrink-0">
+                        <Receipt className="h-5 w-5 text-slate-600" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <h4 className="text-sm font-bold text-[#163300] truncate">{activity.description}</h4>
+                        <p className="text-xs font-semibold text-slate-500 truncate">{activity.category}</p>
+                      </div>
+                    </div>
+                    <div className="text-right shrink-0">
+                      <p className="text-sm font-black text-red-600">-Rp {activity.amount?.toLocaleString()}</p>
+                      <p className="text-xs font-semibold text-slate-400">{activity.date}</p>
+                    </div>
+                  </>
+                )}
               </div>
             ))}
           </div>
