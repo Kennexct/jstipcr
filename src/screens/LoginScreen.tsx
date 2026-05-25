@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { toast } from 'sonner';
 import { getCleanErrorMessage } from '../lib/error';
+import { isSupabaseConfigured } from '../lib/supabase';
 
 export function LoginScreen() {
   const navigate = useNavigate();
@@ -15,33 +16,6 @@ export function LoginScreen() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [submitting, setSubmitting] = useState(false);
-  
-  // Supabase Config State
-  const [showConfig, setShowConfig] = useState(false);
-  const [supaUrl, setSupaUrl] = useState('');
-  const [supaKey, setSupaKey] = useState('');
-  
-  // Load existing config if available
-  useState(() => {
-    try {
-      const saved = localStorage.getItem('jastip_supabase_config');
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (parsed.url) setSupaUrl(parsed.url);
-        if (parsed.key) setSupaKey(parsed.key);
-      }
-    } catch (e) {}
-  });
-
-  const handleSaveConfig = () => {
-    if (!supaUrl || !supaKey) {
-      toast.error('Both URL and Key are required');
-      return;
-    }
-    localStorage.setItem('jastip_supabase_config', JSON.stringify({ url: supaUrl, key: supaKey }));
-    toast.success('Cloud connection saved! You can now log in.');
-    setShowConfig(false);
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -120,51 +94,7 @@ export function LoginScreen() {
               Create Account
             </Link>
           </p>
-          <button 
-            type="button"
-            onClick={() => setShowConfig(!showConfig)}
-            className="text-[10px] text-slate-400 uppercase tracking-widest font-bold mt-4 hover:text-primary transition-colors"
-          >
-            Database Connection settings
-          </button>
         </div>
-
-        {showConfig && (
-          <Card className="border border-primary/20 bg-primary/5 rounded-3xl overflow-hidden mt-4">
-            <CardContent className="p-6 space-y-4 text-left">
-              <p className="text-[10px] font-bold text-primary uppercase tracking-widest">Cloud Database Settings</p>
-              
-              <div className="space-y-1.5">
-                <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Supabase URL</label>
-                <Input 
-                  placeholder="https://xyzcompany.supabase.co" 
-                  value={supaUrl}
-                  onChange={e => setSupaUrl(e.target.value)}
-                  className="h-10 rounded-xl bg-white border-none font-medium text-xs" 
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Supabase Anon Key</label>
-                <Input 
-                  type="password"
-                  placeholder="eyJh..." 
-                  value={supaKey}
-                  onChange={e => setSupaKey(e.target.value)}
-                  className="h-10 rounded-xl bg-white border-none font-medium text-xs" 
-                />
-              </div>
-
-              <Button 
-                type="button" 
-                onClick={handleSaveConfig}
-                className="w-full h-10 rounded-xl font-bold uppercase text-xs"
-              >
-                Save Connection
-              </Button>
-            </CardContent>
-          </Card>
-        )}
       </div>
     </div>
   );

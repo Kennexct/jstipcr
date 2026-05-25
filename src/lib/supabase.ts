@@ -11,20 +11,12 @@ const getEnvValue = (key: string): string => {
 };
 
 // Replace these placeholders with your actual Supabase URL & Anon Key or set them in .env.local
+// Replace these placeholders with your actual Supabase URL & Anon Key or set them in .env.local
 const getSupabaseConfig = () => {
-  try {
-    const saved = localStorage.getItem('jastip_supabase_config');
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      if (parsed.url && parsed.key) {
-        return { url: parsed.url, key: parsed.key };
-      }
-    }
-  } catch (e) {}
-  
   return {
-    url: getEnvValue('VITE_SUPABASE_URL') || '',
-    key: getEnvValue('VITE_SUPABASE_ANON_KEY') || ''
+    // If Vite Env var is present, use it. Otherwise, use the hardcoded fallback from .env for mobile browsers.
+    url: getEnvValue('VITE_SUPABASE_URL') || 'https://xoggvbfsowlstickscex.supabase.co',
+    key: getEnvValue('VITE_SUPABASE_ANON_KEY') || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhvZ2d2YmZzb3dsc3RpY2tzY2V4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk0MjYwMzcsImV4cCI6MjA5NTAwMjAzN30.fQSD9Su7Gt_WVre5YznOZCW7gpoOkodEAfg_sdqQYzU'
   };
 };
 
