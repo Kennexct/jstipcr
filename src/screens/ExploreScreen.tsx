@@ -466,22 +466,22 @@ export function ExploreScreen() {
             <DialogTrigger className={cn(buttonVariants({ variant: 'default', size: 'sm' }), "h-9 rounded-xl font-bold text-[10px] gap-1.5 shadow-lg shadow-primary/15 shrink-0")}>
               <Plus className="h-3.5 w-3.5" /> RECORD REQUEST
             </DialogTrigger>
-            <DialogContent className="rounded-3xl border-none max-w-[95%] md:max-w-md bg-white">
+            <DialogContent className="rounded-3xl border-none max-w-[95%] md:max-w-md bg-white p-6">
               <DialogHeader className="text-left">
-                <DialogTitle className="font-black uppercase italic text-2xl tracking-tighter">
-                  Record External Request
+                <DialogTitle className="text-xl font-black text-[#163300] tracking-tight">
+                  Record Request
                 </DialogTitle>
-                <DialogDescription className="text-xs font-medium">
-                  Manually book requests received from private lines (WA, IG) into this audited traveler session.
+                <DialogDescription className="text-sm font-medium text-slate-500">
+                  Manually book requests received from private lines (WA, IG).
                 </DialogDescription>
               </DialogHeader>
               
               <div className="space-y-4 mt-2">
                 {/* Photo Upload Area */}
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Product Chat Photo / Reference</label>
+                  <label className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Product Photo</label>
                   {formImage ? (
-                    <div className="relative h-28 w-full rounded-2xl overflow-hidden border bg-muted/20 flex items-center justify-center">
+                    <div className="relative h-28 w-full rounded-2xl overflow-hidden border-none bg-[#f2f5f7] flex items-center justify-center">
                       <img src={formImage} className="h-full w-full object-cover" alt="Uploaded reference preview" referrerPolicy="no-referrer" />
                       <button 
                         type="button"
@@ -494,12 +494,12 @@ export function ExploreScreen() {
                   ) : (
                     <label 
                       htmlFor="ref-photo-upload"
-                      className="flex flex-col items-center justify-center h-28 w-full rounded-2xl border-2 border-dashed border-muted-foreground/30 bg-muted/20 hover:bg-muted/35 hover:border-primary/50 transition-colors cursor-pointer text-center p-4 gap-1.5 group"
+                      className="flex flex-col items-center justify-center h-28 w-full rounded-2xl border-2 border-dashed border-slate-200 bg-[#f2f5f7] hover:bg-slate-100 transition-colors cursor-pointer text-center p-4 gap-1.5 group"
                     >
-                      <Camera className="h-6 w-6 text-muted-foreground group-hover:text-primary transition-colors" />
+                      <Camera className="h-6 w-6 text-slate-400 group-hover:text-[#163300] transition-colors" />
                       <div>
-                        <p className="text-xs font-bold text-slate-700">Attach Detailed Product Photo</p>
-                        <p className="text-[9px] text-muted-foreground font-semibold">Provide reference image from custom chat (Tap to choose)</p>
+                        <p className="text-xs font-bold text-[#163300]">Attach Photo</p>
+                        <p className="text-[10px] text-slate-500 font-medium">Tap to choose image</p>
                       </div>
                       <input 
                         id="ref-photo-upload" 
@@ -513,14 +513,14 @@ export function ExploreScreen() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Product Name *</label>
+                  <label className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Product Name *</label>
                   <div className="relative">
-                    <Package className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-primary" />
+                    <Package className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
                     <Input 
                       placeholder="e.g. Aesop Mouthwash 500ml" 
                       value={formName}
                       onChange={e => setFormName(e.target.value)}
-                      className="h-12 pl-12 rounded-xl bg-muted/30 border-none font-bold placeholder:font-normal text-sm" 
+                      className="h-14 pl-12 rounded-full bg-[#f2f5f7] border-none font-bold text-sm" 
                     />
                   </div>
                 </div>
@@ -528,21 +528,21 @@ export function ExploreScreen() {
 
 
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Customer Identifier</label>
+                  <label className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Customer Name</label>
                   <div className="relative">
-                    <Users className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-primary" />
+                    <Users className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
                     <Input 
                       placeholder="e.g. WhatsApp / Jane Andrews" 
                       value={formCustomer}
                       onChange={e => setFormCustomer(e.target.value)}
-                      className="h-12 pl-12 rounded-xl bg-muted/30 border-none font-bold placeholder:font-normal text-sm" 
+                      className="h-14 pl-12 rounded-full bg-[#f2f5f7] border-none font-bold text-sm" 
                     />
                   </div>
                 </div>
 
                 <div className="pt-2">
-                  <Button className="w-full h-12 rounded-2xl font-black uppercase italic shadow-lg shadow-primary/10" onClick={handleCreateWishlist}>
-                    Record to Active List
+                  <Button className="pill-button w-full h-14 bg-[#163300] text-white hover:bg-[#1f4700]" onClick={handleCreateWishlist}>
+                    Record Request
                   </Button>
                 </div>
               </div>
@@ -604,8 +604,8 @@ export function ExploreScreen() {
                 </DialogTrigger>
                 <DialogContent className="rounded-3xl border-none max-w-[90%] bg-white p-5 text-left">
                   <DialogHeader className="text-left">
-                    <DialogTitle className="text-base font-black uppercase italic">Filter by Status</DialogTitle>
-                    <DialogDescription className="text-xs">Narrow down tasks by search/purchase state</DialogDescription>
+                    <DialogTitle className="text-lg font-black text-[#163300] tracking-tight">Filter by Status</DialogTitle>
+                    <DialogDescription className="text-sm text-slate-500 font-medium">Narrow down tasks by state</DialogDescription>
                   </DialogHeader>
                   <div className="grid grid-cols-1 gap-2 py-2">
                     {['all', 'find', 'found', 'out of stock', 'cancel', 'hold'].map(stat => (
@@ -617,10 +617,10 @@ export function ExploreScreen() {
                           toast.success(`Filter applied for status: ${stat.toUpperCase()}`);
                         }}
                         className={cn(
-                          "w-full text-left px-4 py-3 rounded-xl text-xs font-black uppercase tracking-wider transition-all",
+                          "w-full text-left px-4 py-3.5 rounded-2xl text-sm font-bold transition-all",
                           (selectedStatusFilter === stat)
-                            ? "bg-primary text-white"
-                            : "bg-slate-55 bg-slate-50 text-slate-700 hover:bg-slate-100"
+                            ? "bg-[#9fe870] text-[#163300]"
+                            : "bg-[#f2f5f7] text-slate-600 hover:bg-slate-200"
                         )}
                       >
                         {stat === 'all' ? '✨ Show All Items' : getStatusLabel(stat as any)}
@@ -857,20 +857,20 @@ export function ExploreScreen() {
         <DialogContent className="rounded-3xl border-none max-w-[95%] sm:max-w-md bg-white p-6 text-left">
           {selectedDetailItem && (
             <div className="space-y-5 text-left">
-              <DialogHeader className="text-left pb-2 border-b border-slate-50">
+              <DialogHeader className="text-left pb-2">
                 <div className="flex items-center justify-between">
-                  <Badge className="bg-primary/10 text-primary border-none px-2.5 h-5 text-[8.5px] font-black uppercase tracking-wider">
-                    Product Detail File
+                  <Badge className="bg-slate-100 text-slate-600 border-none font-bold uppercase tracking-widest text-[10px]">
+                    Wishlist Request
                   </Badge>
-                  <Badge className={cn("text-[9px] font-black uppercase tracking-widest px-2.5 h-6 rounded-lg", getStatusStyle(selectedDetailItem.status))}>
+                  <Badge className={cn("text-[10px] font-bold uppercase tracking-widest border-none", getStatusStyle(selectedDetailItem.status))}>
                     {selectedDetailItem.status}
                   </Badge>
                 </div>
-                <DialogTitle className="text-lg font-black uppercase italic tracking-tighter text-slate-800 mt-2.5 leading-tight">
+                <DialogTitle className="text-2xl font-black text-[#163300] mt-3 leading-tight tracking-tight">
                   {selectedDetailItem.name}
                 </DialogTitle>
-                <DialogDescription className="text-xs text-muted-foreground font-semibold flex items-center gap-1.5 mt-1">
-                  Sourced for client <span className="text-primary font-bold">{selectedDetailItem.requester}</span>
+                <DialogDescription className="text-sm font-medium text-slate-500 flex items-center gap-1.5 mt-1">
+                  Sourced for client <span className="text-[#163300] font-bold">{selectedDetailItem.requester}</span>
                 </DialogDescription>
               </DialogHeader>
 
@@ -884,17 +884,17 @@ export function ExploreScreen() {
                   onChange={handleDetailImageUpload} 
                 />
                 {selectedDetailItem.image ? (
-                  <label htmlFor="detail-image-upload" className="cursor-pointer block relative group w-full h-44 rounded-2xl overflow-hidden border">
+                  <label htmlFor="detail-image-upload" className="cursor-pointer block relative group w-full h-48 rounded-2xl overflow-hidden bg-[#f2f5f7]">
                     <img src={selectedDetailItem.image} className="h-full w-full object-cover" alt={selectedDetailItem.name} referrerPolicy="no-referrer" />
                     <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 text-white font-bold text-xs uppercase">
                       <Camera className="h-4 w-4" /> Change Photo
                     </div>
                   </label>
                 ) : (
-                  <label htmlFor="detail-image-upload" className="cursor-pointer block w-full h-28 rounded-2xl border border-dashed hover:bg-slate-50 transition-colors flex flex-col items-center justify-center p-4 bg-muted/10 text-muted-foreground gap-1.5 text-center">
-                    <Camera className="h-7 w-7 opacity-65 text-primary animate-pulse" />
-                    <span className="text-[10px] font-black uppercase tracking-wider text-slate-700">Add Photo reference</span>
-                    <span className="text-[8px] opacity-60 font-semibold">Click to upload or take a photo</span>
+                  <label htmlFor="detail-image-upload" className="cursor-pointer block w-full h-32 rounded-2xl border-2 border-dashed border-slate-200 hover:bg-slate-50 transition-colors flex flex-col items-center justify-center p-4 bg-[#f2f5f7] text-slate-500 gap-2 text-center">
+                    <Camera className="h-8 w-8 text-slate-400" />
+                    <span className="text-xs font-bold text-[#163300]">Add Photo Reference</span>
+                    <span className="text-[10px] text-slate-500">Tap to upload</span>
                   </label>
                 )}
               </div>
@@ -915,13 +915,13 @@ export function ExploreScreen() {
                   </div>
                 </div>
                 
-                <Card className="border-none bg-muted/30 overflow-hidden">
-                  <CardContent className="p-5 space-y-6">
+                <Card className="border-none bg-[#f2f5f7] overflow-hidden rounded-2xl">
+                  <CardContent className="p-5 space-y-5">
                     {/* Cost Price */}
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-bold text-muted-foreground uppercase px-1">Cost Price ({editBudgetCurrency})</label>
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-bold text-slate-500 uppercase">Cost Price ({editBudgetCurrency})</label>
                       <div className="relative">
-                        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground font-bold">{getCurrencySymbol(editBudgetCurrency)}</div>
+                        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 font-bold">{getCurrencySymbol(editBudgetCurrency)}</div>
                         <Input 
                           type="text"
                           inputMode="numeric"
@@ -947,21 +947,21 @@ export function ExploreScreen() {
                               }
                             }
                           }}
-                          className="h-14 pl-10 rounded-2xl bg-background border-none text-lg font-bold"
+                          className="h-14 pl-10 rounded-full bg-white border-none text-lg font-black text-[#163300]"
                         />
                       </div>
                       {computedPriceInIdr > 0 && editBudgetCurrency !== 'IDR' && (
-                        <p className="text-[10px] font-medium text-muted-foreground px-1 uppercase">
-                          = Rp {computedPriceInIdr.toLocaleString()} (Cost Base)
+                        <p className="text-[10px] font-medium text-slate-500 pt-1">
+                          ≈ Rp {computedPriceInIdr.toLocaleString()} (Cost Base)
                         </p>
                       )}
                     </div>
 
                     {/* Sell Price */}
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-bold text-primary uppercase px-1">Sell Price (IDR)</label>
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-bold text-slate-500 uppercase">Sell Price (IDR)</label>
                       <div className="relative">
-                        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-primary font-bold">Rp</div>
+                        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#163300] font-bold">Rp</div>
                         <Input 
                           type="text"
                           inputMode="numeric"
@@ -984,7 +984,7 @@ export function ExploreScreen() {
                               }
                             }
                           }}
-                          className="h-14 pl-10 rounded-2xl bg-background border-2 border-primary/20 text-lg font-bold text-primary focus:border-primary"
+                          className="h-14 pl-10 rounded-full bg-white border-none text-lg font-black text-[#163300]"
                         />
                       </div>
                     </div>
@@ -1048,12 +1048,12 @@ export function ExploreScreen() {
                 </div>
               </div>
 
-              <div className="pt-2 flex gap-3 border-t border-slate-50">
+              <div className="pt-4 flex gap-3">
                 <Button 
-                  className="flex-1 h-11 rounded-2xl font-black uppercase text-xs"
+                  className="pill-button w-full h-14 bg-[#163300] text-white hover:bg-[#1f4700]"
                   onClick={() => setSelectedDetailItem(null)}
                 >
-                  Close Detail file
+                  Close Details
                 </Button>
               </div>
             </div>

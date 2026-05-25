@@ -126,7 +126,7 @@ export function OwnerDashboard() {
               </div>
             </div>
           </DialogTrigger>
-          <DialogContent className="rounded-3xl border-none max-w-[90%] md:max-w-md bg-white p-6 shadow-2xl">
+          <DialogContent className="rounded-3xl border-none max-w-[90%] md:max-w-md bg-white p-6">
               <DialogHeader className="text-left pb-2">
                 <DialogTitle className="text-xl font-black text-[#163300]">
                   Account Details
@@ -161,8 +161,7 @@ export function OwnerDashboard() {
                         navigate('/login');
                       }
                     }} 
-                    variant="outline"
-                    className="w-full h-14 rounded-full font-bold text-sm gap-2 text-red-600 border-red-100 hover:bg-red-50 bg-white"
+                    className="pill-button w-full h-14 bg-red-50 text-red-600 hover:bg-red-100 font-bold gap-2"
                   >
                     <LogOut className="h-5 w-5" /> Sign Out
                   </Button>
