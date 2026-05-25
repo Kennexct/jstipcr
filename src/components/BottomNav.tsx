@@ -1,4 +1,4 @@
-import { LayoutDashboard, PackageSearch, TrendingUp, Plus, BarChart2 } from 'lucide-react';
+import { LayoutDashboard, PackageSearch, TrendingUp, PackagePlus, BarChart2 } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { cn } from '@/lib/utils';
@@ -50,10 +50,10 @@ export function BottomNav() {
           <NavLink to="/owner/list-item" className="group">
             {({ isActive }) => (
               <div className={cn(
-                "flex h-14 w-14 items-center justify-center rounded-full shadow-lg transition-transform active:scale-95 border-4 border-white bg-orange-500 text-white",
+                "flex h-14 w-14 items-center justify-center rounded-full shadow-lg transition-transform active:scale-95 border-4 border-[#f2f5f7] bg-[#163300] text-[#9fe870]",
                 isActive ? "scale-105 shadow-xl" : "hover:scale-105"
               )}>
-                <Plus className="h-6 w-6" />
+                <PackagePlus className="h-6 w-6" />
               </div>
             )}
           </NavLink>

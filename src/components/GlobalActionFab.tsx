@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ShoppingCart, Receipt, Plus, Search, Trash2, X, PlusCircle, PackageCheck } from 'lucide-react';
+import { ShoppingCart, Receipt, Zap, Search, Trash2, X, PlusCircle, PackageCheck } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -247,11 +247,11 @@ export function GlobalActionFab() {
           size="icon"
           onClick={() => setIsOpen(!isOpen)}
           className={cn(
-            "h-14 w-14 rounded-full shadow-xl transition-all duration-300",
-            isOpen ? "bg-slate-800 hover:bg-slate-900 rotate-45" : "bg-primary hover:bg-primary/90"
+            "h-14 w-14 rounded-full shadow-xl transition-all duration-300 border-none",
+            isOpen ? "bg-slate-800 hover:bg-slate-900 text-white" : "bg-[#9fe870] hover:bg-[#8ade5f] text-[#163300]"
           )}
         >
-          <Plus className="h-6 w-6 text-white" />
+          <Zap className={cn("h-6 w-6 transition-all", isOpen ? "rotate-45" : "")} />
         </Button>
       </div>
 
