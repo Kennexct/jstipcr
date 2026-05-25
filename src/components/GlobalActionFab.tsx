@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ShoppingCart, Receipt, Zap, Search, Trash2, X, PlusCircle, PackageCheck } from 'lucide-react';
+import { ShoppingCart, Receipt, Zap, Plus, Search, Trash2, X, PlusCircle, PackageCheck } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
