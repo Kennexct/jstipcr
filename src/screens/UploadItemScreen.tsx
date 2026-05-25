@@ -150,7 +150,6 @@ export function UploadItemScreen() {
 
   const [name, setName] = useState('');
   const [price, setPrice] = useState('');
-  const [costCurrency, setCostCurrency] = useState(settings.code);
   const [publishPrice, setPublishPrice] = useState('');
   const [settings, setSettings] = useState<any>({
     code: 'SGD',
@@ -159,6 +158,7 @@ export function UploadItemScreen() {
     realtimeRate: 13050,
     updatedAt: new Date().toISOString()
   });
+  const [costCurrency, setCostCurrency] = useState(settings.code);
   const [showShareBanner, setShowShareBanner] = useState(false);
   const [bannerColor, setBannerColor] = useState('bg-white');
 
@@ -192,7 +192,6 @@ export function UploadItemScreen() {
 
   const basePriceIdr = 0; // Handled dynamically in render now
   const margin = 0; // Handled dynamically in render now
-  const marginPercentage = basePriceIdr > 0 ? (margin / basePriceIdr) * 100 : 0;
 
 
 
@@ -437,6 +436,7 @@ export function UploadItemScreen() {
               ? Number(price) * settings.manualRate 
               : Number(price);
             const margin = Number(publishPrice) - basePriceIdr;
+            const marginPercentage = basePriceIdr > 0 ? (margin / basePriceIdr) * 100 : 0;
             
             return (
               <Card className="border-none bg-muted/30 overflow-hidden">
