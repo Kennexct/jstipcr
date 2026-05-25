@@ -88,17 +88,17 @@ export function OwnerInventoryScreen() {
   );
 
   return (
-    <div className="min-h-screen bg-muted/5">
-      <header className="sticky top-0 z-50 bg-background border-b px-4 h-16 flex items-center gap-3">
-        <Button variant="ghost" size="icon" className="rounded-full" onClick={() => navigate('/owner')}>
-          <ArrowLeft className="h-5 w-5" />
+    <div className="min-h-screen bg-[#f2f5f7]">
+      <header className="sticky top-0 z-50 bg-[#f2f5f7] px-4 pt-8 pb-4 flex items-center justify-between gap-3">
+        <Button variant="ghost" size="icon" className="rounded-full bg-white shadow-sm hover:bg-slate-50 shrink-0" onClick={() => navigate('/owner')}>
+          <ArrowLeft className="h-5 w-5 text-[#163300]" />
         </Button>
-        <h2 className="text-lg font-bold flex-1">My Catalog</h2>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" className="rounded-full h-9 gap-2 font-bold text-[10px]" onClick={handleShareCatalog}>
-            <Share2 className="h-3 w-3" /> SHARE
+        <h2 className="text-xl font-black text-[#163300] tracking-tight flex-1">Inventory</h2>
+        <div className="flex items-center gap-2 shrink-0">
+          <Button variant="outline" className="rounded-full h-10 gap-2 font-bold text-xs bg-white text-[#163300] border-slate-200" onClick={handleShareCatalog}>
+            <Share2 className="h-4 w-4" /> Share
           </Button>
-          <Button size="icon" className="rounded-full h-9 w-9" onClick={() => navigate('/owner/list-item')}>
+          <Button size="icon" className="rounded-full h-10 w-10 bg-[#163300] text-white hover:bg-[#1f4700]" onClick={() => navigate('/owner/list-item')}>
             <Plus className="h-5 w-5" />
           </Button>
         </div>
@@ -107,24 +107,24 @@ export function OwnerInventoryScreen() {
       <div className="p-4 space-y-4">
         <div className="flex gap-2">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
             <Input 
               placeholder="Search your products..." 
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 h-11 bg-background border-none shadow-sm rounded-xl" 
+              className="pl-11 h-12 bg-white border-none shadow-sm rounded-full font-semibold" 
             />
           </div>
           <Button 
             variant="outline" 
-            className="h-11 rounded-xl bg-white border-none shadow-sm font-black text-[10px] uppercase gap-1.5 px-3 flex items-center justify-center text-primary hover:bg-muted shrink-0"
+            className="h-12 rounded-full bg-white border-none shadow-sm font-bold text-xs gap-2 px-4 flex items-center justify-center text-[#163300] hover:bg-slate-50 shrink-0"
             onClick={handleDownloadCatalog}
           >
-            <Download className="h-3.5 w-3.5" /> Download
+            <Download className="h-4 w-4" /> Export
           </Button>
         </div>
 
-        <div className="grid grid-cols-1 gap-3">
+        <div className="grid grid-cols-1 gap-3 pb-24">
           {filteredInventory.map((item, i) => (
             <motion.div
               key={item.id}
@@ -133,35 +133,36 @@ export function OwnerInventoryScreen() {
               transition={{ delay: i * 0.05 }}
             >
               <Card 
-                className="border-none shadow-sm overflow-hidden group cursor-pointer hover:shadow-md transition-shadow"
+                className="fintech-card cursor-pointer group"
                 onClick={() => setSelectedItem(item)}
               >
-                <CardContent className="p-3 flex gap-4">
-                  <div className="relative h-20 w-20 rounded-xl overflow-hidden shrink-0 border">
-                    <img src={item.image} alt={item.name} className="h-full w-full object-cover" />
-                    <div className="absolute top-1 left-1">
-                       <Badge className="bg-green-500/90 text-white text-[8px] h-4 px-1 leading-none border-none">LIVE</Badge>
-                    </div>
+                <CardContent className="p-3.5 flex gap-4 items-center">
+                  <div className="relative h-16 w-16 rounded-xl overflow-hidden shrink-0 bg-[#f2f5f7]">
+                    {item.image ? (
+                      <img src={item.image} alt={item.name} className="h-full w-full object-cover" />
+                    ) : (
+                      <Package className="h-6 w-6 text-slate-300 absolute inset-0 m-auto" />
+                    )}
                   </div>
-                  <div className="flex-1 min-w-0 flex flex-col justify-between py-0.5">
+                  <div className="flex-1 min-w-0 flex flex-col justify-between py-1">
                     <div className="flex justify-between items-start">
-                      <div className="space-y-0.5">
-                        <h4 className="text-sm font-bold truncate pr-2">{item.name}</h4>
-                        <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-tight">Active for Request</p>
+                      <div className="space-y-0.5 min-w-0 pr-2">
+                        <h4 className="text-sm font-bold text-[#163300] truncate">{item.name}</h4>
+                        <Badge className="bg-[#9fe870]/20 text-[#163300] hover:bg-[#9fe870]/30 border-none px-1.5 py-0 text-[9px] uppercase">Active Listing</Badge>
                       </div>
                       <DropdownMenu>
                         <DropdownMenuTrigger 
                           onClick={(e) => e.stopPropagation()} 
-                          className="inline-flex h-8 w-8 -mr-1 items-center justify-center rounded-lg hover:bg-muted transition-colors outline-none"
+                          className="inline-flex h-8 w-8 -mr-2 items-center justify-center rounded-full hover:bg-slate-100 transition-colors outline-none shrink-0"
                         >
-                          <MoreVertical className="h-4 w-4 text-muted-foreground" />
+                          <MoreVertical className="h-5 w-5 text-slate-400" />
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="rounded-xl" onClick={(e) => e.stopPropagation()}>
-                          <DropdownMenuItem className="gap-2 text-xs font-medium" onClick={(e) => { e.stopPropagation(); navigate(`/owner/edit-item/${item.id}`); }}>
-                            <Edit2 className="h-3 w-3" /> Edit Item
+                        <DropdownMenuContent align="end" className="rounded-2xl shadow-xl border-slate-100 p-2" onClick={(e) => e.stopPropagation()}>
+                          <DropdownMenuItem className="gap-3 text-sm font-bold text-[#163300] p-3 rounded-xl cursor-pointer" onClick={(e) => { e.stopPropagation(); navigate(`/owner/edit-item/${item.id}`); }}>
+                            <Edit2 className="h-4 w-4 text-slate-400" /> Edit Item
                           </DropdownMenuItem>
                           <DropdownMenuItem 
-                            className="gap-2 text-xs font-medium"
+                            className="gap-3 text-sm font-bold text-[#163300] p-3 rounded-xl cursor-pointer"
                             onClick={(e) => {
                               e.stopPropagation();
                               toast.success('Product link copied!', {
@@ -169,23 +170,22 @@ export function OwnerInventoryScreen() {
                               });
                             }}
                           >
-                            <ExternalLink className="h-3 w-3" /> Copy Link
+                            <ExternalLink className="h-4 w-4 text-slate-400" /> Copy Link
                           </DropdownMenuItem>
                           <DropdownMenuItem 
-                            className="gap-2 text-xs font-medium text-red-500"
+                            className="gap-3 text-sm font-bold text-red-600 p-3 rounded-xl cursor-pointer hover:bg-red-50 hover:text-red-700"
                             onClick={(e) => {
                               e.stopPropagation();
                               handleRemove(item.id);
                             }}
                           >
-                            <Trash2 className="h-3 w-3" /> Remove
+                            <Trash2 className="h-4 w-4" /> Remove
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </div>
-                    <div className="flex items-baseline justify-between">
-                      <p className="text-sm font-black text-primary">Rp {item.price.toLocaleString()}</p>
-                      <p className="text-[10px] text-muted-foreground">Est. Margin: +Rp 45k</p>
+                    <div className="flex items-center justify-between mt-2">
+                      <p className="text-base font-black text-[#163300]">Rp {item.price.toLocaleString()}</p>
                     </div>
                   </div>
                 </CardContent>
@@ -199,53 +199,52 @@ export function OwnerInventoryScreen() {
       <Dialog open={selectedItem !== null} onOpenChange={(open) => { if (!open) setSelectedItem(null); }}>
         <DialogContent className="rounded-3xl border-none max-w-[90%] md:max-w-md bg-white p-6 max-h-[90vh] overflow-y-auto">
           {selectedItem && (
-            <div className="space-y-5">
+            <div className="space-y-6">
               <DialogHeader className="text-left">
-                <DialogTitle className="text-base font-black tracking-tight uppercase italic text-primary flex items-center gap-2">
-                  <Info className="h-4.5 w-4.5" /> Catalog Product Detail
+                <DialogTitle className="text-xl font-black text-[#163300] tracking-tight">
+                  Product Details
                 </DialogTitle>
-                <DialogDescription className="text-xs text-muted-foreground">
-                  Reference ID: #00{selectedItem.id} • Active Status
+                <DialogDescription className="text-sm text-slate-500 font-medium">
+                  Reference ID: #00{selectedItem.id}
                 </DialogDescription>
               </DialogHeader>
 
               {/* Cover Image & Name block */}
-              <div className="space-y-3">
-                <div className="relative h-44 w-full rounded-2xl overflow-hidden border bg-muted/20">
-                  <img src={selectedItem.image} alt={selectedItem.name} className="h-full w-full object-cover" />
-                  <Badge className="absolute top-3 left-3 bg-green-500 text-white font-bold text-[9px] tracking-wider uppercase">ACTIVE PRODUCT</Badge>
+              <div className="space-y-4">
+                <div className="relative h-48 w-full rounded-2xl overflow-hidden bg-[#f2f5f7]">
+                  {selectedItem.image ? (
+                    <img src={selectedItem.image} alt={selectedItem.name} className="h-full w-full object-cover" />
+                  ) : (
+                    <Package className="h-10 w-10 text-slate-300 absolute inset-0 m-auto" />
+                  )}
+                  <Badge className="absolute top-3 left-3 bg-[#9fe870] text-[#163300] border-none font-bold">Live</Badge>
                 </div>
-                <h3 className="text-base font-black text-slate-800 leading-snug uppercase italic tracking-tight">{selectedItem.name}</h3>
+                <h3 className="text-lg font-black text-[#163300] leading-tight">{selectedItem.name}</h3>
               </div>
 
               {/* Financial Breakdown Grid */}
               <div className="grid grid-cols-2 gap-3">
-                <div className="p-3 rounded-2xl bg-slate-50 border space-y-0.5">
-                  <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none">Publish Price (IDR)</p>
-                  <p className="text-sm font-black text-primary font-mono">Rp {selectedItem.price.toLocaleString()}</p>
+                <div className="p-4 rounded-2xl bg-[#f2f5f7] space-y-1">
+                  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Publish Price</p>
+                  <p className="text-base font-black text-[#163300]">Rp {selectedItem.price.toLocaleString()}</p>
                 </div>
-                <div className="p-3 rounded-2xl bg-slate-50 border space-y-0.5">
-                  <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none">Est. Cost</p>
-                  <p className="text-sm font-black text-emerald-700 font-mono">{selectedItem.cost} {selectedItem.currency}</p>
+                <div className="p-4 rounded-2xl bg-[#f2f5f7] space-y-1">
+                  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Est. Cost</p>
+                  <p className="text-base font-black text-[#163300]">{selectedItem.cost} {selectedItem.currency}</p>
                 </div>
-              </div>
-
-              <div className="p-3.5 rounded-2xl bg-indigo-50/40 border border-indigo-100/60 flex items-center justify-between">
-                <span className="text-[10px] font-black text-indigo-700 uppercase tracking-wider">Estimated Margin</span>
-                <span className="text-xs font-black text-indigo-805 text-indigo-800 bg-white px-2.5 py-1 rounded-xl shadow-sm border border-indigo-100/40">+Rp 45,000 (Sourcing Reward)</span>
               </div>
 
               {/* Action Buttons inside custom popup modal details */}
-              <div className="space-y-2 pt-3 border-t border-slate-100">
+              <div className="space-y-3 pt-2">
                 <Button 
-                  className="w-full h-11 rounded-xl text-xs font-black uppercase tracking-wider italic flex items-center justify-center gap-2"
+                  className="pill-button w-full h-14 bg-[#163300] text-white hover:bg-[#1f4700]"
                   onClick={() => {
                     const id = selectedItem.id;
                     setSelectedItem(null);
                     navigate(`/owner/edit-item/${id}`);
                   }}
                 >
-                  <Edit2 className="h-3.5 w-3.5" /> Edit Catalog Item
+                  <Edit2 className="h-5 w-5" /> Edit Product
                 </Button>
 
                 <div className="grid grid-cols-2 gap-2">

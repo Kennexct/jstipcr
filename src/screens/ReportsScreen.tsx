@@ -154,7 +154,7 @@ export function ReportsScreen() {
   };
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] text-slate-900 pb-16">
+    <div className="min-h-screen bg-[#f2f5f7] text-slate-900 pb-16">
       {/* Print Styles Injection */}
       <style dangerouslySetInnerHTML={{__html: `
         @media print {
@@ -189,11 +189,11 @@ export function ReportsScreen() {
       `}} />
 
       {/* Screen Header */}
-      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b h-16 flex items-center px-4 gap-4 no-print">
-        <Button variant="ghost" size="icon" className="rounded-full" onClick={() => navigate(-1)}>
-          <ArrowLeft className="h-5 w-5" />
+      <header className="sticky top-0 z-50 bg-[#f2f5f7] pt-8 pb-4 border-b h-auto flex items-center px-4 gap-4 no-print">
+        <Button variant="ghost" size="icon" className="rounded-full bg-white shadow-sm hover:bg-slate-50 shrink-0" onClick={() => navigate(-1)}>
+          <ArrowLeft className="h-5 w-5 text-[#163300]" />
         </Button>
-        <h2 className="text-lg font-black uppercase italic tracking-tight text-primary">Traveler Ledger Reports</h2>
+        <h2 className="text-xl font-black tracking-tight text-[#163300]">Ledger Reports</h2>
       </header>
 
       {/* Main Container */}
@@ -209,44 +209,44 @@ export function ReportsScreen() {
 
         {/* Aggregates Summary Cards */}
         <div className="grid grid-cols-3 gap-3">
-          <Card className="border-none shadow-sm bg-white">
+          <Card className="fintech-card bg-white">
             <CardContent className="p-3 space-y-1 text-left">
-              <span className="text-[8px] font-black text-slate-400 uppercase tracking-wider block">Gross Sales</span>
-              <span className="text-sm font-bold font-mono text-emerald-600 block">Rp {totalSalesVal.toLocaleString()}</span>
+              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block">Gross Sales</span>
+              <span className="text-sm font-black text-[#163300] block">Rp {totalSalesVal.toLocaleString()}</span>
             </CardContent>
           </Card>
-          <Card className="border-none shadow-sm bg-white">
+          <Card className="fintech-card bg-white">
             <CardContent className="p-3 space-y-1 text-left">
-              <span className="text-[8px] font-black text-slate-400 uppercase tracking-wider block">Expenses</span>
-              <span className="text-sm font-bold font-mono text-red-500 block">Rp {totalExpensesVal.toLocaleString()}</span>
+              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block">Expenses</span>
+              <span className="text-sm font-black text-red-600 block">Rp {totalExpensesVal.toLocaleString()}</span>
             </CardContent>
           </Card>
-          <Card className="border-none shadow-sm bg-primary text-white">
+          <Card className="fintech-card bg-[#163300] text-white">
             <CardContent className="p-3 space-y-1 text-left">
-              <span className="text-[8px] font-black opacity-80 uppercase tracking-wider block">Net Margin</span>
-              <span className="text-sm font-black font-mono block">Rp {netProfitVal.toLocaleString()}</span>
+              <span className="text-[10px] font-bold text-[#9fe870] uppercase tracking-widest block">Net Margin</span>
+              <span className="text-sm font-black block">Rp {netProfitVal.toLocaleString()}</span>
             </CardContent>
           </Card>
         </div>
 
         {/* Tab selection & export controls */}
         <div className="flex items-center justify-between no-print">
-          <div className="bg-slate-200/60 p-1 rounded-2xl flex gap-1 border">
+          <div className="bg-slate-200/50 p-1.5 rounded-2xl flex gap-1.5">
             <button
               onClick={() => setActiveTab('sales')}
-              className={`h-9 px-4 rounded-xl text-xs font-black uppercase transition-all flex items-center gap-1.5 ${
-                activeTab === 'sales' ? 'bg-white text-primary shadow-sm' : 'text-slate-500 hover:text-slate-800'
+              className={`h-10 px-4 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${
+                activeTab === 'sales' ? 'bg-white text-[#163300] shadow-sm' : 'text-slate-500 hover:text-slate-800'
               }`}
             >
-              <TrendingUp className="h-3.5 w-3.5" /> Sales
+              <TrendingUp className="h-4 w-4" /> Sales
             </button>
             <button
               onClick={() => setActiveTab('expenses')}
-              className={`h-9 px-4 rounded-xl text-xs font-black uppercase transition-all flex items-center gap-1.5 ${
-                activeTab === 'expenses' ? 'bg-white text-primary shadow-sm' : 'text-slate-500 hover:text-slate-800'
+              className={`h-10 px-4 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${
+                activeTab === 'expenses' ? 'bg-white text-[#163300] shadow-sm' : 'text-slate-500 hover:text-slate-800'
               }`}
             >
-              <Receipt className="h-3.5 w-3.5" /> Expenses
+              <Receipt className="h-4 w-4" /> Expenses
             </button>
           </div>
 
@@ -254,20 +254,20 @@ export function ReportsScreen() {
             <Button
               variant="outline"
               size="icon"
-              className="h-9 w-9 rounded-xl border-slate-200"
+              className="h-10 w-10 rounded-xl bg-white border-none shadow-sm"
               onClick={handleExportCSV}
               title="Export Excel (CSV)"
             >
-              <FileSpreadsheet className="h-4.5 w-4.5 text-emerald-600" />
+              <FileSpreadsheet className="h-5 w-5 text-[#163300]" />
             </Button>
             <Button
               variant="outline"
               size="icon"
-              className="h-9 w-9 rounded-xl border-slate-200"
+              className="h-10 w-10 rounded-xl bg-white border-none shadow-sm"
               onClick={handlePrint}
               title="Print PDF"
             >
-              <Printer className="h-4.5 w-4.5 text-primary" />
+              <Printer className="h-5 w-5 text-[#163300]" />
             </Button>
           </div>
         </div>
@@ -275,28 +275,28 @@ export function ReportsScreen() {
         {/* Sales Report Table Section */}
         {activeTab === 'sales' && (
           <section className="space-y-3">
-            <h3 className="text-xs font-black uppercase tracking-widest text-slate-500 pl-1 text-left print:block hidden">Sales Ledger Breakdown</h3>
-            <div className="bg-white border rounded-3xl overflow-hidden shadow-sm no-print">
-              <div className="p-4 border-b bg-slate-50/50 flex justify-between items-center">
-                <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">Recorded Sales Transactions</span>
-                <Badge variant="secondary" className="text-[9px] font-mono px-2 py-0.5 bg-slate-100">{sales.length} records</Badge>
+            <h3 className="text-xs font-bold uppercase tracking-widest text-slate-500 pl-1 text-left print:block hidden">Sales Ledger Breakdown</h3>
+            <div className="bg-white rounded-3xl overflow-hidden fintech-card no-print">
+              <div className="p-4 border-b border-slate-100 flex justify-between items-center">
+                <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Recorded Sales Transactions</span>
+                <Badge className="text-[10px] font-bold px-2 py-0.5 bg-slate-100 text-slate-700 hover:bg-slate-200">{sales.length} records</Badge>
               </div>
 
               {sales.length === 0 ? (
-                <div className="p-8 text-center text-slate-400 text-xs italic font-medium">No sales recorded yet.</div>
+                <div className="p-8 text-center text-slate-400 text-xs font-medium">No sales recorded yet.</div>
               ) : (
-                <div className="divide-y divide-slate-100 max-h-[360px] overflow-y-auto pr-1">
+                <div className="divide-y divide-slate-100 max-h-[450px] overflow-y-auto">
                   {sales.map((sale) => (
-                    <div key={sale.id} className="p-4 space-y-3">
+                    <div key={sale.id} className="p-5 space-y-4">
                       <div className="flex justify-between items-start">
-                        <div className="text-left">
-                          <h4 className="text-xs font-black uppercase tracking-tight text-slate-800">{sale.customerName}</h4>
-                          <span className="text-[9.5px] text-slate-400 font-bold uppercase">{sale.date || 'Today'}</span>
+                        <div className="text-left space-y-1">
+                          <h4 className="text-sm font-bold text-[#163300]">{sale.customerName}</h4>
+                          <span className="text-[10px] text-slate-400 font-bold uppercase">{sale.date || 'Today'}</span>
                         </div>
-                        <span className="text-xs font-black text-emerald-600 font-mono">Rp {sale.total.toLocaleString()}</span>
+                        <span className="text-sm font-black text-[#163300]">Rp {sale.total.toLocaleString()}</span>
                       </div>
 
-                      <div className="space-y-1.5 pl-2 border-l-2 border-slate-100">
+                      <div className="space-y-2 pl-3 border-l-2 border-slate-100">
                         {sale.items.map((item: any, idx: number) => {
                           const unitCost = item.cost || resolveItemCost(item.name);
                           const totalCost = unitCost * item.qty;
@@ -304,19 +304,19 @@ export function ReportsScreen() {
                           const profit = totalPublish - totalCost;
 
                           return (
-                            <div key={idx} className="text-[11px] font-semibold text-slate-650 text-slate-700 flex flex-col gap-0.5">
-                              <div className="flex justify-between font-bold text-slate-800 uppercase text-[10px]">
+                            <div key={idx} className="flex flex-col gap-1">
+                              <div className="flex justify-between font-bold text-[#163300] text-xs">
                                 <span>
                                   {item.qty}x {item.name}
                                   {item.sourceCategory === 'Wishlist' && (
-                                    <Badge variant="secondary" className="ml-2 text-[8px] px-1 py-0 h-3 bg-purple-100 text-purple-700">Wishlist</Badge>
+                                    <Badge className="ml-2 text-[9px] px-1.5 py-0 bg-purple-50 text-purple-700 hover:bg-purple-100 border-none">Wishlist</Badge>
                                   )}
                                 </span>
                                 <span>Rp {totalPublish.toLocaleString()}</span>
                               </div>
-                              <div className="flex justify-between text-[9px] text-slate-400">
-                                <span>Cost/Item: Rp {unitCost.toLocaleString()} (Total Cost: Rp {totalCost.toLocaleString()})</span>
-                                <span className={profit >= 0 ? "text-emerald-500" : "text-red-500"}>
+                              <div className="flex justify-between text-[10px] font-medium text-slate-500">
+                                <span>Cost: Rp {unitCost.toLocaleString()}/ea</span>
+                                <span className={profit >= 0 ? "text-emerald-600 font-bold" : "text-red-600 font-bold"}>
                                   Margin: Rp {profit.toLocaleString()}
                                 </span>
                               </div>
@@ -382,37 +382,37 @@ export function ReportsScreen() {
         {/* Expenses Report Table Section */}
         {activeTab === 'expenses' && (
           <section className="space-y-3">
-            <h3 className="text-xs font-black uppercase tracking-widest text-slate-500 pl-1 text-left print:block hidden">Expenses Ledger Breakdown</h3>
-            <div className="bg-white border rounded-3xl overflow-hidden shadow-sm no-print">
-              <div className="p-4 border-b bg-slate-50/50 flex justify-between items-center">
-                <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">Operational Expenses Ledger</span>
-                <Badge variant="secondary" className="text-[9px] font-mono px-2 py-0.5 bg-slate-100">{expenses.length} records</Badge>
+            <h3 className="text-xs font-bold uppercase tracking-widest text-slate-500 pl-1 text-left print:block hidden">Expenses Ledger Breakdown</h3>
+            <div className="bg-white rounded-3xl overflow-hidden fintech-card no-print">
+              <div className="p-4 border-b border-slate-100 flex justify-between items-center">
+                <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Operational Expenses Ledger</span>
+                <Badge className="text-[10px] font-bold px-2 py-0.5 bg-slate-100 text-slate-700 hover:bg-slate-200">{expenses.length} records</Badge>
               </div>
 
               {expenses.length === 0 ? (
-                <div className="p-8 text-center text-slate-400 text-xs italic font-medium">No expenses logged yet.</div>
+                <div className="p-8 text-center text-slate-400 text-xs font-medium">No expenses logged yet.</div>
               ) : (
-                <div className="divide-y divide-slate-100 max-h-[360px] overflow-y-auto pr-1">
+                <div className="divide-y divide-slate-100 max-h-[450px] overflow-y-auto">
                   {expenses.map((exp) => (
-                    <div key={exp.id} className="p-4 flex items-center justify-between gap-4">
-                      <div className="text-left min-w-0 flex-1">
-                        <div className="flex items-center gap-2 mb-1.5 flex-wrap">
-                          <h4 className="text-xs font-black uppercase tracking-tight text-slate-800 truncate">{exp.description}</h4>
-                          <Badge variant="ghost" className="text-[7.5px] font-black bg-red-50 text-red-600 border-none px-1 h-4 uppercase">
+                    <div key={exp.id} className="p-5 flex items-center justify-between gap-4">
+                      <div className="text-left min-w-0 flex-1 space-y-1">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <h4 className="text-sm font-bold text-[#163300] truncate">{exp.description}</h4>
+                          <Badge className="text-[9px] font-bold bg-slate-100 text-slate-600 border-none px-1.5 py-0 uppercase">
                             {exp.category}
                           </Badge>
                         </div>
                         {exp.notes && (
-                          <p className="text-[9.5px] text-slate-400 italic font-medium leading-none mb-1">
+                          <p className="text-[10px] text-slate-500 font-medium">
                             &ldquo;{exp.notes}&rdquo;
                           </p>
                         )}
-                        <span className="text-[9px] text-slate-400 font-bold uppercase">{exp.date || 'Today'}</span>
+                        <span className="text-[10px] text-slate-400 font-bold uppercase block pt-1">{exp.date || 'Today'}</span>
                       </div>
                       <div className="text-right shrink-0">
-                        <span className="text-xs font-black text-red-605 text-red-600 font-mono">- Rp {exp.amount.toLocaleString()}</span>
+                        <span className="text-sm font-black text-red-600">- Rp {exp.amount.toLocaleString()}</span>
                         {exp.originalAmount && (
-                          <p className="text-[9px] text-slate-400 font-bold uppercase mt-0.5">
+                          <p className="text-[10px] text-slate-400 font-bold uppercase mt-1">
                             {exp.originalSymbol} {exp.originalAmount.toLocaleString()}
                           </p>
                         )}
