@@ -150,6 +150,7 @@ export function UploadItemScreen() {
 
   const [name, setName] = useState('');
   const [price, setPrice] = useState('');
+  const [costCurrency, setCostCurrency] = useState(settings.code);
   const [publishPrice, setPublishPrice] = useState('');
   const [settings, setSettings] = useState<any>({
     code: 'SGD',
@@ -181,15 +182,16 @@ export function UploadItemScreen() {
           setImage(item.image);
           setRawImage(item.rawImage || item.image || null);
           setName(item.name);
-          setPrice(item.cost.toString());
-          setPublishPrice(item.price.toString());
+          if (item.cost) setPrice(item.cost.toString());
+          if (item.currency) setCostCurrency(item.currency);
+          if (item.price) setPublishPrice(item.price.toString());
         }
       }
     }
   }, [id, isEdit, loading, catalogItems, tripSettings]);
 
-  const basePriceIdr = Number(price) * settings.manualRate;
-  const margin = Number(publishPrice) - basePriceIdr;
+  const basePriceIdr = 0; // Handled dynamically in render now
+  const margin = 0; // Handled dynamically in render now
   const marginPercentage = basePriceIdr > 0 ? (margin / basePriceIdr) * 100 : 0;
 
 
@@ -276,7 +278,7 @@ export function UploadItemScreen() {
       name: name.trim(),
       price: Number(publishPrice),
       cost: Number(price),
-      currency: settings.code,
+      currency: costCurrency,
       image: finalImage,
       rawImage: baseImage,
       status: 'active'
@@ -430,30 +432,48 @@ export function UploadItemScreen() {
             <Badge variant="outline" className="text-[10px] bg-primary/5 text-primary border-none">Rate: 1 {settings.code} = Rp {settings.manualRate.toLocaleString()}</Badge>
           </div>
           
-          <Card className="border-none bg-muted/30 overflow-hidden">
-            <CardContent className="p-5 space-y-6">
-              {/* Foreign Price */}
-              <div className="space-y-2">
-                <label className="text-[10px] font-bold text-muted-foreground uppercase px-1">Cost Price ({settings.code})</label>
-                <div className="relative">
-                  <div className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground font-bold">{settings.symbol}</div>
-                  <Input 
-                    type="number"
-                    placeholder="0.00" 
-                    className="h-14 pl-10 rounded-2xl bg-background border-none text-lg font-bold"
-                    value={price}
-                    onChange={(e) => setPrice(e.target.value)}
-                    inputMode="decimal"
-                  />
-                </div>
-                {basePriceIdr > 0 && (
-                  <p className="text-[10px] font-medium text-muted-foreground px-1 uppercase">
-                    = Rp {basePriceIdr.toLocaleString()} (Cost Base)
-                  </p>
-                )}
-              </div>
+          {(() => {
+            const basePriceIdr = costCurrency === settings.code 
+              ? Number(price) * settings.manualRate 
+              : Number(price);
+            const margin = Number(publishPrice) - basePriceIdr;
+            
+            return (
+              <Card className="border-none bg-muted/30 overflow-hidden">
+                <CardContent className="p-5 space-y-6">
+                  {/* Foreign Price */}
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between px-1">
+                      <label className="text-[10px] font-bold text-muted-foreground uppercase">Cost Price</label>
+                      <button 
+                        type="button"
+                        onClick={() => setCostCurrency(costCurrency === settings.code ? 'IDR' : settings.code)}
+                        className="text-[10px] font-black uppercase tracking-widest text-[#163300] bg-[#163300]/10 hover:bg-[#163300]/20 px-2 py-1 rounded transition-colors"
+                      >
+                        {costCurrency} 🔄
+                      </button>
+                    </div>
+                    <div className="relative">
+                      <div className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground font-bold">
+                        {costCurrency === settings.code ? settings.symbol : 'Rp'}
+                      </div>
+                      <Input 
+                        type="number"
+                        placeholder="0.00" 
+                        className="h-14 pl-10 rounded-2xl bg-background border-none text-lg font-bold"
+                        value={price}
+                        onChange={(e) => setPrice(e.target.value)}
+                        inputMode="decimal"
+                      />
+                    </div>
+                    {basePriceIdr > 0 && costCurrency !== 'IDR' && (
+                      <p className="text-[10px] font-medium text-muted-foreground px-1 uppercase">
+                        = Rp {basePriceIdr.toLocaleString()} (Cost Base)
+                      </p>
+                    )}
+                  </div>
 
-              {/* Publish Price */}
+                  {/* Publish Price */}
               <div className="space-y-2">
                 <label className="text-[10px] font-bold text-primary uppercase px-1">Sell Price (IDR)</label>
                 <div className="relative">
@@ -487,6 +507,8 @@ export function UploadItemScreen() {
               )}
             </CardContent>
           </Card>
+          );
+          })()}
         </section>
 
         {/* Product Details */}

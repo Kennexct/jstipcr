@@ -930,7 +930,16 @@ export function ExploreScreen() {
                   <CardContent className="p-5 space-y-5">
                     {/* Cost Price */}
                     <div className="space-y-1">
-                      <label className="text-[10px] font-bold text-slate-500 uppercase">Cost Price ({editBudgetCurrency})</label>
+                      <div className="flex items-center justify-between">
+                        <label className="text-[10px] font-bold text-slate-500 uppercase">Cost Price</label>
+                        <button 
+                          type="button"
+                          onClick={() => setEditBudgetCurrency(editBudgetCurrency === shoppingCurrencyCode ? payoutCurrencyCode : shoppingCurrencyCode)}
+                          className="text-[10px] font-black uppercase tracking-widest text-slate-500 bg-slate-100 hover:bg-slate-200 px-2 py-1 rounded transition-colors"
+                        >
+                          {editBudgetCurrency} 🔄
+                        </button>
+                      </div>
                       <div className="relative">
                         <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 font-bold">{getCurrencySymbol(editBudgetCurrency)}</div>
                         <Input 

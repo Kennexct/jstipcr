@@ -40,7 +40,7 @@ export function GlobalActionFab() {
   const [productSearchText, setProductSearchText] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(false);
 
-  const [selectedQty, setSelectedQty] = useState(1);
+  const [selectedQty, setSelectedQty] = useState<number | ''>('');
   const [draftSaleItems, setDraftSaleItems] = useState<any[]>([]);
   const [isSaleOpen, setIsSaleOpen] = useState(false);
   const [isSubmittingSale, setIsSubmittingSale] = useState(false);
@@ -51,7 +51,7 @@ export function GlobalActionFab() {
       setSelectedItemId('');
       setProductSearchText('');
       setDraftSaleItems([]);
-      setSelectedQty(1);
+      setSelectedQty('');
       setIsOpen(false);
     }
   }, [isSaleOpen]);
@@ -148,11 +148,12 @@ export function GlobalActionFab() {
     const itemCurrency = matchedProduct.currency || currencySettings.code;
     const rate = currencySettings.code === itemCurrency ? (currencySettings.manualRate || 13500) : 1;
     const costInIdr = Math.round((matchedProduct.cost || 0) * rate);
+    const finalQty = typeof selectedQty === 'number' && selectedQty > 0 ? selectedQty : 1;
 
     const alreadyInDraftIdx = draftSaleItems.findIndex(i => i.productId === selectedItemId);
     if (alreadyInDraftIdx > -1) {
       const updated = [...draftSaleItems];
-      updated[alreadyInDraftIdx].qty += selectedQty;
+      updated[alreadyInDraftIdx].qty += finalQty;
       setDraftSaleItems(updated);
     } else {
       setDraftSaleItems([
@@ -162,11 +163,11 @@ export function GlobalActionFab() {
           name: matchedProduct.name,
           price: matchedProduct.price,
           cost: costInIdr,
-          qty: selectedQty
+          qty: finalQty
         }
       ]);
     }
-    setSelectedQty(1);
+    setSelectedQty('');
     setSelectedItemId('');
     setProductSearchText('');
   };
@@ -183,11 +184,12 @@ export function GlobalActionFab() {
     if (finalDraft.length === 0) {
       const matchedProduct = catalogItems.find(p => p.id === selectedItemId);
       if (matchedProduct) {
+        const finalQty = typeof selectedQty === 'number' && selectedQty > 0 ? selectedQty : 1;
         finalDraft.push({
           productId: selectedItemId,
           name: matchedProduct.name,
           price: matchedProduct.price,
-          qty: selectedQty
+          qty: finalQty
         });
       } else {
         toast.error('Please add at least one item');
@@ -414,17 +416,15 @@ export function GlobalActionFab() {
               )}
 
               <div className="flex items-end justify-between gap-3 pt-2">
-                <div className="space-y-1.5 flex-1">
+                <div className="space-y-1.5 flex-[0.5]">
                   <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">Quantity</label>
-                  <div className="flex items-center gap-1.5 bg-white p-1 rounded-2xl w-fit shadow-sm">
-                    <Button type="button" variant="ghost" size="icon" className="h-10 w-10 rounded-xl hover:bg-slate-100" onClick={() => setSelectedQty(Math.max(1, selectedQty - 1))}>
-                      <X className="h-4 w-4" />
-                    </Button>
-                    <Input type="number" value={selectedQty} onChange={e => setSelectedQty(Math.max(1, parseInt(e.target.value) || 1))} className="h-10 w-12 text-center border-none font-black text-sm bg-transparent" />
-                    <Button type="button" variant="ghost" size="icon" className="h-10 w-10 rounded-xl hover:bg-slate-100" onClick={() => setSelectedQty(selectedQty + 1)}>
-                      <Plus className="h-4 w-4" />
-                    </Button>
-                  </div>
+                  <Input 
+                    type="number" 
+                    placeholder="e.g. 1" 
+                    value={selectedQty} 
+                    onChange={e => setSelectedQty(e.target.value === '' ? '' : Math.max(1, parseInt(e.target.value) || 1))} 
+                    className="h-12 w-full rounded-2xl bg-white border-none font-black text-sm shadow-sm px-4" 
+                  />
                 </div>
                 <Button 
                   type="button" 
