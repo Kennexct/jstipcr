@@ -1071,6 +1071,7 @@ export function ExploreScreen() {
           )}
         </DialogContent>
       </Dialog>
+      </div>
     </div>
   );
 }
