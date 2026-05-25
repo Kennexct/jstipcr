@@ -11,17 +11,32 @@ const getEnvValue = (key: string): string => {
 };
 
 // Replace these placeholders with your actual Supabase URL & Anon Key or set them in .env.local
-const SUPABASE_URL = getEnvValue('VITE_SUPABASE_URL') || '';
-const SUPABASE_ANON_KEY = getEnvValue('VITE_SUPABASE_ANON_KEY') || '';
+const getSupabaseConfig = () => {
+  try {
+    const saved = localStorage.getItem('jastip_supabase_config');
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (parsed.url && parsed.key) {
+        return { url: parsed.url, key: parsed.key };
+      }
+    }
+  } catch (e) {}
+  
+  return {
+    url: getEnvValue('VITE_SUPABASE_URL') || '',
+    key: getEnvValue('VITE_SUPABASE_ANON_KEY') || ''
+  };
+};
 
 export const isSupabaseConfigured = () => {
-  const isKeyValid = SUPABASE_ANON_KEY.trim().startsWith('ey');
-  return SUPABASE_URL.trim() !== '' && SUPABASE_ANON_KEY.trim() !== '' && isKeyValid;
+  const { url, key } = getSupabaseConfig();
+  const isKeyValid = key.trim().startsWith('ey');
+  return url.trim() !== '' && key.trim() !== '' && isKeyValid;
 };
 
 console.log(
   isSupabaseConfigured()
-    ? `[Supabase] Live Sync Active targeting: ${SUPABASE_URL}`
+    ? `[Supabase] Live Sync Active targeting: ${getSupabaseConfig().url}`
     : '[Supabase] Credentials missing. Running in LocalStorage fallback mode.'
 );
 
@@ -35,13 +50,14 @@ async function postgrestRequest(
     preferSingle?: boolean;
   } = {}
 ) {
+  const { url: supaUrl, key: supaKey } = getSupabaseConfig();
   const method = options.method || 'GET';
   const query = options.query ? `?${options.query}` : '';
-  const url = `${SUPABASE_URL}/rest/v1/${table}${query}`;
+  const url = `${supaUrl}/rest/v1/${table}${query}`;
 
   const headers: Record<string, string> = {
-    'apikey': SUPABASE_ANON_KEY,
-    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+    'apikey': supaKey,
+    'Authorization': `Bearer ${supaKey}`,
     'Content-Type': 'application/json',
   };
 
