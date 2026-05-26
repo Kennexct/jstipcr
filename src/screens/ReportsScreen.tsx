@@ -221,10 +221,10 @@ export function ReportsScreen() {
               <span className="text-sm font-black text-red-600 block">Rp {totalExpensesVal.toLocaleString()}</span>
             </CardContent>
           </Card>
-          <Card className="fintech-card bg-[#163300] text-white">
+          <Card className="fintech-card bg-white">
             <CardContent className="p-3 space-y-1 text-left">
-              <span className="text-[10px] font-bold text-[#9fe870] uppercase tracking-widest block">Net Margin</span>
-              <span className="text-sm font-black block">Rp {netProfitVal.toLocaleString()}</span>
+              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block">Net Margin</span>
+              <span className="text-sm font-black text-emerald-600 block">Rp {netProfitVal.toLocaleString()}</span>
             </CardContent>
           </Card>
         </div>
