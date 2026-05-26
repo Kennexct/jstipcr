@@ -72,6 +72,7 @@ export function ExploreScreen() {
 
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [viewMode, setViewMode] = useState<'board' | 'checklist'>('board');
+  const [checklistViewMode, setChecklistViewMode] = useState<'transaction' | 'summary'>('transaction');
   const [selectedStatusFilter, setSelectedStatusFilter] = useState<string>('all');
 
   // Track active popup elements
@@ -427,6 +428,23 @@ export function ExploreScreen() {
 
   const checklistItems = getMergedChecklistItems();
 
+  const groupedChecklistItems = React.useMemo(() => {
+    const map = new Map<string, { name: string; qty: number; checkedQty: number; ids: string[] }>();
+    checklistItems.forEach(item => {
+      const key = item.name.toLowerCase().trim();
+      const checked = isItemChecked(item.id, item.type);
+      if (!map.has(key)) {
+        map.set(key, { name: item.name, qty: item.qty, checkedQty: checked ? item.qty : 0, ids: [item.id] });
+      } else {
+        const existing = map.get(key)!;
+        existing.qty += item.qty;
+        if (checked) existing.checkedQty += item.qty;
+        existing.ids.push(item.id);
+      }
+    });
+    return Array.from(map.values()).sort((a, b) => b.qty - a.qty);
+  }, [checklistItems, boughtIds]);
+
   const isItemChecked = (itemId: string, itemType: 'wishlist' | 'sale') => {
     return boughtIds.includes(itemId);
   };
@@ -769,7 +787,26 @@ export function ExploreScreen() {
           <div className="space-y-3">
             <div className="flex items-center justify-between px-1">
               <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Checkout Checklist Items</p>
-              <Badge variant="outline" className="text-[10px] h-5 border-dashed font-bold">{totalChecklistCount} AUDIT LINES</Badge>
+              <div className="flex bg-slate-200/50 p-1 rounded-xl">
+                <button
+                  onClick={() => setChecklistViewMode('transaction')}
+                  className={cn(
+                    "px-3 py-1 rounded-lg text-[10px] font-bold transition-all",
+                    checklistViewMode === 'transaction' ? "bg-white text-[#163300] shadow-sm" : "text-slate-500 hover:text-slate-800"
+                  )}
+                >
+                  By Transaction
+                </button>
+                <button
+                  onClick={() => setChecklistViewMode('summary')}
+                  className={cn(
+                    "px-3 py-1 rounded-lg text-[10px] font-bold transition-all",
+                    checklistViewMode === 'summary' ? "bg-white text-[#163300] shadow-sm" : "text-slate-500 hover:text-slate-800"
+                  )}
+                >
+                  By Item Summary
+                </button>
+              </div>
             </div>
 
             {checklistItems.length === 0 ? (
@@ -782,76 +819,130 @@ export function ExploreScreen() {
               </div>
             ) : (
               <div className="space-y-2.5">
-                {checklistItems.map((item, idx) => {
-                  const checked = isItemChecked(item.id, item.type);
-                  return (
-                    <motion.div
-                      key={item.id}
-                      initial={{ opacity: 0, x: -10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: idx * 0.03 }}
-                    >
-                      <Card 
-                        onClick={() => handleToggleCustomChecklist(item.id, item.type)}
-                        className={cn(
-                          "fintech-card cursor-pointer hover:border-[#9fe870] transition-all select-none p-4",
-                          checked ? "bg-slate-50 opacity-60 border-transparent shadow-none" : ""
-                        )}
+                {checklistViewMode === 'transaction' ? (
+                  checklistItems.map((item, idx) => {
+                    const checked = isItemChecked(item.id, item.type);
+                    return (
+                      <motion.div
+                        key={item.id}
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: idx * 0.03 }}
                       >
-                        <div className="flex items-center justify-between gap-4">
-                          <div className="flex items-center gap-4 min-w-0 flex-1">
-                            
-                            {/* Visual toggle checkbox */}
-                            <div className="shrink-0 transition-transform active:scale-90">
+                        <Card 
+                          onClick={() => handleToggleCustomChecklist(item.id, item.type)}
+                          className={cn(
+                            "fintech-card cursor-pointer hover:border-[#9fe870] transition-all select-none p-4",
+                            checked ? "bg-slate-50 opacity-60 border-transparent shadow-none" : ""
+                          )}
+                        >
+                          <div className="flex items-center justify-between gap-4">
+                            <div className="flex items-center gap-4 min-w-0 flex-1">
+                              
+                              {/* Visual toggle checkbox */}
+                              <div className="shrink-0 transition-transform active:scale-90">
+                                {checked ? (
+                                  <CheckSquare className="h-6 w-6 text-[#163300] fill-[#9fe870]" />
+                                ) : (
+                                  <Square className="h-6 w-6 text-slate-300" />
+                                )}
+                              </div>
+
+                              {/* Item name and descriptors */}
+                              <div className="space-y-1 min-w-0 flex-1">
+                                <h4 className={cn(
+                                  "text-sm font-bold text-[#163300] truncate",
+                                  checked ? "line-through text-slate-400" : ""
+                                )}>
+                                  {item.name}
+                                </h4>
+                                <div className="flex flex-wrap items-center gap-2 text-xs font-semibold text-slate-500">
+                                  <span className={cn(
+                                    "px-2 py-0.5 rounded text-[10px] font-bold uppercase",
+                                    item.type === 'sale' ? "bg-blue-50 text-blue-700" : "bg-purple-50 text-purple-700"
+                                  )}>
+                                    {item.type === 'sale' ? 'Invoice' : 'Wishlist'}
+                                  </span>
+                                  <span className="opacity-40">•</span>
+                                  <span className="font-bold text-[#163300]">Qty {item.qty}</span>
+                                  <span className="opacity-40">•</span>
+                                  <span>Client: {item.requester}</span>
+                                </div>
+                              </div>
+
+                            </div>
+
+                            {/* Sourced status Tag */}
+                            <div className="shrink-0 text-right">
                               {checked ? (
-                                <CheckSquare className="h-6 w-6 text-[#163300] fill-[#9fe870]" />
+                                <Badge className="bg-emerald-100 text-emerald-800 hover:bg-emerald-100 border-none px-2 h-5.5 rounded text-[8px] font-black uppercase tracking-widest leading-none">
+                                  ALREADY BOUGHT
+                                </Badge>
                               ) : (
-                                <Square className="h-6 w-6 text-slate-300" />
+                                <Badge className="bg-amber-100 text-amber-800 hover:bg-amber-100 border-none px-2 h-5.5 rounded text-[8px] font-black uppercase tracking-widest leading-none">
+                                  NOT BUY YET
+                                </Badge>
+                              )}
+                              <p className="text-[8px] text-slate-400 font-bold uppercase mt-0.5">Sourced: {item.location}</p>
+                            </div>
+                          </div>
+                        </Card>
+                      </motion.div>
+                    );
+                  })
+                ) : (
+                  groupedChecklistItems.map((group, idx) => {
+                    const fullyChecked = group.checkedQty === group.qty;
+                    return (
+                      <motion.div
+                        key={group.name}
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: idx * 0.03 }}
+                      >
+                        <Card className={cn(
+                          "fintech-card p-4 transition-all select-none",
+                          fullyChecked ? "bg-slate-50 opacity-60 border-transparent shadow-none" : ""
+                        )}>
+                          <div className="flex items-center justify-between gap-4">
+                            <div className="flex items-center gap-4 min-w-0 flex-1">
+                              
+                              <div className="shrink-0 flex flex-col items-center justify-center bg-slate-100 h-10 w-10 rounded-xl">
+                                <span className="text-[10px] font-black text-slate-400 uppercase leading-none">Total</span>
+                                <span className={cn("text-lg font-black leading-none", fullyChecked ? "text-slate-400" : "text-[#163300]")}>{group.qty}</span>
+                              </div>
+
+                              <div className="space-y-1 min-w-0 flex-1">
+                                <h4 className={cn(
+                                  "text-sm font-bold text-[#163300] truncate",
+                                  fullyChecked ? "line-through text-slate-400" : ""
+                                )}>
+                                  {group.name}
+                                </h4>
+                                <div className="flex items-center gap-2 text-xs font-semibold text-slate-500">
+                                  <span className="font-bold text-[#163300]">{group.checkedQty}</span> / {group.qty} already bought
+                                </div>
+                              </div>
+
+                            </div>
+
+                            <div className="shrink-0 text-right">
+                              {fullyChecked ? (
+                                <Badge className="bg-emerald-100 text-emerald-800 hover:bg-emerald-100 border-none px-2 h-5.5 rounded text-[8px] font-black uppercase tracking-widest leading-none">
+                                  COMPLETED
+                                </Badge>
+                              ) : (
+                                <Badge className="bg-amber-100 text-amber-800 hover:bg-amber-100 border-none px-2 h-5.5 rounded text-[8px] font-black uppercase tracking-widest leading-none">
+                                  {group.qty - group.checkedQty} REMAINING
+                                </Badge>
                               )}
                             </div>
-
-                            {/* Item name and descriptors */}
-                            <div className="space-y-1 min-w-0 flex-1">
-                              <h4 className={cn(
-                                "text-sm font-bold text-[#163300] truncate",
-                                checked ? "line-through text-slate-400" : ""
-                              )}>
-                                {item.name}
-                              </h4>
-                              <div className="flex flex-wrap items-center gap-2 text-xs font-semibold text-slate-500">
-                                <span className={cn(
-                                  "px-2 py-0.5 rounded text-[10px] font-bold uppercase",
-                                  item.type === 'sale' ? "bg-blue-50 text-blue-700" : "bg-purple-50 text-purple-700"
-                                )}>
-                                  {item.type === 'sale' ? 'Invoice' : 'Wishlist'}
-                                </span>
-                                <span className="opacity-40">•</span>
-                                <span className="font-bold text-[#163300]">Qty {item.qty}</span>
-                                <span className="opacity-40">•</span>
-                                <span>Client: {item.requester}</span>
-                              </div>
-                            </div>
-
                           </div>
-
-                          {/* Sourced status Tag */}
-                          <div className="shrink-0 text-right">
-                            {checked ? (
-                              <Badge className="bg-emerald-100 text-emerald-800 hover:bg-emerald-100 border-none px-2 h-5.5 rounded text-[8px] font-black uppercase tracking-widest leading-none">
-                                ALREADY BOUGHT
-                              </Badge>
-                            ) : (
-                              <Badge className="bg-amber-100 text-amber-800 hover:bg-amber-100 border-none px-2 h-5.5 rounded text-[8px] font-black uppercase tracking-widest leading-none">
-                                NOT BUY YET
-                              </Badge>
-                            )}
-                            <p className="text-[8px] text-slate-400 font-bold uppercase mt-0.5">Sourced: {item.location}</p>
-                          </div>
-                        </div>
-                      </Card>
-                    </motion.div>
-                  );
-                })}
+                        </Card>
+                      </motion.div>
+                    );
+                  })
+                )}
               </div>
             )}
           </div>
