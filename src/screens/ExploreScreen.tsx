@@ -68,16 +68,7 @@ export function ExploreScreen() {
   const shoppingCurrencyCode = tripSettings?.currency?.code || 'SGD';
   const payoutCurrencyCode = tripSettings?.currency?.payout || 'IDR';
 
-  const getCurrencySymbol = (code: string) => {
-    if (code === 'IDR') return 'Rp';
-    if (code === 'SGD') return 'S$';
-    if (code === 'KRW') return '₩';
-    if (code === 'JPY') return '¥';
-    if (code === 'THB') return '฿';
-    if (code === 'USD') return '$';
-    if (code === 'EUR') return '€';
-    return '$';
-  };
+
 
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [viewMode, setViewMode] = useState<'board' | 'checklist'>('board');
@@ -929,7 +920,7 @@ export function ExploreScreen() {
                           onClick={handleCycleBudgetCurrency}
                           title="Click to switch currency"
                         >
-                          {getCurrencySymbol(editBudgetCurrency)}
+                          {editBudgetCurrency === shoppingCurrencyCode ? (tripSettings?.currency?.symbol || 'S$') : 'Rp'}
                         </div>
                         <Input 
                           type="text"
