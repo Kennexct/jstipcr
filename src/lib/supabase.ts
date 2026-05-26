@@ -95,7 +95,11 @@ const getLocal = (key: string, fallback: any) => {
 };
 
 const setLocal = (key: string, data: any) => {
-  localStorage.setItem(key, JSON.stringify(data));
+  try {
+    localStorage.setItem(key, JSON.stringify(data));
+  } catch (e) {
+    console.warn('Failed to save to localStorage (quota exceeded?), bypassing local cache:', e);
+  }
 };
 
 // ----------------------------------------------------

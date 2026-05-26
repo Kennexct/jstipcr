@@ -31,7 +31,9 @@ import {
 const applyWatermark = (originalImageSrc: string, watermarkImageSrc: string): Promise<string> => {
   return new Promise((resolve) => {
     const img = new Image();
-    img.crossOrigin = "anonymous";
+    if (!originalImageSrc.startsWith('data:')) {
+      img.crossOrigin = "anonymous";
+    }
     img.onload = () => {
       const canvas = document.createElement('canvas');
       canvas.width = img.width;
@@ -68,7 +70,9 @@ const applyWatermark = (originalImageSrc: string, watermarkImageSrc: string): Pr
 const resizeImageToMax = (originalImageSrc: string, maxDim: number): Promise<string> => {
   return new Promise((resolve) => {
     const img = new Image();
-    img.crossOrigin = "anonymous";
+    if (!originalImageSrc.startsWith('data:')) {
+      img.crossOrigin = "anonymous";
+    }
     img.onload = () => {
       let width = img.width;
       let height = img.height;
@@ -99,7 +103,9 @@ const resizeImageToMax = (originalImageSrc: string, maxDim: number): Promise<str
 const drawPriceLabelOnImage = (originalImageSrc: string, priceText: string): Promise<string> => {
   return new Promise((resolve) => {
     const img = new Image();
-    img.crossOrigin = "anonymous";
+    if (!originalImageSrc.startsWith('data:')) {
+      img.crossOrigin = "anonymous";
+    }
     img.onload = () => {
       const canvas = document.createElement('canvas');
       canvas.width = img.width;
