@@ -159,9 +159,7 @@ export function StorefrontScreen() {
           <ArrowLeft className="h-5 w-5" />
         </Button>
         <span className="text-xs font-black uppercase tracking-[0.2em] opacity-60">Storefront Product</span>
-        <Button variant="ghost" size="icon" className="rounded-full text-primary" onClick={handleShare}>
-          <Share2 className="h-5 w-5" />
-        </Button>
+        <div className="w-10 h-10" />
       </header>
 
       {/* Hero Image Section */}
