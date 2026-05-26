@@ -285,7 +285,11 @@ export function ExploreScreen() {
   const renderWishlistItem = (item: WishlistItem, i: number, opacityClass: string = "") => {
     return (
       <Card 
-        className={cn("fintech-card overflow-visible cursor-pointer", opacityClass)}
+        className={cn(
+          "fintech-card overflow-visible cursor-pointer relative",
+          activeDropdownId === item.id ? "z-50" : "z-10",
+          opacityClass
+        )}
         onClick={() => setSelectedDetailItem(item)}
       >
         <CardContent className="p-4 flex items-center justify-between gap-4 overflow-visible">
@@ -342,7 +346,7 @@ export function ExploreScreen() {
                     setActiveDropdownId(null);
                   }} 
                 />
-                <div className="absolute right-0 top-10 mt-1 bg-white border border-slate-100 rounded-2xl shadow-xl p-2.5 z-55 min-w-[170px] space-y-1 text-left cursor-default" onClick={e => e.stopPropagation()}>
+                <div className="absolute right-0 top-10 mt-1 bg-white border border-slate-100 rounded-2xl shadow-xl p-2.5 z-50 min-w-[170px] space-y-1 text-left cursor-default" onClick={e => e.stopPropagation()}>
                   <p className="text-[8px] font-black uppercase text-muted-foreground tracking-widest px-1.5 pb-1.5 border-b">Set Status</p>
                   {[
                     { code: 'find', label: '🔍 Find (Search)', color: 'text-blue-600 hover:bg-blue-50/70' },
