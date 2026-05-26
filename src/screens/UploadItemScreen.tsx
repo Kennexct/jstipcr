@@ -489,7 +489,6 @@ export function UploadItemScreen() {
                         title="Click to switch currency"
                       >
                         {costCurrency === settings.code ? settings.symbol : 'Rp'}
-                        <span className="text-[8px] opacity-50">🔄</span>
                       </div>
                       <Input 
                         type="number"
