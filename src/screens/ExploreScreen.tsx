@@ -914,16 +914,6 @@ export function ExploreScreen() {
               <div className="space-y-4">
                 <div className="flex items-center justify-between ml-1">
                   <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Pricing & Currency</label>
-                  <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={handleCycleBudgetCurrency}
-                      className="text-[10px] font-black text-primary bg-primary/10 hover:bg-primary/20 px-2 py-1 rounded transition-all active:scale-95 animate-pulse"
-                      title="Click to switch currency"
-                    >
-                      Cycle Currency: {editBudgetCurrency}
-                    </button>
-                  </div>
                 </div>
                 
                 <Card className="border-none bg-[#f2f5f7] overflow-hidden rounded-2xl">
@@ -932,16 +922,15 @@ export function ExploreScreen() {
                     <div className="space-y-1">
                       <div className="flex items-center justify-between">
                         <label className="text-[10px] font-bold text-slate-500 uppercase">Cost Price</label>
-                        <button 
-                          type="button"
-                          onClick={() => setEditBudgetCurrency(editBudgetCurrency === shoppingCurrencyCode ? payoutCurrencyCode : shoppingCurrencyCode)}
-                          className="text-[10px] font-black uppercase tracking-widest text-slate-500 bg-slate-100 hover:bg-slate-200 px-2 py-1 rounded transition-colors"
-                        >
-                          {editBudgetCurrency} 🔄
-                        </button>
                       </div>
                       <div className="relative">
-                        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 font-bold">{getCurrencySymbol(editBudgetCurrency)}</div>
+                        <div 
+                          className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 font-bold cursor-pointer hover:text-primary transition-colors flex items-center gap-1 z-10"
+                          onClick={handleCycleBudgetCurrency}
+                          title="Click to switch currency"
+                        >
+                          {getCurrencySymbol(editBudgetCurrency)}
+                        </div>
                         <Input 
                           type="text"
                           inputMode="numeric"
