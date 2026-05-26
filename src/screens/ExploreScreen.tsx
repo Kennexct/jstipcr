@@ -1,4 +1,4 @@
-import { useState, ChangeEvent, useEffect } from 'react';
+import { useState, ChangeEvent, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { 
@@ -428,10 +428,10 @@ export function ExploreScreen() {
 
   const checklistItems = getMergedChecklistItems();
 
-  const groupedChecklistItems = React.useMemo(() => {
+  const groupedChecklistItems = useMemo(() => {
     const map = new Map<string, { name: string; qty: number; checkedQty: number; ids: string[] }>();
     checklistItems.forEach(item => {
-      const key = item.name.toLowerCase().trim();
+      const key = (item.name || 'Unknown').toLowerCase().trim();
       const checked = isItemChecked(item.id, item.type);
       if (!map.has(key)) {
         map.set(key, { name: item.name, qty: item.qty, checkedQty: checked ? item.qty : 0, ids: [item.id] });
