@@ -748,35 +748,29 @@ export function ExploreScreen() {
       {viewMode === 'checklist' && (
         <div className="space-y-6">
           {/* Checklist header state */}
-          <Card className="border-none bg-[#163300] text-white shadow-xl rounded-3xl overflow-hidden relative">
-            <div className="absolute right-0 bottom-0 opacity-10 translate-x-6 translate-y-6">
-              <ListTodo className="h-40 w-40 text-[#9fe870]" />
-            </div>
-            <CardContent className="p-6 space-y-4 relative z-10">
-              <div className="space-y-2">
-                <span className="bg-[#9fe870] text-[#163300] px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest inline-block leading-none">
-                  Checkout Audit Docket
-                </span>
-                <h3 className="text-2xl font-black tracking-tight">
-                  End-of-Trip Checklist
-                </h3>
-                <p className="text-slate-300 text-xs font-medium leading-relaxed max-w-[85%]">
-                  Verify purchase logs before baggage packaging. Combines items from sales invoices and found wishlists.
-                </p>
+          <Card className="border-none bg-[#163300] text-white shadow-md rounded-2xl overflow-hidden relative">
+            <CardContent className="p-4 relative z-10 flex flex-col gap-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2.5">
+                  <div className="bg-[#9fe870]/20 p-2 rounded-xl">
+                    <ListTodo className="h-5 w-5 text-[#9fe870]" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-black tracking-tight">Checkout Audit</h3>
+                    <p className="text-[10px] text-slate-300 font-medium">Verify all items</p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <span className="text-xl font-black text-[#9fe870] leading-none">{checkedCount} <span className="text-xs text-slate-400">/ {totalChecklistCount}</span></span>
+                </div>
               </div>
 
               {/* Progress visual section */}
-              <div className="space-y-2 pt-2">
-                <div className="flex items-center justify-between text-xs font-bold uppercase tracking-tight">
-                  <span className="text-slate-400">Checkout Audit Progress</span>
-                  <span className="text-[#9fe870] font-black">{checkedCount} / {totalChecklistCount} Items Done</span>
-                </div>
-                <div className="h-3 w-full bg-slate-800 rounded-full overflow-hidden">
-                  <div 
-                    className="h-full bg-[#9fe870] transition-all duration-500 rounded-full"
-                    style={{ width: `${completionPercentage}%` }}
-                  />
-                </div>
+              <div className="h-1.5 w-full bg-slate-800 rounded-full overflow-hidden">
+                <div 
+                  className="h-full bg-[#9fe870] transition-all duration-500 rounded-full"
+                  style={{ width: `${completionPercentage}%` }}
+                />
               </div>
             </CardContent>
           </Card>
