@@ -63,6 +63,7 @@ async function postgrestRequest(
   const res = await fetch(url, {
     method,
     headers,
+    cache: 'no-store',
     body: options.body ? JSON.stringify(options.body) : undefined,
   });
 
