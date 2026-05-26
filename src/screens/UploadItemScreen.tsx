@@ -65,6 +65,37 @@ const applyWatermark = (originalImageSrc: string, watermarkImageSrc: string): Pr
   });
 };
 
+const resizeImageToMax = (originalImageSrc: string, maxDim: number): Promise<string> => {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => {
+      let width = img.width;
+      let height = img.height;
+      if (width > maxDim || height > maxDim) {
+        const ratio = Math.min(maxDim / width, maxDim / height);
+        width = Math.round(width * ratio);
+        height = Math.round(height * ratio);
+      } else {
+        resolve(originalImageSrc);
+        return;
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL('image/jpeg', 0.85));
+      } else {
+        resolve(originalImageSrc);
+      }
+    };
+    img.onerror = () => resolve(originalImageSrc);
+    img.src = originalImageSrc;
+  });
+};
+
 const drawPriceLabelOnImage = (originalImageSrc: string, priceText: string): Promise<string> => {
   return new Promise((resolve) => {
     const img = new Image();
@@ -238,10 +269,15 @@ export function UploadItemScreen() {
     const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
-      reader.onloadend = () => {
+      reader.onloadend = async () => {
         const dataUrl = reader.result as string;
-        processImageWithAI(dataUrl);
-        toast.success('Photo uploaded!');
+        try {
+          const resizedUrl = await resizeImageToMax(dataUrl, 800);
+          processImageWithAI(resizedUrl);
+          toast.success('Photo uploaded!');
+        } catch (e) {
+          processImageWithAI(dataUrl);
+        }
       };
       reader.readAsDataURL(file);
     }
