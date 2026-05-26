@@ -8,6 +8,7 @@ import { TripSettingsScreen } from './screens/TripSettingsScreen';
 import { OwnerInventoryScreen } from './screens/OwnerInventoryScreen';
 import { OwnerRequestDetailScreen } from './screens/OwnerRequestDetailScreen';
 import { StorefrontScreen } from './screens/StorefrontScreen';
+import { PublicCatalogScreen } from './screens/PublicCatalogScreen';
 import { LoginScreen } from './screens/LoginScreen';
 import { SignUpScreen } from './screens/SignUpScreen';
 import { ReportsScreen } from './screens/ReportsScreen';
@@ -49,6 +50,7 @@ export default function App() {
         <ScrollToTop />
         <Routes>
           {/* Public Storefront Route */}
+          <Route path="catalog" element={<PublicCatalogScreen />} />
           <Route path="items/:id" element={<StorefrontScreen />} />
 
           {/* Auth routes */}

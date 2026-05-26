@@ -25,8 +25,10 @@ export function OwnerInventoryScreen() {
   const { catalogItems: inventory, removeItem, loading } = useMaster();
 
   const handleShareCatalog = () => {
+    const url = `${window.location.origin}/catalog`;
+    navigator.clipboard.writeText(url);
     toast.success('Public catalog link copied!', {
-      description: 'Your customers can now browse your active listings.'
+      description: 'Your customers can now browse your active listings at /catalog.'
     });
   };
 
