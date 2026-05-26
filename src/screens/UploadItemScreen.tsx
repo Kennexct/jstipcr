@@ -481,17 +481,15 @@ export function UploadItemScreen() {
                   <div className="space-y-2">
                     <div className="flex items-center justify-between px-1">
                       <label className="text-[10px] font-bold text-muted-foreground uppercase">Cost Price</label>
-                      <button 
-                        type="button"
-                        onClick={() => setCostCurrency(costCurrency === settings.code ? 'IDR' : settings.code)}
-                        className="text-[10px] font-black uppercase tracking-widest text-[#163300] bg-[#163300]/10 hover:bg-[#163300]/20 px-2 py-1 rounded transition-colors"
-                      >
-                        {costCurrency} 🔄
-                      </button>
                     </div>
                     <div className="relative">
-                      <div className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground font-bold">
+                      <div 
+                        className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground font-bold cursor-pointer hover:text-primary transition-colors flex items-center gap-1 z-10"
+                        onClick={() => setCostCurrency(costCurrency === settings.code ? 'IDR' : settings.code)}
+                        title="Click to switch currency"
+                      >
                         {costCurrency === settings.code ? settings.symbol : 'Rp'}
+                        <span className="text-[8px] opacity-50">🔄</span>
                       </div>
                       <Input 
                         type="number"

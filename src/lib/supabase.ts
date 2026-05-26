@@ -194,7 +194,7 @@ export const db = {
           name: item.name,
           price: item.price || 0,
           cost: item.cost || 0,
-          currency: item.currency || 'SGD',
+          currency: item.currency,
           image: item.image || '',
           status: item.status || 'active',
           merchant_id: merchantId || null

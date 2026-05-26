@@ -208,9 +208,9 @@ export function MasterProvider({ children }: { children: ReactNode }) {
     });
     try {
       await db.saveItem(item, currentUser?.id);
-    } catch (err) {
+    } catch (err: any) {
       console.error('Failed to save catalog item to db:', err);
-      toast.error('Saved locally. Cloud sync failed.');
+      toast.error(`Cloud sync failed: ${err.message || 'Unknown error'}`);
     }
   };
 
