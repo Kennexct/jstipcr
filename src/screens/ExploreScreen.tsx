@@ -856,7 +856,7 @@ export function ExploreScreen() {
 
       {/* DETAIL PRODUCT MODAL SCREEN */}
       <Dialog open={selectedDetailItem !== null} onOpenChange={(open) => { if (!open) setSelectedDetailItem(null); }}>
-        <DialogContent className="rounded-3xl border-none max-w-[95%] sm:max-w-md bg-white p-6 text-left">
+        <DialogContent className="rounded-3xl border-none max-w-[95%] sm:max-w-md bg-white p-6 text-left max-h-[90vh] overflow-y-auto">
           {selectedDetailItem && (
             <div className="space-y-5 text-left">
               <DialogHeader className="text-left pb-2">
