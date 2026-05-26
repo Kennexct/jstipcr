@@ -428,6 +428,10 @@ export function ExploreScreen() {
 
   const checklistItems = getMergedChecklistItems();
 
+  const isItemChecked = (itemId: string, itemType: 'wishlist' | 'sale') => {
+    return boughtIds.includes(itemId);
+  };
+
   const groupedChecklistItems = useMemo(() => {
     const map = new Map<string, { name: string; qty: number; checkedQty: number; ids: string[] }>();
     checklistItems.forEach(item => {
@@ -444,12 +448,6 @@ export function ExploreScreen() {
     });
     return Array.from(map.values()).sort((a, b) => b.qty - a.qty);
   }, [checklistItems, boughtIds]);
-
-  const isItemChecked = (itemId: string, itemType: 'wishlist' | 'sale') => {
-    return boughtIds.includes(itemId);
-  };
-
-
 
   // Calculate stats for checklist completed items
   const checkedCount = checklistItems.filter(item => isItemChecked(item.id, item.type)).length;
