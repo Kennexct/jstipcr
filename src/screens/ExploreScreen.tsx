@@ -1015,14 +1015,14 @@ export function ExploreScreen() {
       <Dialog open={selectedDetailItem !== null} onOpenChange={async (open) => { 
         if (!open) {
           if (selectedDetailItem) {
-            const parsedCost = parseInt(editBudgetAmount.replace(/[^0-9]/g, '')) || 0;
-            const finalIdrPrice = editBudgetCurrency === shoppingCurrencyCode
-              ? Math.round(parsedCost * conversionRate)
-              : parsedCost;
-            const parsedSell = parseInt(editSellAmount.replace(/[^0-9]/g, '')) || 0;
-            
-            if (finalIdrPrice !== selectedDetailItem.price || parsedSell !== selectedDetailItem.sellPrice) {
-              await saveWishlist({ ...selectedDetailItem, price: finalIdrPrice, sellPrice: parsedSell });
+            const original = myWishlist.find(w => w.id === selectedDetailItem.id);
+            if (original && (
+              original.price !== selectedDetailItem.price || 
+              original.sellPrice !== selectedDetailItem.sellPrice || 
+              original.qty !== selectedDetailItem.qty || 
+              original.status !== selectedDetailItem.status
+            )) {
+              await saveWishlist(selectedDetailItem);
             }
           }
           setSelectedDetailItem(null); 
@@ -1281,13 +1281,39 @@ export function ExploreScreen() {
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1.5">
                     <label className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Quantity</label>
-                    <Input 
-                      type="number"
-                      min="1"
-                      value={editChecklistForm.qty}
-                      onChange={e => setEditChecklistForm({ ...editChecklistForm, qty: parseInt(e.target.value) || 1 })}
-                      className="h-12 rounded-xl bg-[#f2f5f7] border-none font-bold text-sm" 
-                    />
+                    <div className="flex items-center gap-3 h-12 bg-[#f2f5f7] rounded-xl px-2">
+                      <Button 
+                        variant="ghost" 
+                        size="icon"
+                        className="h-8 w-8 rounded-lg hover:bg-white shrink-0"
+                        onClick={() => {
+                          const newQty = Math.max(1, editChecklistForm.qty - 1);
+                          if (editingChecklistItem) {
+                            const unitPrice = editingChecklistItem.price / (editingChecklistItem.qty || 1);
+                            setEditChecklistForm({ ...editChecklistForm, qty: newQty, price: unitPrice * newQty });
+                          }
+                        }}
+                      >
+                        <Minus className="h-4 w-4" />
+                      </Button>
+                      <div className="flex-1 text-center font-black text-lg text-[#163300]">
+                        {editChecklistForm.qty}
+                      </div>
+                      <Button 
+                        variant="ghost" 
+                        size="icon"
+                        className="h-8 w-8 rounded-lg hover:bg-white shrink-0"
+                        onClick={() => {
+                          const newQty = editChecklistForm.qty + 1;
+                          if (editingChecklistItem) {
+                            const unitPrice = editingChecklistItem.price / (editingChecklistItem.qty || 1);
+                            setEditChecklistForm({ ...editChecklistForm, qty: newQty, price: unitPrice * newQty });
+                          }
+                        }}
+                      >
+                        <Plus className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
                   <div className="space-y-1.5">
                     <label className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Customer Name</label>
@@ -1304,9 +1330,9 @@ export function ExploreScreen() {
                   <Input 
                     type="text"
                     inputMode="numeric"
-                    value={editChecklistForm.price}
-                    onChange={e => setEditChecklistForm({ ...editChecklistForm, price: parseInt(e.target.value.replace(/[^0-9]/g, '')) || 0 })}
-                    className="h-12 rounded-xl bg-[#f2f5f7] border-none font-bold text-sm" 
+                    value={'Rp ' + editChecklistForm.price.toLocaleString()}
+                    disabled
+                    className="h-12 rounded-xl bg-[#f2f5f7] border-none font-bold text-sm opacity-80" 
                   />
                 </div>
               </div>
