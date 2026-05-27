@@ -16,8 +16,12 @@ const getEnvValue = (key: string): string => {
 // Replace these placeholders with your actual Supabase URL & Anon Key or set them in .env.local
 // Hardcoded connection for hosted environments to completely bypass missing .env injections.
 const getSupabaseConfig = () => {
+  let url = getEnvValue('VITE_SUPABASE_URL');
+  if (url && !url.startsWith('http')) {
+    url = `https://${url}`;
+  }
   return {
-    url: getEnvValue('VITE_SUPABASE_URL'),
+    url: url,
     key: getEnvValue('VITE_SUPABASE_ANON_KEY')
   };
 };
