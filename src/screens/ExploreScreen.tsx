@@ -1306,10 +1306,7 @@ export function ExploreScreen() {
                         className="h-8 w-8 rounded-lg hover:bg-white shrink-0"
                         onClick={() => {
                           const newQty = Math.max(1, editChecklistForm.qty - 1);
-                          if (editingChecklistItem) {
-                            const unitPrice = editingChecklistItem.price / (editingChecklistItem.qty || 1);
-                            setEditChecklistForm({ ...editChecklistForm, qty: newQty, price: unitPrice * newQty });
-                          }
+                          setEditChecklistForm({ ...editChecklistForm, qty: newQty });
                         }}
                       >
                         <Minus className="h-4 w-4" />
@@ -1323,10 +1320,7 @@ export function ExploreScreen() {
                         className="h-8 w-8 rounded-lg hover:bg-white shrink-0"
                         onClick={() => {
                           const newQty = editChecklistForm.qty + 1;
-                          if (editingChecklistItem) {
-                            const unitPrice = editingChecklistItem.price / (editingChecklistItem.qty || 1);
-                            setEditChecklistForm({ ...editChecklistForm, qty: newQty, price: unitPrice * newQty });
-                          }
+                          setEditChecklistForm({ ...editChecklistForm, qty: newQty });
                         }}
                       >
                         <Plus className="h-4 w-4" />
@@ -1348,7 +1342,7 @@ export function ExploreScreen() {
                   <Input 
                     type="text"
                     inputMode="numeric"
-                    value={'Rp ' + editChecklistForm.price.toLocaleString()}
+                    value={'Rp ' + (editChecklistForm.price * editChecklistForm.qty).toLocaleString()}
                     disabled
                     className="h-12 rounded-xl bg-[#f2f5f7] border-none font-bold text-sm opacity-80" 
                   />
@@ -1400,7 +1394,6 @@ export function ExploreScreen() {
                           ...matched, 
                           name: editChecklistForm.name,
                           qty: editChecklistForm.qty,
-                          price: editChecklistForm.price,
                           requester: editChecklistForm.customerName
                         });
                       }
@@ -1415,8 +1408,7 @@ export function ExploreScreen() {
                         newItems[productIndex] = {
                           ...newItems[productIndex],
                           name: editChecklistForm.name,
-                          qty: editChecklistForm.qty,
-                          price: editChecklistForm.price
+                          qty: editChecklistForm.qty
                         };
                         await saveSale({ 
                           ...matchedSale, 
