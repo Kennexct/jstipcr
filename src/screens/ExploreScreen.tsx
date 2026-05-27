@@ -134,6 +134,22 @@ export function ExploreScreen() {
   const [editingChecklistItem, setEditingChecklistItem] = useState<any>(null);
   const [editChecklistForm, setEditChecklistForm] = useState({ name: '', qty: 1, price: 0, customerName: '' });
 
+  const handleCloseDetail = async () => {
+    if (selectedDetailItem) {
+      const original = myWishlist.find(w => w.id === selectedDetailItem.id);
+      if (original && (
+        original.price !== selectedDetailItem.price || 
+        original.sellPrice !== selectedDetailItem.sellPrice || 
+        original.qty !== selectedDetailItem.qty || 
+        original.status !== selectedDetailItem.status
+      )) {
+        await saveWishlist(selectedDetailItem);
+      }
+    }
+    setSelectedDetailItem(null);
+  };
+
+
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -1014,18 +1030,7 @@ export function ExploreScreen() {
       {/* DETAIL PRODUCT MODAL SCREEN */}
       <Dialog open={selectedDetailItem !== null} onOpenChange={async (open) => { 
         if (!open) {
-          if (selectedDetailItem) {
-            const original = myWishlist.find(w => w.id === selectedDetailItem.id);
-            if (original && (
-              original.price !== selectedDetailItem.price || 
-              original.sellPrice !== selectedDetailItem.sellPrice || 
-              original.qty !== selectedDetailItem.qty || 
-              original.status !== selectedDetailItem.status
-            )) {
-              await saveWishlist(selectedDetailItem);
-            }
-          }
-          setSelectedDetailItem(null); 
+          await handleCloseDetail();
         } 
       }}>
         <DialogContent>
@@ -1246,7 +1251,7 @@ export function ExploreScreen() {
               <div className="pt-4 flex gap-3">
                 <Button 
                   className="pill-button w-full h-14 bg-[#163300] text-white hover:bg-[#1f4700]"
-                  onClick={() => setSelectedDetailItem(null)}
+                  onClick={handleCloseDetail}
                 >
                   Close Details
                 </Button>
