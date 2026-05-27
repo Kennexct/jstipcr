@@ -483,7 +483,31 @@ export const db = {
     return true;
   },
 
-  // 6. Merchants (Auth)
+  // 6. Ledger Logging
+  async logLedger(entry: { action_type: string, entity_id: string, description: string, amount: number, currency?: string, metadata?: any }, merchantId?: string) {
+    if (!isSupabaseConfigured()) return null;
+    try {
+      const dbPayload = {
+        action_type: entry.action_type,
+        entity_id: entry.entity_id,
+        description: entry.description,
+        amount: entry.amount,
+        currency: entry.currency || 'IDR',
+        metadata: entry.metadata || {},
+        merchant_id: merchantId || null
+      };
+      await postgrestRequest('jstip_ledger', {
+        method: 'POST',
+        body: dbPayload
+      });
+      return true;
+    } catch (e) {
+      console.error('Supabase ledger logging error:', e);
+      return false;
+    }
+  },
+
+  // 7. Merchants (Auth)
   async getMerchants(): Promise<any[]> {
     let remoteMerchants: any[] = [];
     if (isSupabaseConfigured()) {

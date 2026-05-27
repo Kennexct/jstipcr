@@ -16,6 +16,7 @@ const PublicCatalogScreen = lazy(() => import('./screens/PublicCatalogScreen').t
 const LoginScreen = lazy(() => import('./screens/LoginScreen').then(m => ({ default: m.LoginScreen })));
 const SignUpScreen = lazy(() => import('./screens/SignUpScreen').then(m => ({ default: m.SignUpScreen })));
 const ReportsScreen = lazy(() => import('./screens/ReportsScreen').then(m => ({ default: m.ReportsScreen })));
+const LedgerScreen = lazy(() => import('./screens/LedgerScreen').then(m => ({ default: m.LedgerScreen })));
 
 function RequireAuth() {
   const { currentUser, loading } = useMaster();
@@ -80,6 +81,7 @@ export default function App() {
                   <Route path="owner/request/:id" element={<OwnerRequestDetailScreen />} />
                   <Route path="trip-settings" element={<TripSettingsScreen />} />
                   <Route path="reports" element={<ReportsScreen />} />
+                  <Route path="ledger" element={<LedgerScreen />} />
                 </Route>
               </Route>
 

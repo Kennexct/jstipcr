@@ -250,6 +250,16 @@ export function MasterProvider({ children }: { children: ReactNode }) {
 
     try {
       await db.saveSale(sale, currentUser?.id);
+      
+      // Log to Ledger
+      await db.logLedger({
+        action_type: 'SALE',
+        entity_id: sale.id,
+        description: `Sale to ${sale.customerName}`,
+        amount: sale.total || 0,
+        currency: 'IDR',
+        metadata: sale
+      }, currentUser?.id).catch(e => console.error('Ledger error:', e));
 
       // Automatically update the Wishlist items to 'found' if they are linked
       if (sale.items && Array.isArray(sale.items)) {
@@ -295,6 +305,16 @@ export function MasterProvider({ children }: { children: ReactNode }) {
     });
     try {
       await db.saveExpense(expense, currentUser?.id);
+
+      // Log to Ledger
+      await db.logLedger({
+        action_type: 'EXPENSE',
+        entity_id: expense.id,
+        description: expense.description,
+        amount: -(expense.amount || 0),
+        currency: 'IDR',
+        metadata: expense
+      }, currentUser?.id).catch(e => console.error('Ledger error:', e));
     } catch (err) {
       console.error('Failed to save expense to db:', err);
       toast.error('Saved locally. Cloud sync failed.');

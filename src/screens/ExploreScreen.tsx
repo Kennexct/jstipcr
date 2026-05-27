@@ -80,6 +80,8 @@ export function ExploreScreen() {
   const [viewMode, setViewMode] = useState<'board' | 'checklist'>('board');
   const [checklistViewMode, setChecklistViewMode] = useState<'transaction' | 'summary'>('transaction');
   const [selectedStatusFilter, setSelectedStatusFilter] = useState<string>('all');
+  const [isBulkMode, setIsBulkMode] = useState(false);
+  const [selectedBulkIds, setSelectedBulkIds] = useState<string[]>([]);
 
   // Track active popup elements
   const [activeDropdownId, setActiveDropdownId] = useState<string | null>(null);
@@ -858,6 +860,69 @@ export function ExploreScreen() {
                   By Item Summary
                 </button>
               </div>
+
+              {checklistViewMode === 'transaction' && (
+                <div className="flex items-center gap-2">
+                  {isBulkMode ? (
+                    <>
+                      <Button 
+                        size="sm" 
+                        variant="ghost" 
+                        onClick={() => {
+                          setIsBulkMode(false);
+                          setSelectedBulkIds([]);
+                        }}
+                        className="text-xs text-slate-500 h-7"
+                      >
+                        Cancel
+                      </Button>
+                      <Button 
+                        size="sm" 
+                        variant="destructive"
+                        disabled={selectedBulkIds.length === 0}
+                        onClick={async () => {
+                          const confirmed = await confirm(`Are you sure you want to delete ${selectedBulkIds.length} items?`);
+                          if (!confirmed) return;
+                          
+                          for (const fullId of selectedBulkIds) {
+                            if (fullId.startsWith('chk_wishlist_')) {
+                              const wId = fullId.replace('chk_wishlist_', '');
+                              const matched = myWishlist.find(w => w.id === wId);
+                              if (matched) await saveWishlist({ ...matched, status: 'cancel' });
+                            } else if (fullId.startsWith('chk_sale_')) {
+                              const stripped = fullId.replace('chk_sale_', '');
+                              const lastUnderscore = stripped.lastIndexOf('_');
+                              const saleId = stripped.substring(0, lastUnderscore);
+                              const productIndex = parseInt(stripped.substring(lastUnderscore + 1));
+                              const matchedSale = sales.find(s => s.id === saleId);
+                              if (matchedSale) {
+                                const newItems = [...matchedSale.items];
+                                newItems.splice(productIndex, 1);
+                                await saveSale({ ...matchedSale, items: newItems });
+                              }
+                            }
+                          }
+                          setSelectedBulkIds([]);
+                          setIsBulkMode(false);
+                          toast.success('Items deleted successfully');
+                        }}
+                        className="text-xs h-7 gap-1"
+                      >
+                        <Trash2 className="h-3 w-3" /> Delete ({selectedBulkIds.length})
+                      </Button>
+                    </>
+                  ) : (
+                    <Button 
+                      size="sm" 
+                      variant="outline" 
+                      onClick={() => setIsBulkMode(true)}
+                      className="text-[10px] font-bold h-7 uppercase tracking-widest text-slate-500 border-slate-200"
+                    >
+                      Bulk Delete
+                    </Button>
+                  )}
+                </div>
+              )}
             </div>
 
             {checklistItems.length === 0 ? (
@@ -881,10 +946,20 @@ export function ExploreScreen() {
                         transition={{ delay: idx * 0.03 }}
                       >
                         <Card 
-                          onClick={() => handleToggleCustomChecklist(item.id, item.type)}
+                          onClick={() => {
+                            if (isBulkMode) {
+                              if (selectedBulkIds.includes(item.id)) {
+                                setSelectedBulkIds(selectedBulkIds.filter(id => id !== item.id));
+                              } else {
+                                setSelectedBulkIds([...selectedBulkIds, item.id]);
+                              }
+                            } else {
+                              handleToggleCustomChecklist(item.id, item.type);
+                            }
+                          }}
                           className={cn(
                             "fintech-card cursor-pointer hover:border-[#9fe870] transition-all select-none p-4",
-                            checked ? "bg-slate-50 opacity-60 border-transparent shadow-none" : ""
+                            isBulkMode && selectedBulkIds.includes(item.id) ? "border-red-500 bg-red-50/50" : (checked && !isBulkMode ? "bg-slate-50 opacity-60 border-transparent shadow-none" : "")
                           )}
                         >
                           <div className="flex items-center justify-between gap-4">
@@ -892,10 +967,18 @@ export function ExploreScreen() {
                               
                               {/* Visual toggle checkbox */}
                               <div className="shrink-0 transition-transform active:scale-90">
-                                {checked ? (
-                                  <CheckSquare className="h-8 w-8 text-[#163300] fill-[#9fe870]" />
+                                {isBulkMode ? (
+                                  selectedBulkIds.includes(item.id) ? (
+                                    <CheckSquare className="h-8 w-8 text-red-500 fill-red-100" />
+                                  ) : (
+                                    <Square className="h-8 w-8 text-slate-300" />
+                                  )
                                 ) : (
-                                  <Square className="h-8 w-8 text-slate-300" />
+                                  checked ? (
+                                    <CheckSquare className="h-8 w-8 text-[#163300] fill-[#9fe870]" />
+                                  ) : (
+                                    <Square className="h-8 w-8 text-slate-300" />
+                                  )
                                 )}
                               </div>
 
@@ -903,7 +986,7 @@ export function ExploreScreen() {
                               <div className="space-y-1 min-w-0 flex-1">
                                 <h4 className={cn(
                                   "text-sm font-bold text-[#163300] truncate",
-                                  checked ? "line-through text-slate-400" : ""
+                                  checked && !isBulkMode ? "line-through text-slate-400" : ""
                                 )}>
                                   {item.name}
                                 </h4>

@@ -21,6 +21,7 @@ import { toast } from 'sonner';
 import { useMaster } from '../context/MasterContext';
 import { useConfirm } from '../context/ConfirmContext';
 import { isAiConfigured, analyzeProductImage } from '../lib/ai';
+import imageCompression from 'browser-image-compression';
 import { 
   Dialog, 
   DialogContent, 
@@ -278,21 +279,40 @@ export function UploadItemScreen() {
     }
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = async () => {
-        const dataUrl = reader.result as string;
-        try {
-          const resizedUrl = await resizeImageToMax(dataUrl, 800);
-          processImageWithAI(resizedUrl);
-          toast.success('Photo uploaded!');
-        } catch (e) {
+      try {
+        const options = {
+          maxSizeMB: 0.5,
+          maxWidthOrHeight: 1200,
+          useWebWorker: true,
+        };
+        const compressedFile = await imageCompression(file, options);
+        
+        const reader = new FileReader();
+        reader.onloadend = async () => {
+          const dataUrl = reader.result as string;
+          try {
+            const resizedUrl = await resizeImageToMax(dataUrl, 800);
+            processImageWithAI(resizedUrl);
+            toast.success('Photo optimized & uploaded!');
+          } catch (e) {
+            processImageWithAI(dataUrl);
+          }
+        };
+        reader.readAsDataURL(compressedFile);
+      } catch (error) {
+        console.error('Image compression error:', error);
+        toast.error('Failed to optimize image, using original...');
+        // Fallback to original
+        const reader = new FileReader();
+        reader.onloadend = async () => {
+          const dataUrl = reader.result as string;
           processImageWithAI(dataUrl);
-        }
-      };
-      reader.readAsDataURL(file);
+        };
+        reader.readAsDataURL(file);
+      }
     }
   };
 

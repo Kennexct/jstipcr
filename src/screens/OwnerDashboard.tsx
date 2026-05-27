@@ -18,6 +18,7 @@ import {
   ShoppingCart,
   X,
   Trash2,
+  ClipboardCheck,
   DollarSign,
   PlusCircle,
   PackageCheck,
@@ -85,7 +86,7 @@ export function OwnerDashboard() {
   const totalSales = sales.reduce((acc, sale) => acc + (sale.total || 0), 0);
   const totalExpenses = expenses.reduce((acc, exp) => acc + (exp.amount || 0), 0);
   const netEarnings = totalSales - totalExpenses;
-  const expectedRevenue = wishlistItems.reduce((acc, item) => acc + (item.price || 0), 0);
+  const expectedRevenue = wishlistItems.reduce((acc, item) => acc + ((item.sellPrice || item.price || 0) * (item.qty || 1)), 0);
 
   // Combine and sort activities (newest first based on timestamp in ID)
   const allActivities = [
@@ -230,6 +231,13 @@ export function OwnerDashboard() {
           >
             <Receipt className="h-5 w-5" />
             Analytics
+          </Button>
+          <Button 
+            onClick={() => navigate('/ledger')}
+            className="pill-button h-14 px-6 bg-white text-[#163300] hover:bg-slate-50 border border-slate-200 shadow-sm shrink-0"
+          >
+            <ClipboardCheck className="h-5 w-5" />
+            Ledger
           </Button>
           <Button 
             onClick={() => navigate('/trip-settings')}
