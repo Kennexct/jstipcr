@@ -209,7 +209,7 @@ export function OwnerInventoryScreen() {
 
       {/* Catalog Product Detail Popup Modal */}
       <Dialog open={selectedItem !== null} onOpenChange={(open) => { if (!open) setSelectedItem(null); }}>
-        <DialogContent className="rounded-3xl border-none max-w-[90%] md:max-w-md bg-white p-6 max-h-[90vh] overflow-y-auto">
+        <DialogContent>
           {selectedItem && (
             <div className="space-y-6">
               <DialogHeader className="text-left">

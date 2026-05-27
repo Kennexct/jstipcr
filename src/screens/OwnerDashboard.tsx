@@ -103,7 +103,7 @@ export function OwnerDashboard() {
     date: tripSettings?.trip?.date || '22 May 2026',
     weightUsed: 5.2,
     weightLimit: tripSettings?.trip?.weightLimit || 15,
-    requests: wishlistItems.length,
+    requests: sales.length,
     revenue: expectedRevenue,
   };
 
@@ -139,7 +139,7 @@ export function OwnerDashboard() {
               </div>
             </div>
           </DialogTrigger>
-          <DialogContent className="rounded-3xl border-none max-w-[90%] md:max-w-md bg-white p-6">
+          <DialogContent>
               <DialogHeader className="text-left pb-2">
                 <DialogTitle className="text-xl font-black text-[#163300]">
                   Account Details
@@ -326,7 +326,7 @@ export function OwnerDashboard() {
 
       {/* EDIT ACTIVITY MODAL */}
       <Dialog open={editingActivity !== null} onOpenChange={(open) => { if (!open) setEditingActivity(null); }}>
-        <DialogContent className="rounded-3xl border-none max-w-[95%] sm:max-w-md bg-white p-6 text-left">
+        <DialogContent>
           {editingActivity && (
             <div className="space-y-4">
               <DialogHeader>

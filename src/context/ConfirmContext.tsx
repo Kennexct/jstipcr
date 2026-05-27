@@ -52,7 +52,7 @@ export const ConfirmProvider = ({ children }: { children: ReactNode }) => {
       <Dialog open={isOpen} onOpenChange={(open) => {
         if (!open) handleCancel();
       }}>
-        <DialogContent className="rounded-3xl border-none max-w-[90%] md:max-w-sm bg-white p-6">
+        <DialogContent>
           <DialogHeader className="text-left pb-2">
             <div className="flex items-center gap-3 mb-2">
               <div className={`h-10 w-10 rounded-full flex items-center justify-center ${options.isDestructive ? 'bg-red-50' : 'bg-amber-50'}`}>

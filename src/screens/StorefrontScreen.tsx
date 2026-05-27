@@ -292,7 +292,7 @@ export function StorefrontScreen() {
 
       {/* Sourcing Request Modal Dialog */}
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent className="rounded-3xl border-none max-w-[95%] sm:max-w-md bg-white p-6">
+        <DialogContent>
           <DialogHeader className="text-left pb-2">
             <DialogTitle className="text-lg font-black tracking-tight uppercase italic text-primary flex items-center gap-2">
               <MessageSquare className="h-5 w-5" /> Order Sourcing Request

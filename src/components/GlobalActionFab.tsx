@@ -271,7 +271,7 @@ export function GlobalActionFab() {
 
       {/* Expenses Dialog */}
       <Dialog open={isExpenseOpen} onOpenChange={setIsExpenseOpen}>
-        <DialogContent className="rounded-3xl border-none max-w-[95%] md:max-w-md bg-white p-6">
+        <DialogContent>
           <DialogHeader className="text-left pb-2">
             <DialogTitle className="text-lg font-black tracking-tight uppercase italic text-primary flex items-center gap-2">
               <Wallet className="h-5 w-5" /> Record Operational Expense
@@ -341,7 +341,7 @@ export function GlobalActionFab() {
 
       {/* Record Sale Dialog */}
       <Dialog open={isSaleOpen} onOpenChange={setIsSaleOpen}>
-        <DialogContent className="rounded-3xl border-none max-w-[95%] md:max-w-md bg-white p-6 max-h-[85vh] overflow-y-auto">
+        <DialogContent>
           <DialogHeader className="text-left pb-2">
             <DialogTitle className="text-lg font-black tracking-tight uppercase italic text-primary flex items-center gap-2">
               <Banknote className="h-5 w-5" /> Record Customer Sale

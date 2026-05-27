@@ -94,11 +94,11 @@ export function ExploreScreen() {
   useEffect(() => {
     if (selectedDetailItem) {
       setEditBudgetAmount(selectedDetailItem.price ? selectedDetailItem.price.toString() : '');
-      setEditBudgetCurrency('IDR');
+      setEditBudgetCurrency(shoppingCurrencyCode);
       setEditSellAmount(selectedDetailItem.sellPrice ? selectedDetailItem.sellPrice.toString() : '');
       setEditSellCurrency('IDR');
     }
-  }, [selectedDetailItem]);
+  }, [selectedDetailItem, shoppingCurrencyCode]);
 
   const conversionRate = tripSettings?.currency?.manualRate || 13500;
   const computedPriceInIdr = editBudgetCurrency === shoppingCurrencyCode
@@ -405,7 +405,7 @@ export function ExploreScreen() {
       .map(item => ({
         id: `chk_wishlist_${item.id}`,
         name: item.name,
-        qty: 1,
+        qty: item.qty || 1,
         price: item.price,
         requester: item.requester,
         location: item.location,
@@ -496,7 +496,7 @@ export function ExploreScreen() {
             <DialogTrigger className="flex h-10 w-10 items-center justify-center rounded-full bg-[#163300] text-white hover:bg-[#1f4700] shrink-0 outline-none">
               <Plus className="h-5 w-5" />
             </DialogTrigger>
-            <DialogContent className="rounded-3xl border-none max-w-[95%] md:max-w-md bg-white p-6">
+            <DialogContent>
               <DialogHeader className="text-left">
                 <DialogTitle className="text-xl font-black text-[#163300] tracking-tight">
                   Record Request
@@ -650,7 +650,7 @@ export function ExploreScreen() {
                 <DialogTrigger className={cn(buttonVariants({ variant: 'outline' }), "h-12 w-12 rounded-2xl border-dashed p-0 shrink-0 inline-flex items-center justify-center")}>
                   <Filter className="h-5 w-5" />
                 </DialogTrigger>
-                <DialogContent className="rounded-3xl border-none max-w-[90%] bg-white p-5 text-left">
+                <DialogContent>
                   <DialogHeader className="text-left">
                     <DialogTitle className="text-lg font-black text-[#163300] tracking-tight">Filter by Status</DialogTitle>
                     <DialogDescription className="text-sm text-slate-500 font-medium">Narrow down tasks by state</DialogDescription>
@@ -901,25 +901,27 @@ export function ExploreScreen() {
                                 </Badge>
                               )}
                               <p className="text-[8px] text-slate-400 font-bold uppercase mt-0.5">Sourced: {item.location}</p>
-                              <div className="mt-2 flex justify-end">
-                                <Button 
-                                  variant="ghost" 
-                                  size="sm" 
-                                  className="h-6 px-2 text-[10px] text-slate-500 hover:text-[#163300] hover:bg-slate-200/50"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    setEditingChecklistItem(item);
-                                    setEditChecklistForm({
-                                      name: item.name,
-                                      qty: item.qty,
-                                      price: item.price,
-                                      customerName: item.requester || ''
-                                    });
-                                  }}
-                                >
-                                  <Edit2 className="h-3 w-3 mr-1" /> Edit
-                                </Button>
-                              </div>
+                              {!checked && (
+                                <div className="mt-2 flex justify-end">
+                                  <Button 
+                                    variant="ghost" 
+                                    size="sm" 
+                                    className="h-6 px-2 text-[10px] text-slate-500 hover:text-[#163300] hover:bg-slate-200/50"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setEditingChecklistItem(item);
+                                      setEditChecklistForm({
+                                        name: item.name,
+                                        qty: item.qty,
+                                        price: item.price,
+                                        customerName: item.requester || ''
+                                      });
+                                    }}
+                                  >
+                                    <Edit2 className="h-3 w-3 mr-1" /> Edit
+                                  </Button>
+                                </div>
+                              )}
                             </div>
                           </div>
                         </Card>
@@ -987,7 +989,7 @@ export function ExploreScreen() {
 
       {/* DETAIL PRODUCT MODAL SCREEN */}
       <Dialog open={selectedDetailItem !== null} onOpenChange={(open) => { if (!open) setSelectedDetailItem(null); }}>
-        <DialogContent className="rounded-3xl border-none max-w-[95%] sm:max-w-md bg-white p-6 text-left max-h-[90vh] overflow-y-auto">
+        <DialogContent>
           {selectedDetailItem && (
             <div className="space-y-5 text-left">
               <DialogHeader className="text-left pb-2">
@@ -1234,7 +1236,7 @@ export function ExploreScreen() {
 
       {/* EDIT CHECKLIST ITEM MODAL */}
       <Dialog open={editingChecklistItem !== null} onOpenChange={(open) => { if (!open) setEditingChecklistItem(null); }}>
-        <DialogContent className="rounded-3xl border-none max-w-[95%] sm:max-w-md bg-white p-6 text-left">
+        <DialogContent>
           {editingChecklistItem && (
             <div className="space-y-4">
               <DialogHeader>
@@ -1322,6 +1324,9 @@ export function ExploreScreen() {
                 <Button 
                   className="h-12 rounded-xl bg-[#163300] text-white hover:bg-[#1f4700] flex-1"
                   onClick={async () => {
+                    const isConfirmed = await confirm("Are you sure you want to save these changes?");
+                    if (!isConfirmed) return;
+
                     if (editingChecklistItem.type === 'wishlist') {
                       const matched = myWishlist.find(w => w.id === editingChecklistItem.id.replace('chk_wishlist_', ''));
                       if (matched) {

@@ -278,7 +278,7 @@ export function TripSettingsScreen() {
                     <DialogTrigger render={<Button variant="ghost" size="sm" className="text-primary font-bold text-xs h-8 px-3 rounded-lg hover:bg-primary/10" />}>
                       Change
                     </DialogTrigger>
-                    <DialogContent className="rounded-3xl border-none max-w-[90%] md:max-w-md">
+                    <DialogContent>
                       <DialogHeader>
                         <DialogTitle className="text-left font-black uppercase italic text-xl">Select Shopping Currency</DialogTitle>
                       </DialogHeader>
@@ -358,7 +358,7 @@ export function TripSettingsScreen() {
                     <DialogTrigger render={<Button variant="ghost" size="sm" className="text-primary font-bold text-xs h-8 px-3 rounded-lg hover:bg-primary/10" />}>
                       Change
                     </DialogTrigger>
-                    <DialogContent className="rounded-3xl border-none max-w-[90%] md:max-w-md">
+                    <DialogContent>
                       <DialogHeader>
                         <DialogTitle className="text-left font-black uppercase italic text-xl">Select Payout Currency</DialogTitle>
                       </DialogHeader>

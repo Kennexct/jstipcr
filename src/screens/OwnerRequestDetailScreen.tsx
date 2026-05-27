@@ -205,7 +205,7 @@ export function OwnerRequestDetailScreen() {
             <DialogTrigger className={cn(buttonVariants({ variant: 'ghost', size: 'sm' }), "h-7 text-primary text-[10px] font-bold")}>
               <Plus className="h-3 w-3 mr-1" /> ADD ITEM
             </DialogTrigger>
-              <DialogContent className="rounded-3xl border-none max-w-[90%] md:max-w-md">
+              <DialogContent>
                 <DialogHeader className="text-left">
                   <DialogTitle className="font-black uppercase italic text-2xl tracking-tighter">New Item Record</DialogTitle>
                   <DialogDescription className="text-xs font-medium">Record a localized item find or a specific customer request detail.</DialogDescription>
