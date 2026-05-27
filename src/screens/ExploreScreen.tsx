@@ -134,16 +134,29 @@ export function ExploreScreen() {
   const [editingChecklistItem, setEditingChecklistItem] = useState<any>(null);
   const [editChecklistForm, setEditChecklistForm] = useState({ name: '', qty: 1, price: 0, customerName: '' });
 
-  const handleCloseDetail = async () => {
+  const handleCloseDetail = async (explicitSave: boolean = false) => {
     if (selectedDetailItem) {
       const original = myWishlist.find(w => w.id === selectedDetailItem.id);
-      if (original && (
+      const isDirty = original && (
         original.price !== selectedDetailItem.price || 
         original.sellPrice !== selectedDetailItem.sellPrice || 
         original.qty !== selectedDetailItem.qty || 
         original.status !== selectedDetailItem.status
-      )) {
-        await saveWishlist(selectedDetailItem);
+      );
+
+      if (isDirty) {
+        if (explicitSave) {
+          // Explicit save triggered by the Save & Close button
+          await saveWishlist(selectedDetailItem);
+        } else {
+          // Accidental close (ESC or click outside)
+          const discard = await confirm("You have unsaved changes. Are you sure you want to discard them and close?");
+          if (!discard) {
+            // Abort the closing process, let the user continue editing
+            return;
+          }
+          // If they confirmed discard, we do NOT save and simply let it close.
+        }
       }
     }
     setSelectedDetailItem(null);
@@ -1251,9 +1264,9 @@ export function ExploreScreen() {
               <div className="pt-4 flex gap-3">
                 <Button 
                   className="pill-button w-full h-14 bg-[#163300] text-white hover:bg-[#1f4700]"
-                  onClick={handleCloseDetail}
+                  onClick={() => handleCloseDetail(true)}
                 >
-                  Close Details
+                  Save & Close
                 </Button>
               </div>
             </div>
