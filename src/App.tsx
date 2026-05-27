@@ -51,41 +51,45 @@ const LoadingFallback = () => (
   </div>
 );
 
+import { ConfirmProvider } from './context/ConfirmContext';
+
 export default function App() {
   return (
     <MasterProvider>
-      <BrowserRouter>
-        <ScrollToTop />
-        <Suspense fallback={<LoadingFallback />}>
-          <Routes>
-            {/* Public Storefront Route */}
-            <Route path="catalog" element={<PublicCatalogScreen />} />
-            <Route path="items/:id" element={<StorefrontScreen />} />
+      <ConfirmProvider>
+        <BrowserRouter>
+          <ScrollToTop />
+          <Suspense fallback={<LoadingFallback />}>
+            <Routes>
+              {/* Public Storefront Route */}
+              <Route path="catalog" element={<PublicCatalogScreen />} />
+              <Route path="items/:id" element={<StorefrontScreen />} />
 
-            {/* Auth routes */}
-            <Route path="login" element={<LoginScreen />} />
-            <Route path="signup" element={<SignUpScreen />} />
+              {/* Auth routes */}
+              <Route path="login" element={<LoginScreen />} />
+              <Route path="signup" element={<SignUpScreen />} />
 
-            {/* Protect merchant routes */}
-            <Route element={<RequireAuth />}>
-              <Route path="/" element={<Layout />}>
-                <Route index element={<OwnerDashboard />} />
-                <Route path="explore" element={<ExploreScreen />} />
-                <Route path="owner/inventory" element={<OwnerInventoryScreen />} />
-                <Route path="owner/list-item" element={<UploadItemScreen />} />
-                <Route path="owner/edit-item/:id" element={<UploadItemScreen />} />
-                <Route path="owner/request/:id" element={<OwnerRequestDetailScreen />} />
-                <Route path="trip-settings" element={<TripSettingsScreen />} />
-                <Route path="reports" element={<ReportsScreen />} />
+              {/* Protect merchant routes */}
+              <Route element={<RequireAuth />}>
+                <Route path="/" element={<Layout />}>
+                  <Route index element={<OwnerDashboard />} />
+                  <Route path="explore" element={<ExploreScreen />} />
+                  <Route path="owner/inventory" element={<OwnerInventoryScreen />} />
+                  <Route path="owner/list-item" element={<UploadItemScreen />} />
+                  <Route path="owner/edit-item/:id" element={<UploadItemScreen />} />
+                  <Route path="owner/request/:id" element={<OwnerRequestDetailScreen />} />
+                  <Route path="trip-settings" element={<TripSettingsScreen />} />
+                  <Route path="reports" element={<ReportsScreen />} />
+                </Route>
               </Route>
-            </Route>
 
-            {/* Catch all */}
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </Suspense>
-        <Toaster position="top-center" />
-      </BrowserRouter>
+              {/* Catch all */}
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </Suspense>
+          <Toaster position="top-center" />
+        </BrowserRouter>
+      </ConfirmProvider>
     </MasterProvider>
   );
 }

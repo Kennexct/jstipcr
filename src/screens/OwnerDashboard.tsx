@@ -42,6 +42,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
 import { useMaster } from '../context/MasterContext';
+import { useConfirm } from '../context/ConfirmContext';
 
 const EXPENSE_CURRENCIES = [
   { code: 'KRW', symbol: '₩', rate: 11.7 },
@@ -67,6 +68,8 @@ export function OwnerDashboard() {
     saveItem,
     logout
   } = useMaster();
+
+  const confirm = useConfirm();
 
   // Compute stats dynamically
   const totalSales = sales.reduce((acc, sale) => acc + (sale.total || 0), 0);
@@ -155,8 +158,13 @@ export function OwnerDashboard() {
 
                 <div className="pt-4">
                   <Button 
-                    onClick={() => {
-                      if (window.confirm("Are you sure you want to log out?")) {
+                    onClick={async () => {
+                      const confirmed = await confirm({
+                        message: "Are you sure you want to log out?",
+                        isDestructive: true,
+                        confirmText: "Sign Out"
+                      });
+                      if (confirmed) {
                         logout();
                         navigate('/login');
                       }

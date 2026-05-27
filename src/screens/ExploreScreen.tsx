@@ -40,6 +40,7 @@ import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { useMaster } from '../context/MasterContext';
+import { useConfirm } from '../context/ConfirmContext';
 
 export interface WishlistItem {
   id: string;
@@ -64,6 +65,8 @@ export function ExploreScreen() {
     toggleBoughtId,
     tripSettings
   } = useMaster();
+
+  const confirm = useConfirm();
 
   const shoppingCurrencyCode = tripSettings?.currency?.code || 'SGD';
   const payoutCurrencyCode = tripSettings?.currency?.payout || 'IDR';
@@ -140,7 +143,8 @@ export function ExploreScreen() {
     }
     
     setIsSubmitting(true);
-    if (!window.confirm(`Are you sure you want to create a new wishlist request for "${formName}"?`)) {
+    const confirmed = await confirm(`Are you sure you want to create a new wishlist request for "${formName}"?`);
+    if (!confirmed) {
       setIsSubmitting(false);
       return;
     }
@@ -197,9 +201,10 @@ export function ExploreScreen() {
   const handleUpdateStatus = async (id: string, newStatus: 'find' | 'found' | 'out of stock' | 'cancel' | 'hold') => {
     const matchedItem = myWishlist.find(item => item.id === id);
     if (!matchedItem) return;
-    if (!window.confirm(`Are you sure you want to change the status of "${matchedItem.name}" to ${newStatus.toUpperCase()}?`)) {
-      return;
-    }
+    
+    const confirmed = await confirm(`Are you sure you want to change the status of "${matchedItem.name}" to ${newStatus.toUpperCase()}?`);
+    if (!confirmed) return;
+    
     const updatedItem = { ...matchedItem, status: newStatus };
 
     try {
@@ -213,9 +218,9 @@ export function ExploreScreen() {
   const handleToggleCustomChecklist = async (id: string, type: 'wishlist' | 'sale') => {
     const isCurrentlyBought = boughtIds.includes(id);
     const action = isCurrentlyBought ? 'uncheck this item' : 'confirm this item as bought';
-    if (!window.confirm(`Are you sure you want to ${action}?`)) {
-      return;
-    }
+    
+    const confirmed = await confirm(`Are you sure you want to ${action}?`);
+    if (!confirmed) return;
 
     // Auto generate sales record when a wishlist item is checked
     if (!isCurrentlyBought && type === 'wishlist') {

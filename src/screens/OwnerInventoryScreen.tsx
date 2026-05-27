@@ -16,6 +16,7 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog';
 import { useMaster } from '../context/MasterContext';
+import { useConfirm } from '../context/ConfirmContext';
 
 export function OwnerInventoryScreen() {
   const navigate = useNavigate();
@@ -23,6 +24,7 @@ export function OwnerInventoryScreen() {
   const [selectedItem, setSelectedItem] = useState<any | null>(null);
   
   const { catalogItems: inventory, removeItem, loading } = useMaster();
+  const confirm = useConfirm();
 
   const handleShareCatalog = () => {
     const url = `${window.location.origin}/catalog`;
@@ -37,7 +39,12 @@ export function OwnerInventoryScreen() {
   };
 
   const handleRemove = async (id: string) => {
-    if (!window.confirm("Are you sure you want to remove this item from the catalog?")) {
+    const confirmed = await confirm({
+      message: "Are you sure you want to remove this item from the catalog?",
+      isDestructive: true,
+      confirmText: "Remove"
+    });
+    if (!confirmed) {
       return;
     }
     try {

@@ -19,6 +19,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { useMaster } from '../context/MasterContext';
+import { useConfirm } from '../context/ConfirmContext';
 import { isAiConfigured, analyzeProductImage } from '../lib/ai';
 import { 
   Dialog, 
@@ -179,6 +180,7 @@ export function UploadItemScreen() {
   const isEdit = !!id;
 
   const { loading, catalogItems, tripSettings, saveItem } = useMaster();
+  const confirm = useConfirm();
 
   const [image, setImage] = useState<string | null>(null);
   const [rawImage, setRawImage] = useState<string | null>(null);
@@ -298,7 +300,8 @@ export function UploadItemScreen() {
       return;
     }
 
-    if (!window.confirm(isEdit ? "Are you sure you want to save changes to this catalog item?" : "Are you sure you want to add this item to the catalog?")) {
+    const confirmed = await confirm(isEdit ? "Are you sure you want to save changes to this catalog item?" : "Are you sure you want to add this item to the catalog?");
+    if (!confirmed) {
       return;
     }
 

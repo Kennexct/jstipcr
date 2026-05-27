@@ -19,6 +19,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
+import { useMaster } from '../context/MasterContext';
+import { useConfirm } from '../context/ConfirmContext';
 import { Separator } from '@/components/ui/separator';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { 
@@ -45,6 +47,8 @@ export function StorefrontScreen() {
   const [clientBudget, setClientBudget] = useState('');
   const [clientLocation, setClientLocation] = useState('');
   const [clientNotes, setClientNotes] = useState('');
+  const { catalogItems, saveWishlist } = useMaster();
+  const confirm = useConfirm();
 
   useEffect(() => {
     async function loadData() {
@@ -94,7 +98,8 @@ export function StorefrontScreen() {
       return;
     }
 
-    if (!window.confirm(`Are you sure you want to submit this sourcing request for "${item.name}" with a budget of Rp ${budgetNum.toLocaleString()}?`)) {
+    const confirmed = await confirm(`Are you sure you want to submit this sourcing request for "${item.name}" with a budget of Rp ${budgetNum.toLocaleString()}?`);
+    if (!confirmed) {
       return;
     }
 

@@ -14,6 +14,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
 import { useMaster } from '../context/MasterContext';
+import { useConfirm } from '../context/ConfirmContext';
 import { fetchLiveExchangeRate } from '../lib/currency';
 import { cn } from '@/lib/utils';
 import { 
@@ -87,6 +88,7 @@ const COUNTRIES = [
 export function TripSettingsScreen() {
   const navigate = useNavigate();
   const { loading, tripSettings, saveSettings } = useMaster();
+  const confirm = useConfirm();
 
   const [origin, setOrigin] = useState('');
   const [destination, setDestination] = useState('');
@@ -139,7 +141,8 @@ export function TripSettingsScreen() {
 
   const handleSave = async () => {
     if (isSubmitting) return;
-    if (!window.confirm("Are you sure you want to save these trip settings?")) {
+    const confirmed = await confirm("Are you sure you want to save these trip settings?");
+    if (!confirmed) {
       return;
     }
     
@@ -286,7 +289,8 @@ export function TripSettingsScreen() {
                             variant={settings.code === curr.code ? 'default' : 'ghost'}
                             className="justify-between h-12 px-4 rounded-xl font-bold"
                             onClick={async () => {
-                              if (!window.confirm(`Are you sure you want to change the shopping currency to ${curr.code}? This will fetch and calculate a new exchange rate.`)) {
+                              const confirmed = await confirm(`Are you sure you want to change the shopping currency to ${curr.code}? This will fetch and calculate a new exchange rate.`);
+                              if (!confirmed) {
                                   return;
                               }
                               const rate = await fetchLiveExchangeRate(curr.code);
@@ -364,8 +368,9 @@ export function TripSettingsScreen() {
                             key={curr.code}
                             variant={payoutCurrency === curr.code ? 'default' : 'ghost'}
                             className="justify-between h-12 px-4 rounded-xl font-bold"
-                            onClick={() => {
-                              if (!window.confirm(`Are you sure you want to set the settlement payout currency to ${curr.code}?`)) {
+                            onClick={async () => {
+                              const confirmed = await confirm(`Are you sure you want to set the settlement payout currency to ${curr.code}?`);
+                              if (!confirmed) {
                                 return;
                               }
                               setPayoutCurrency(curr.code);

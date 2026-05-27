@@ -23,7 +23,8 @@ import { Button, buttonVariants } from '@/components/ui/button';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { useConfirm } from '../context/ConfirmContext';
 import { 
   Dialog,
   DialogContent,
@@ -51,6 +52,7 @@ interface WishlistItem {
 export function OwnerRequestDetailScreen() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const confirm = useConfirm();
   
   const isNew = id === 'new';
   
@@ -68,10 +70,14 @@ export function OwnerRequestDetailScreen() {
   const [newItemData, setNewItemData] = useState({ name: '', cost: 0, price: 0, currency: 'SGD' });
   const [paymentStatus, setPaymentStatus] = useState<'unpaid' | 'paid' | 'partial'>('unpaid');
 
-  const updateItemStatus = (itemId: string, status: WishlistItem['status']) => {
+  const updateItemStatus = async (itemId: string, status: WishlistItem['status']) => {
     const item = items.find(i => i.id === itemId);
     const itemName = item ? item.name : 'this item';
-    if (!window.confirm(`Are you sure you want to change the status of "${itemName}" to ${status.toUpperCase().replace('_', ' ')}?`)) {
+    const confirmed = await confirm({
+      title: 'Update Status',
+      description: `Are you sure you want to change the status of "${itemName}" to ${status.toUpperCase().replace('_', ' ')}?`
+    });
+    if (!confirmed) {
       return;
     }
     setItems(items.map(item => item.id === itemId ? { ...item, status, logs: [...(item.logs || []), `Status: ${status} at ${new Date().toLocaleTimeString()}`] } : item));
@@ -82,12 +88,16 @@ export function OwnerRequestDetailScreen() {
     setItems(items.map(item => item.id === itemId ? { ...item, [field]: value } : item));
   };
 
-  const handleAddItem = () => {
+  const handleAddItem = async () => {
     if (!newItemData.name) {
       toast.error('Please enter an item name');
       return;
     }
-    if (!window.confirm(`Are you sure you want to add "${newItemData.name}" to this request?`)) {
+    const confirmed = await confirm({
+      title: 'Add Item',
+      description: `Are you sure you want to add "${newItemData.name}" to this request?`
+    });
+    if (!confirmed) {
       return;
     }
     const newItem: WishlistItem = {
@@ -333,8 +343,12 @@ export function OwnerRequestDetailScreen() {
                             variant="ghost" 
                             size="icon" 
                             className="h-8 w-8 text-red-400 hover:bg-red-50 rounded-full" 
-                            onClick={() => {
-                              if (window.confirm(`Are you sure you want to remove "${item.name}" from the request?`)) {
+                            onClick={async () => {
+                              const confirmed = await confirm({
+                                message: `Are you sure you want to remove "${item.name}" from the request?`,
+                                isDestructive: true
+                              });
+                              if (confirmed) {
                                 setItems(items.filter(i => i.id !== item.id));
                                 toast.success('Removed item from request');
                               }
@@ -477,8 +491,9 @@ export function OwnerRequestDetailScreen() {
                  <Button 
                     variant="ghost"
                     className={`h-12 rounded-2xl font-black text-[9px] gap-1 border-none ${paymentStatus === 'partial' ? 'bg-blue-600 text-white' : 'bg-white/5 text-white'}`}
-                    onClick={() => {
-                      if (window.confirm("Are you sure you want to change the payment status to PARTIAL PAY?")) {
+                    onClick={async () => {
+                      const confirmed = await confirm("Are you sure you want to change the payment status to PARTIAL PAY?");
+                      if (confirmed) {
                         setPaymentStatus('partial');
                         toast.success('Payment status updated to partial');
                       }
@@ -488,8 +503,9 @@ export function OwnerRequestDetailScreen() {
                   </Button>
                   <Button 
                     className={`h-12 rounded-2xl font-black text-[9px] gap-1 border-none transition-all ${paymentStatus === 'paid' ? 'bg-slate-800 text-slate-500' : 'bg-primary text-primary-foreground shadow-xl shadow-primary/30'}`}
-                    onClick={() => {
-                      if (window.confirm("Are you sure you want to change the payment status to FULL PAYMENT (Settled)?")) {
+                    onClick={async () => {
+                      const confirmed = await confirm("Are you sure you want to change the payment status to FULL PAYMENT (Settled)?");
+                      if (confirmed) {
                         setPaymentStatus('paid');
                         toast.success('Payment status updated to settled');
                       }
