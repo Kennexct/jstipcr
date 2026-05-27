@@ -154,7 +154,7 @@ export function ReportsScreen() {
   };
 
   return (
-    <div className="min-h-screen bg-[#f2f5f7] text-slate-900 pb-16">
+    <div className="min-h-screen bg-[#f2f5f7] text-slate-900 pb-28">
       {/* Print Styles Injection */}
       <style dangerouslySetInnerHTML={{__html: `
         @media print {

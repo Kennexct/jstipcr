@@ -157,7 +157,7 @@ export function StorefrontScreen() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f2f5f7] pb-20">
+    <div className="min-h-screen bg-[#f2f5f7] pb-28">
       {/* Sticky Header */}
       <header className="sticky top-0 z-50 bg-[#f2f5f7]/80 backdrop-blur-md pt-8 pb-4 border-none h-auto flex items-center justify-between px-4">
         <Button variant="ghost" size="icon" className="rounded-full bg-white shadow-sm hover:bg-slate-50 shrink-0" onClick={() => navigate(-1)}>

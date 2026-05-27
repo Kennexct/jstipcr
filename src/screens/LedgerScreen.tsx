@@ -82,9 +82,15 @@ export function LedgerScreen() {
         {loading ? (
           <div className="text-center py-10 text-slate-400 font-bold text-sm">Syncing Ledger...</div>
         ) : filteredEntries.length === 0 ? (
-          <div className="text-center p-10 bg-white rounded-3xl shadow-sm text-slate-400 flex flex-col items-center gap-2">
+          <div className="text-center p-10 bg-white rounded-3xl shadow-sm text-slate-400 flex flex-col items-center gap-4">
             <ClipboardCheck className="h-8 w-8 opacity-20" />
             <p className="text-sm font-bold">No ledger entries found</p>
+            <Button 
+              onClick={() => navigate('/owner/inventory')}
+              className="mt-2 bg-[#163300] hover:bg-[#1f4700] text-white rounded-full px-6"
+            >
+              Record First Sale
+            </Button>
           </div>
         ) : (
           filteredEntries.map(entry => (
