@@ -2,8 +2,11 @@
 // Falls back to LocalStorage if SUPABASE_URL and SUPABASE_ANON_KEY are not configured.
 
 const getEnvValue = (key: string): string => {
-  // Vite injects env variables under import.meta.env
-  const value = import.meta.env[key];
+  // Vite strictly requires static references for import.meta.env during production build
+  let value = '';
+  if (key === 'VITE_SUPABASE_URL') value = import.meta.env.VITE_SUPABASE_URL;
+  if (key === 'VITE_SUPABASE_ANON_KEY') value = import.meta.env.VITE_SUPABASE_ANON_KEY;
+  
   if (value && value !== 'MY_SUPABASE_URL' && value !== 'MY_SUPABASE_ANON_KEY' && value !== '') {
     return value;
   }
