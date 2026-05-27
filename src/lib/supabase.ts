@@ -43,7 +43,7 @@ console.log(
 );
 
 // Generic fetch wrapper for Supabase PostgREST API
-async function postgrestRequest(
+export async function postgrestRequest(
   table: string,
   options: {
     method?: 'GET' | 'POST' | 'PATCH' | 'DELETE';
