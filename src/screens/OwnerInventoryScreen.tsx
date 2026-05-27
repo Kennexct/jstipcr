@@ -135,57 +135,63 @@ export function OwnerInventoryScreen() {
                 className="fintech-card cursor-pointer group"
                 onClick={() => setSelectedItem(item)}
               >
-                <CardContent className="p-3.5 flex gap-4 items-center">
-                  <div className="relative h-16 w-16 rounded-xl overflow-hidden shrink-0 bg-[#f2f5f7]">
+                <CardContent className="p-4 flex gap-4 items-center">
+                  {/* Left: Image */}
+                  <div className="relative h-20 w-20 rounded-2xl overflow-hidden shrink-0 bg-slate-100 border border-slate-100 shadow-sm">
                     {item.image ? (
                       <img src={item.image} alt={item.name} className="h-full w-full object-cover" />
                     ) : (
-                      <Package className="h-6 w-6 text-slate-300 absolute inset-0 m-auto" />
+                      <Package className="h-8 w-8 text-slate-300 absolute inset-0 m-auto" />
                     )}
                   </div>
-                  <div className="flex-1 min-w-0 flex flex-col justify-between py-1">
-                    <div className="flex justify-between items-start">
-                      <div className="space-y-0.5 min-w-0 pr-2">
-                        <h4 className="text-sm font-bold text-[#163300] truncate">{item.name}</h4>
-                        <Badge className="bg-[#9fe870]/20 text-[#163300] hover:bg-[#9fe870]/30 border-none px-1.5 py-0 text-[9px] uppercase">Active Listing</Badge>
-                      </div>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger 
-                          onClick={(e) => e.stopPropagation()} 
-                          className="inline-flex h-8 w-8 -mr-2 items-center justify-center rounded-full hover:bg-slate-100 transition-colors outline-none shrink-0"
+                  
+                  {/* Middle: Name & Badge */}
+                  <div className="flex-1 min-w-0 flex flex-col justify-center space-y-1.5">
+                    <h4 className="text-base font-black text-[#163300] truncate">{item.name}</h4>
+                    <div className="flex items-center gap-2">
+                      <Badge className="bg-[#9fe870]/20 text-[#163300] hover:bg-[#9fe870]/30 border-none px-2 py-0.5 text-[9px] uppercase font-bold tracking-wider">
+                        Active
+                      </Badge>
+                      <span className="text-xs font-bold text-slate-400">#00{item.id.replace(/\D/g, '').slice(0,3) || '1'}</span>
+                    </div>
+                  </div>
+
+                  {/* Right: Dropdown & Price */}
+                  <div className="shrink-0 flex flex-col items-end justify-between h-20 text-right">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger 
+                        onClick={(e) => e.stopPropagation()} 
+                        className="inline-flex h-8 w-8 items-center justify-center rounded-full hover:bg-slate-100 transition-colors outline-none shrink-0"
+                      >
+                        <MoreVertical className="h-5 w-5 text-slate-400" />
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="rounded-2xl shadow-xl border-slate-100 p-2" onClick={(e) => e.stopPropagation()}>
+                        <DropdownMenuItem className="gap-3 text-sm font-bold text-[#163300] p-3 rounded-xl cursor-pointer" onClick={(e) => { e.stopPropagation(); navigate(`/owner/edit-item/${item.id}`); }}>
+                          <Edit2 className="h-4 w-4 text-slate-400" /> Edit Item
+                        </DropdownMenuItem>
+                        <DropdownMenuItem 
+                          className="gap-3 text-sm font-bold text-[#163300] p-3 rounded-xl cursor-pointer"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toast.success('Product link copied!', {
+                              description: 'Share this link with your customers.'
+                            });
+                          }}
                         >
-                          <MoreVertical className="h-5 w-5 text-slate-400" />
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="rounded-2xl shadow-xl border-slate-100 p-2" onClick={(e) => e.stopPropagation()}>
-                          <DropdownMenuItem className="gap-3 text-sm font-bold text-[#163300] p-3 rounded-xl cursor-pointer" onClick={(e) => { e.stopPropagation(); navigate(`/owner/edit-item/${item.id}`); }}>
-                            <Edit2 className="h-4 w-4 text-slate-400" /> Edit Item
-                          </DropdownMenuItem>
-                          <DropdownMenuItem 
-                            className="gap-3 text-sm font-bold text-[#163300] p-3 rounded-xl cursor-pointer"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              toast.success('Product link copied!', {
-                                description: 'Share this link with your customers.'
-                              });
-                            }}
-                          >
-                            <ExternalLink className="h-4 w-4 text-slate-400" /> Copy Link
-                          </DropdownMenuItem>
-                          <DropdownMenuItem 
-                            className="gap-3 text-sm font-bold text-red-600 p-3 rounded-xl cursor-pointer hover:bg-red-50 hover:text-red-700"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleRemove(item.id);
-                            }}
-                          >
-                            <Trash2 className="h-4 w-4" /> Remove
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </div>
-                    <div className="flex items-center justify-between mt-2">
-                      <p className="text-base font-black text-[#163300]">Rp {item.price.toLocaleString()}</p>
-                    </div>
+                          <ExternalLink className="h-4 w-4 text-slate-400" /> Copy Link
+                        </DropdownMenuItem>
+                        <DropdownMenuItem 
+                          className="gap-3 text-sm font-bold text-red-600 p-3 rounded-xl cursor-pointer hover:bg-red-50 hover:text-red-700"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleRemove(item.id);
+                          }}
+                        >
+                          <Trash2 className="h-4 w-4" /> Remove
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                    <p className="text-lg font-black text-[#163300] tracking-tight">Rp {item.price.toLocaleString()}</p>
                   </div>
                 </CardContent>
               </Card>
