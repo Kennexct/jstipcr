@@ -366,6 +366,24 @@ export const db = {
     return sale;
   },
 
+  async removeSale(id: string) {
+    const sales = await getLocal('jastip_sales', []);
+    const updated = sales.filter((s: any) => s.id !== id);
+    setLocal('jastip_sales', updated);
+
+    if (isSupabaseConfigured()) {
+      try {
+        await postgrestRequest('jstip_sales', {
+          method: 'DELETE',
+          query: `id=eq.${id}`
+        });
+      } catch (e) {
+        console.error('Supabase remove sale error:', e);
+      }
+    }
+    return true;
+  },
+
   // 5. Operational Expenses
   async getExpenses(merchantId?: string): Promise<any[]> {
     if (isSupabaseConfigured()) {
@@ -424,6 +442,24 @@ export const db = {
       }
     }
     return expense;
+  },
+
+  async removeExpense(id: string) {
+    const expenses = await getLocal('jastip_expenses', []);
+    const updated = expenses.filter((e: any) => e.id !== id);
+    setLocal('jastip_expenses', updated);
+
+    if (isSupabaseConfigured()) {
+      try {
+        await postgrestRequest('jstip_expenses', {
+          method: 'DELETE',
+          query: `id=eq.${id}`
+        });
+      } catch (e) {
+        console.error('Supabase remove expense error:', e);
+      }
+    }
+    return true;
   },
 
   // 6. Merchants (Auth)

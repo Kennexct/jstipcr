@@ -12,6 +12,7 @@ export interface WishlistItem {
   image?: string;
   status: 'find' | 'found' | 'out of stock' | 'cancel' | 'hold';
   note?: string;
+  qty?: number;
 }
 
 export interface MasterContextType {
@@ -33,6 +34,8 @@ export interface MasterContextType {
   saveWishlist: (item: any) => Promise<void>;
   saveSale: (sale: any) => Promise<void>;
   saveExpense: (expense: any) => Promise<void>;
+  removeSale: (id: string) => Promise<void>;
+  removeExpense: (id: string) => Promise<void>;
   toggleBoughtId: (id: string) => void;
 }
 
@@ -295,6 +298,24 @@ export function MasterProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const removeSale = async (id: string) => {
+    setSales(prev => prev.filter(s => s.id !== id));
+    try {
+      await db.removeSale(id);
+    } catch (err) {
+      console.error('Failed to remove sale:', err);
+    }
+  };
+
+  const removeExpense = async (id: string) => {
+    setExpenses(prev => prev.filter(e => e.id !== id));
+    try {
+      await db.removeExpense(id);
+    } catch (err) {
+      console.error('Failed to remove expense:', err);
+    }
+  };
+
   return (
     <MasterContext.Provider
       value={{
@@ -316,6 +337,8 @@ export function MasterProvider({ children }: { children: ReactNode }) {
         saveWishlist,
         saveSale,
         saveExpense,
+        removeSale,
+        removeExpense,
         toggleBoughtId
       }}
     >

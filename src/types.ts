@@ -52,4 +52,5 @@ export interface WishlistItem {
   price: number;
   status: 'pending' | 'found' | 'out_of_stock' | 'cancelled';
   note?: string;
+  qty?: number;
 }

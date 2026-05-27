@@ -66,8 +66,18 @@ export function OwnerDashboard() {
     saveSale,
     saveWishlist,
     saveItem,
+    removeSale,
+    removeExpense,
     logout
   } = useMaster();
+
+  const [editingActivity, setEditingActivity] = useState<any>(null);
+  const [editActivityForm, setEditActivityForm] = useState({
+    customerName: '',
+    total: 0,
+    description: '',
+    amount: 0
+  });
 
   const confirm = useConfirm();
 
@@ -258,7 +268,18 @@ export function OwnerDashboard() {
             )}
             
             {allActivities.slice(0, 5).map((activity) => (
-              <div key={activity.id} className="flex items-center justify-between p-4 fintech-card">
+              <div 
+                key={activity.id} 
+                className="flex items-center justify-between p-4 fintech-card cursor-pointer hover:border-[#9fe870]"
+                onClick={() => {
+                  setEditingActivity(activity);
+                  if (activity.type === 'sale') {
+                    setEditActivityForm({ ...editActivityForm, customerName: activity.customerName, total: activity.total });
+                  } else {
+                    setEditActivityForm({ ...editActivityForm, description: activity.description, amount: activity.amount });
+                  }
+                }}
+              >
                 {activity.type === 'sale' ? (
                   <>
                     <div className="flex items-center gap-4">
@@ -305,6 +326,112 @@ export function OwnerDashboard() {
           </div>
         </div>
       </main>
+
+      {/* EDIT ACTIVITY MODAL */}
+      <Dialog open={editingActivity !== null} onOpenChange={(open) => { if (!open) setEditingActivity(null); }}>
+        <DialogContent className="rounded-3xl border-none max-w-[95%] sm:max-w-md bg-white p-6 text-left">
+          {editingActivity && (
+            <div className="space-y-4">
+              <DialogHeader>
+                <DialogTitle className="text-xl font-black text-[#163300]">
+                  Edit {editingActivity.type === 'sale' ? 'Logged Sale' : 'Expense'}
+                </DialogTitle>
+                <DialogDescription className="text-xs font-medium text-slate-500">
+                  Update the details or delete this record completely.
+                </DialogDescription>
+              </DialogHeader>
+
+              <div className="space-y-3 mt-4">
+                {editingActivity.type === 'sale' ? (
+                  <>
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Customer Name</label>
+                      <Input 
+                        value={editActivityForm.customerName}
+                        onChange={e => setEditActivityForm({ ...editActivityForm, customerName: e.target.value })}
+                        className="h-12 rounded-xl bg-[#f2f5f7] border-none font-bold text-sm" 
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Total Price (IDR)</label>
+                      <Input 
+                        type="text"
+                        inputMode="numeric"
+                        value={editActivityForm.total}
+                        onChange={e => setEditActivityForm({ ...editActivityForm, total: parseInt(e.target.value.replace(/[^0-9]/g, '')) || 0 })}
+                        className="h-12 rounded-xl bg-[#f2f5f7] border-none font-bold text-sm" 
+                      />
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Description</label>
+                      <Input 
+                        value={editActivityForm.description}
+                        onChange={e => setEditActivityForm({ ...editActivityForm, description: e.target.value })}
+                        className="h-12 rounded-xl bg-[#f2f5f7] border-none font-bold text-sm" 
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Amount (IDR)</label>
+                      <Input 
+                        type="text"
+                        inputMode="numeric"
+                        value={editActivityForm.amount}
+                        onChange={e => setEditActivityForm({ ...editActivityForm, amount: parseInt(e.target.value.replace(/[^0-9]/g, '')) || 0 })}
+                        className="h-12 rounded-xl bg-[#f2f5f7] border-none font-bold text-sm" 
+                      />
+                    </div>
+                  </>
+                )}
+              </div>
+
+              <div className="pt-4 flex items-center justify-between gap-3">
+                <Button 
+                  variant="outline" 
+                  className="h-12 rounded-xl border-red-200 bg-red-50 text-red-600 hover:bg-red-100 hover:text-red-700 flex-1"
+                  onClick={async () => {
+                    const confirmed = await confirm(`Are you sure you want to completely delete this ${editingActivity.type}? This cannot be undone.`);
+                    if (!confirmed) return;
+                    
+                    if (editingActivity.type === 'sale') {
+                      await removeSale(editingActivity.id);
+                    } else {
+                      await removeExpense(editingActivity.id);
+                    }
+                    setEditingActivity(null);
+                  }}
+                >
+                  <Trash2 className="h-4 w-4 mr-2" /> Delete
+                </Button>
+                
+                <Button 
+                  className="h-12 rounded-xl bg-[#163300] text-white hover:bg-[#1f4700] flex-1"
+                  onClick={async () => {
+                    if (editingActivity.type === 'sale') {
+                      await saveSale({ 
+                        ...editingActivity, 
+                        customerName: editActivityForm.customerName,
+                        total: editActivityForm.total 
+                      });
+                    } else {
+                      await saveExpense({
+                        ...editingActivity,
+                        description: editActivityForm.description,
+                        amount: editActivityForm.amount
+                      });
+                    }
+                    setEditingActivity(null);
+                  }}
+                >
+                  Save Changes
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

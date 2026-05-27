@@ -23,7 +23,10 @@ import {
   ShoppingBag,
   ListTodo,
   Info,
-  Calendar
+  Calendar,
+  Edit2,
+  Trash2,
+  Minus
 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button, buttonVariants } from '@/components/ui/button';
@@ -116,12 +119,15 @@ export function ExploreScreen() {
 
   // Form states for manually recording a wishlist
   const [formName, setFormName] = useState('');
+  const [formQty, setFormQty] = useState('1');
   const [formLocation, setFormLocation] = useState('');
   const [formCustomer, setFormCustomer] = useState('');
   const [formImage, setFormImage] = useState<string>('');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const [editingChecklistItem, setEditingChecklistItem] = useState<any>(null);
+  const [editChecklistForm, setEditChecklistForm] = useState({ name: '', qty: 1, price: 0, customerName: '' });
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -153,6 +159,7 @@ export function ExploreScreen() {
       name: formName,
       location: formLocation || 'External Chat',
       price: 0,
+      qty: parseInt(formQty) || 1,
       requester: formCustomer || 'Walk-in Client',
       status: 'find',
       image: formImage || undefined
@@ -164,6 +171,7 @@ export function ExploreScreen() {
       setIsDialogOpen(false);
       // Reset Form
       setFormName('');
+      setFormQty('1');
       setFormLocation('');
       setFormCustomer('');
       setFormImage('');
@@ -548,6 +556,19 @@ export function ExploreScreen() {
                 </div>
 
 
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Quantity</label>
+                  <div className="relative">
+                    <Input 
+                      type="number"
+                      min="1"
+                      placeholder="1" 
+                      value={formQty}
+                      onChange={e => setFormQty(e.target.value)}
+                      className="h-14 px-4 rounded-full bg-[#f2f5f7] border-none font-bold text-sm" 
+                    />
+                  </div>
+                </div>
 
                 <div className="space-y-1.5">
                   <label className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Customer Name</label>
@@ -880,6 +901,25 @@ export function ExploreScreen() {
                                 </Badge>
                               )}
                               <p className="text-[8px] text-slate-400 font-bold uppercase mt-0.5">Sourced: {item.location}</p>
+                              <div className="mt-2 flex justify-end">
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm" 
+                                  className="h-6 px-2 text-[10px] text-slate-500 hover:text-[#163300] hover:bg-slate-200/50"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setEditingChecklistItem(item);
+                                    setEditChecklistForm({
+                                      name: item.name,
+                                      qty: item.qty,
+                                      price: item.price,
+                                      customerName: item.requester || ''
+                                    });
+                                  }}
+                                >
+                                  <Edit2 className="h-3 w-3 mr-1" /> Edit
+                                </Button>
+                              </div>
                             </div>
                           </div>
                         </Card>
@@ -990,6 +1030,46 @@ export function ExploreScreen() {
                     <span className="text-[10px] text-slate-500">Tap to upload</span>
                   </label>
                 )}
+              </div>
+
+              {/* Quantity Editor */}
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground ml-1">Quantity Requested</label>
+                <div className="flex items-center gap-3">
+                  <Button 
+                    variant="outline" 
+                    size="icon"
+                    className="h-10 w-10 rounded-xl"
+                    onClick={async () => {
+                      if (!selectedDetailItem) return;
+                      const newQty = Math.max(1, (selectedDetailItem.qty || 1) - 1);
+                      if (newQty !== selectedDetailItem.qty) {
+                        const updated = { ...selectedDetailItem, qty: newQty };
+                        setSelectedDetailItem(updated);
+                        await saveWishlist(updated);
+                      }
+                    }}
+                  >
+                    <Minus className="h-4 w-4" />
+                  </Button>
+                  <div className="flex-1 text-center font-black text-xl text-[#163300]">
+                    {selectedDetailItem.qty || 1}
+                  </div>
+                  <Button 
+                    variant="outline" 
+                    size="icon"
+                    className="h-10 w-10 rounded-xl"
+                    onClick={async () => {
+                      if (!selectedDetailItem) return;
+                      const newQty = (selectedDetailItem.qty || 1) + 1;
+                      const updated = { ...selectedDetailItem, qty: newQty };
+                      setSelectedDetailItem(updated);
+                      await saveWishlist(updated);
+                    }}
+                  >
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
 
               {/* Pricing & Currency - Matches Add to Catalog Style */}
@@ -1145,6 +1225,138 @@ export function ExploreScreen() {
                   onClick={() => setSelectedDetailItem(null)}
                 >
                   Close Details
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* EDIT CHECKLIST ITEM MODAL */}
+      <Dialog open={editingChecklistItem !== null} onOpenChange={(open) => { if (!open) setEditingChecklistItem(null); }}>
+        <DialogContent className="rounded-3xl border-none max-w-[95%] sm:max-w-md bg-white p-6 text-left">
+          {editingChecklistItem && (
+            <div className="space-y-4">
+              <DialogHeader>
+                <DialogTitle className="text-xl font-black text-[#163300]">Edit Transaction Item</DialogTitle>
+                <DialogDescription className="text-xs font-medium text-slate-500">
+                  Modifying {editingChecklistItem.type === 'wishlist' ? 'a wishlist request' : 'a logged sale invoice'}.
+                </DialogDescription>
+              </DialogHeader>
+
+              <div className="space-y-3 mt-4">
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Product Name</label>
+                  <Input 
+                    value={editChecklistForm.name}
+                    onChange={e => setEditChecklistForm({ ...editChecklistForm, name: e.target.value })}
+                    className="h-12 rounded-xl bg-[#f2f5f7] border-none font-bold text-sm" 
+                  />
+                </div>
+                
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Quantity</label>
+                    <Input 
+                      type="number"
+                      min="1"
+                      value={editChecklistForm.qty}
+                      onChange={e => setEditChecklistForm({ ...editChecklistForm, qty: parseInt(e.target.value) || 1 })}
+                      className="h-12 rounded-xl bg-[#f2f5f7] border-none font-bold text-sm" 
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Customer Name</label>
+                    <Input 
+                      value={editChecklistForm.customerName}
+                      onChange={e => setEditChecklistForm({ ...editChecklistForm, customerName: e.target.value })}
+                      className="h-12 rounded-xl bg-[#f2f5f7] border-none font-bold text-sm" 
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Total Price (IDR)</label>
+                  <Input 
+                    type="text"
+                    inputMode="numeric"
+                    value={editChecklistForm.price}
+                    onChange={e => setEditChecklistForm({ ...editChecklistForm, price: parseInt(e.target.value.replace(/[^0-9]/g, '')) || 0 })}
+                    className="h-12 rounded-xl bg-[#f2f5f7] border-none font-bold text-sm" 
+                  />
+                </div>
+              </div>
+
+              <div className="pt-4 flex items-center justify-between gap-3">
+                <Button 
+                  variant="outline" 
+                  className="h-12 rounded-xl border-red-200 bg-red-50 text-red-600 hover:bg-red-100 hover:text-red-700 flex-1"
+                  onClick={async () => {
+                    const confirmed = await confirm(`Are you sure you want to completely cancel and remove this item?`);
+                    if (!confirmed) return;
+                    
+                    if (editingChecklistItem.type === 'wishlist') {
+                      const matched = myWishlist.find(w => w.id === editingChecklistItem.id.replace('chk_wishlist_', ''));
+                      if (matched) {
+                        await saveWishlist({ ...matched, status: 'cancel' });
+                      }
+                    } else {
+                      const idParts = editingChecklistItem.id.replace('chk_sale_', '').split('_');
+                      const saleId = idParts[0];
+                      const productIndex = parseInt(idParts[1]);
+                      const matchedSale = sales.find(s => s.id === saleId);
+                      if (matchedSale) {
+                        const newItems = [...matchedSale.items];
+                        newItems.splice(productIndex, 1);
+                        await saveSale({ ...matchedSale, items: newItems });
+                      }
+                    }
+                    toast.success("Item removed successfully");
+                    setEditingChecklistItem(null);
+                  }}
+                >
+                  <Trash2 className="h-4 w-4 mr-2" /> Remove Item
+                </Button>
+                
+                <Button 
+                  className="h-12 rounded-xl bg-[#163300] text-white hover:bg-[#1f4700] flex-1"
+                  onClick={async () => {
+                    if (editingChecklistItem.type === 'wishlist') {
+                      const matched = myWishlist.find(w => w.id === editingChecklistItem.id.replace('chk_wishlist_', ''));
+                      if (matched) {
+                        await saveWishlist({ 
+                          ...matched, 
+                          name: editChecklistForm.name,
+                          qty: editChecklistForm.qty,
+                          price: editChecklistForm.price,
+                          requester: editChecklistForm.customerName
+                        });
+                      }
+                    } else {
+                      const idParts = editingChecklistItem.id.replace('chk_sale_', '').split('_');
+                      const saleId = idParts[0];
+                      const productIndex = parseInt(idParts[1]);
+                      const matchedSale = sales.find(s => s.id === saleId);
+                      if (matchedSale) {
+                        const newItems = [...matchedSale.items];
+                        newItems[productIndex] = {
+                          ...newItems[productIndex],
+                          name: editChecklistForm.name,
+                          qty: editChecklistForm.qty,
+                          price: editChecklistForm.price
+                        };
+                        await saveSale({ 
+                          ...matchedSale, 
+                          customerName: editChecklistForm.customerName,
+                          items: newItems 
+                        });
+                      }
+                    }
+                    toast.success("Changes saved!");
+                    setEditingChecklistItem(null);
+                  }}
+                >
+                  Save Changes
                 </Button>
               </div>
             </div>
