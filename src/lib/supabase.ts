@@ -1,3 +1,5 @@
+import { toast } from 'sonner';
+
 // Custom Zero-Dependency Supabase client that uses PostgREST REST API.
 // Falls back to LocalStorage if SUPABASE_URL and SUPABASE_ANON_KEY are not configured.
 
@@ -80,9 +82,15 @@ async function postgrestRequest(
 
   if (!res.ok) {
     const errorText = await res.text();
-    const errMsg = `Supabase request failed: ${res.status} - ${errorText}`;
-    console.error(errMsg);
-    alert(`DATABASE CONNECTION ERROR: ${errMsg}`); // Show to user so we can debug!
+    let parsedError = errorText;
+    try {
+      const j = JSON.parse(errorText);
+      parsedError = j.message || j.details || errorText;
+    } catch(e) {}
+    
+    const errMsg = `Database Sync Failed: ${parsedError}`;
+    console.error(`Supabase request failed: ${res.status} - ${errorText}`);
+    toast.error(errMsg, { duration: 5000 });
     throw new Error(errMsg);
   }
 

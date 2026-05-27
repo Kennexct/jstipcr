@@ -1215,7 +1215,11 @@ export function ExploreScreen() {
                     >
                       {opt.label}
                     </button>
-                           <div className="pt-4 flex gap-3">
+                  ))}
+                </div>
+              </div>
+
+              <div className="pt-4 flex gap-3">
                 <Button 
                   className="pill-button w-full h-14 bg-[#163300] text-white hover:bg-[#1f4700]"
                   onClick={() => setSelectedDetailItem(null)}
