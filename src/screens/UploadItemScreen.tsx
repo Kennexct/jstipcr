@@ -198,6 +198,7 @@ export function UploadItemScreen() {
     updatedAt: new Date().toISOString()
   });
   const [costCurrency, setCostCurrency] = useState(settings.code);
+  const itemSetRef = useRef(false);
   const [showShareBanner, setShowShareBanner] = useState(false);
   const [bannerColor, setBannerColor] = useState('bg-white');
 
@@ -213,6 +214,10 @@ export function UploadItemScreen() {
     if (!loading) {
       if (tripSettings && tripSettings.currency) {
         setSettings(tripSettings.currency);
+        if (!isEdit && !itemSetRef.current) {
+          setCostCurrency(tripSettings.currency.code);
+          itemSetRef.current = true;
+        }
       }
 
       if (isEdit && catalogItems) {
@@ -500,11 +505,11 @@ export function UploadItemScreen() {
                         {costCurrency === settings.code ? settings.symbol : 'Rp'}
                       </div>
                       <Input 
-                        type="number"
+                        type="text"
                         placeholder="0.00" 
                         className="h-14 pl-10 rounded-2xl bg-background border-none text-lg font-bold"
                         value={price}
-                        onChange={(e) => setPrice(e.target.value)}
+                        onChange={(e) => setPrice(e.target.value.replace(/[^0-9.]/g, ''))}
                         inputMode="decimal"
                       />
                     </div>
@@ -521,11 +526,11 @@ export function UploadItemScreen() {
                 <div className="relative">
                   <div className="absolute left-4 top-1/2 -translate-y-1/2 text-primary font-bold">Rp</div>
                   <Input 
-                    type="number"
+                    type="text"
                     placeholder="Selling Price to Customer" 
                     className="h-14 pl-10 rounded-2xl bg-background border-2 border-primary/20 text-lg font-bold text-primary focus:border-primary"
                     value={publishPrice}
-                    onChange={(e) => setPublishPrice(e.target.value)}
+                    onChange={(e) => setPublishPrice(e.target.value.replace(/[^0-9]/g, ''))}
                     inputMode="numeric"
                   />
                 </div>

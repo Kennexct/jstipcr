@@ -86,7 +86,7 @@ export function ExploreScreen() {
   const [selectedDetailItem, setSelectedDetailItem] = useState<WishlistItem | null>(null);
 
   const [editBudgetAmount, setEditBudgetAmount] = useState('');
-  const [editBudgetCurrency, setEditBudgetCurrency] = useState('IDR');
+  const [editBudgetCurrency, setEditBudgetCurrency] = useState(shoppingCurrencyCode || 'SGD');
   
   const [editSellAmount, setEditSellAmount] = useState('');
   const [editSellCurrency, setEditSellCurrency] = useState('IDR');
@@ -103,7 +103,7 @@ export function ExploreScreen() {
       setEditSellAmount(selectedDetailItem.sellPrice ? selectedDetailItem.sellPrice.toString() : '');
       setEditSellCurrency('IDR');
     }
-  }, [selectedDetailItem?.id, shoppingCurrencyCode, tripSettings?.currency?.manualRate]);
+  }, [selectedDetailItem?.id, shoppingCurrencyCode, payoutCurrencyCode]);
 
   const conversionRate = tripSettings?.currency?.manualRate || 13500;
   const computedPriceInIdr = editBudgetCurrency === shoppingCurrencyCode
