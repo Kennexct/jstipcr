@@ -976,7 +976,7 @@ export function ExploreScreen() {
                               )}
                             </div>
                           </div>
-                        </Card>
+                    </Card>
                       </motion.div>
                     );
                   })
@@ -1007,7 +1007,22 @@ export function ExploreScreen() {
       )}
 
       {/* DETAIL PRODUCT MODAL SCREEN */}
-      <Dialog open={selectedDetailItem !== null} onOpenChange={(open) => { if (!open) setSelectedDetailItem(null); }}>
+      <Dialog open={selectedDetailItem !== null} onOpenChange={async (open) => { 
+        if (!open) {
+          if (selectedDetailItem) {
+            const parsedCost = parseInt(editBudgetAmount.replace(/[^0-9]/g, '')) || 0;
+            const finalIdrPrice = editBudgetCurrency === shoppingCurrencyCode
+              ? Math.round(parsedCost * conversionRate)
+              : parsedCost;
+            const parsedSell = parseInt(editSellAmount.replace(/[^0-9]/g, '')) || 0;
+            
+            if (finalIdrPrice !== selectedDetailItem.price || parsedSell !== selectedDetailItem.sellPrice) {
+              await saveWishlist({ ...selectedDetailItem, price: finalIdrPrice, sellPrice: parsedSell });
+            }
+          }
+          setSelectedDetailItem(null); 
+        } 
+      }}>
         <DialogContent>
           {selectedDetailItem && (
             <div className="space-y-5 text-left">
@@ -1120,23 +1135,15 @@ export function ExploreScreen() {
                           pattern="[0-9]*"
                           placeholder="0"
                           value={editBudgetAmount}
-                          onChange={(e) => setEditBudgetAmount(e.target.value.replace(/[^0-9]/g, ''))}
-                          onBlur={async () => {
-                            if (!selectedDetailItem) return;
-                            const parsedAmount = parseInt(editBudgetAmount.replace(/[^0-9]/g, '')) || 0;
-                            const finalIdrPrice = editBudgetCurrency === shoppingCurrencyCode
-                              ? Math.round(parsedAmount * conversionRate)
-                              : parsedAmount;
-                            
-                            if (finalIdrPrice !== (selectedDetailItem.price || 0)) {
-                              const updatedItem = { ...selectedDetailItem, price: finalIdrPrice };
-                              try {
-                                await saveWishlist(updatedItem);
-                                setSelectedDetailItem(updatedItem);
-                                toast.success(`Cost Price saved automatically`);
-                              } catch (err) {
-                                toast.error('Failed to update Cost Price');
-                              }
+                          onChange={(e) => {
+                            const val = e.target.value.replace(/[^0-9]/g, '');
+                            setEditBudgetAmount(val);
+                            if (selectedDetailItem) {
+                              const parsedAmount = parseInt(val) || 0;
+                              const finalIdrPrice = editBudgetCurrency === shoppingCurrencyCode
+                                ? Math.round(parsedAmount * conversionRate)
+                                : parsedAmount;
+                              setSelectedDetailItem({ ...selectedDetailItem, price: finalIdrPrice });
                             }
                           }}
                           className="h-14 pl-10 rounded-full bg-white border-none text-lg font-black text-[#163300]"
@@ -1160,20 +1167,11 @@ export function ExploreScreen() {
                           pattern="[0-9]*"
                           placeholder="Selling Price to Customer" 
                           value={editSellAmount}
-                          onChange={(e) => setEditSellAmount(e.target.value.replace(/[^0-9]/g, ''))}
-                          onBlur={async () => {
-                            if (!selectedDetailItem) return;
-                            const parsedAmount = parseInt(editSellAmount.replace(/[^0-9]/g, '')) || 0;
-                            
-                            if (parsedAmount !== (selectedDetailItem.sellPrice || 0)) {
-                              const updatedItem = { ...selectedDetailItem, sellPrice: parsedAmount };
-                              try {
-                                await saveWishlist(updatedItem);
-                                setSelectedDetailItem(updatedItem);
-                                toast.success(`Sell Price saved automatically`);
-                              } catch (err) {
-                                toast.error('Failed to update Sell Price');
-                              }
+                          onChange={(e) => {
+                            const val = e.target.value.replace(/[^0-9]/g, '');
+                            setEditSellAmount(val);
+                            if (selectedDetailItem) {
+                              setSelectedDetailItem({ ...selectedDetailItem, sellPrice: parseInt(val) || 0 });
                             }
                           }}
                           className="h-14 pl-10 rounded-full bg-white border-none text-lg font-black text-[#163300]"
