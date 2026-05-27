@@ -93,12 +93,17 @@ export function ExploreScreen() {
 
   useEffect(() => {
     if (selectedDetailItem) {
-      setEditBudgetAmount(selectedDetailItem.price ? selectedDetailItem.price.toString() : '');
+      const rate = tripSettings?.currency?.manualRate || 13500;
+      if (shoppingCurrencyCode !== 'IDR' && selectedDetailItem.price) {
+        setEditBudgetAmount(Math.round(selectedDetailItem.price / rate).toString());
+      } else {
+        setEditBudgetAmount(selectedDetailItem.price ? selectedDetailItem.price.toString() : '');
+      }
       setEditBudgetCurrency(shoppingCurrencyCode);
       setEditSellAmount(selectedDetailItem.sellPrice ? selectedDetailItem.sellPrice.toString() : '');
       setEditSellCurrency('IDR');
     }
-  }, [selectedDetailItem, shoppingCurrencyCode]);
+  }, [selectedDetailItem?.id, shoppingCurrencyCode, tripSettings?.currency?.manualRate]);
 
   const conversionRate = tripSettings?.currency?.manualRate || 13500;
   const computedPriceInIdr = editBudgetCurrency === shoppingCurrencyCode
