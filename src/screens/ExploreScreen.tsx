@@ -440,7 +440,7 @@ export function ExploreScreen() {
         id: `chk_wishlist_${item.id}`,
         name: item.name,
         qty: item.qty || 1,
-        price: item.price,
+        price: item.sellPrice || item.price,
         requester: item.requester,
         location: item.location,
         type: 'wishlist' as const,
