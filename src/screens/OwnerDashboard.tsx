@@ -67,6 +67,9 @@ export function OwnerDashboard() {
     saveItem,
     logout
   } = useMaster();
+  
+  // Temporary debug info for troubleshooting Vercel deployment
+  const debugInfo = `User ID: ${currentUser?.id} | Items: ${catalogItems.length} | DB Configured: ${import.meta.env.VITE_SUPABASE_URL ? 'YES' : 'NO'}`;
 
   // Compute stats dynamically
   const totalSales = sales.reduce((acc, sale) => acc + (sale.total || 0), 0);
@@ -292,11 +295,210 @@ export function OwnerDashboard() {
           
           <div className="pt-2">
             <Button variant="ghost" className="w-full text-[#163300] font-bold text-sm bg-slate-200/50 hover:bg-slate-200 rounded-2xl h-12" onClick={() => navigate('/reports')}>
+        <div className="flex flex-col items-center gap-3">
+          <div className="h-10 w-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+          <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Loading Hub Dashboard...</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-[#f2f5f7] pb-24 font-sans">
+      
+      {/* 1. Header & Profile */}
+      <header className="px-6 pt-8 pb-4 flex items-center justify-between">
+        <Dialog>
+          <DialogTrigger asChild>
+            <div className="flex items-center gap-3 cursor-pointer group">
+              <Avatar className="h-11 w-11 border-2 border-transparent ring-2 ring-primary/20 transition-all group-hover:ring-primary/50">
+                <AvatarFallback className="font-black bg-[#e2e8f0] text-[#163300]">
+                  {(currentUser?.businessName || currentUser?.username || 'JF').substring(0, 2).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex flex-col">
+                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Account</span>
+                <span className="text-sm font-black text-[#163300] leading-none">
+                  {currentUser?.businessName || currentUser?.username}
+                </span>
+              </div>
+            </div>
+          </DialogTrigger>
+          <DialogContent className="rounded-3xl border-none max-w-[90%] md:max-w-md bg-white p-6">
+              <DialogHeader className="text-left pb-2">
+                <DialogTitle className="text-xl font-black text-[#163300]">
+                  Account Details
+                </DialogTitle>
+                <DialogDescription className="text-sm text-slate-500 font-medium">
+                  Manage your merchant profile and settings.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                <div className="flex items-center gap-4 p-4 rounded-2xl bg-[#f2f5f7]">
+                  <Avatar className="h-16 w-16 border-2 border-white shadow-sm">
+                    <AvatarFallback className="font-black text-xl bg-[#e2e8f0] text-[#163300]">
+                      {(currentUser?.businessName || currentUser?.username || 'JF').substring(0, 2).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="space-y-1">
+                    <h3 className="text-lg font-black text-[#163300] leading-none">
+                      {currentUser?.businessName || currentUser?.username}
+                    </h3>
+                    <p className="text-sm font-semibold text-slate-500">@{currentUser?.username}</p>
+                    <Badge className="mt-1 bg-[#163300] text-white hover:bg-[#163300] border-none font-bold">
+                      Active
+                    </Badge>
+                  </div>
+                </div>
+
+                <div className="pt-4">
+                  <Button 
+                    onClick={() => {
+                      if (window.confirm("Are you sure you want to log out?")) {
+                        logout();
+                        navigate('/login');
+                      }
+                    }} 
+                    className="pill-button w-full h-14 bg-red-50 text-red-600 hover:bg-red-100 font-bold gap-2"
+                  >
+                    <LogOut className="h-5 w-5" /> Sign Out
+                  </Button>
+                </div>
+              </div>
+          </DialogContent>
+        </Dialog>
+
+        <Button variant="ghost" size="icon" className="rounded-full h-11 w-11 bg-white shadow-sm hover:bg-slate-50" onClick={() => navigate('/trip-settings')}>
+          <Settings className="h-5 w-5 text-[#163300]" />
+        </Button>
+      </header>
+
+      {/* 2. Massive Balance Section */}
+      <section className="px-6 py-6 space-y-1">
+        <p className="text-sm font-bold text-slate-500 tracking-wide">Net Earnings</p>
+        <div className="flex items-baseline gap-1">
+          <span className="text-2xl font-black text-[#163300]">Rp</span>
+          <h1 className="text-[2.75rem] font-black text-[#163300] tracking-tight leading-none">
+            {netEarnings.toLocaleString()}
+          </h1>
+        </div>
+        <div className="flex items-center gap-2 pt-2">
+          <Badge className="bg-[#9fe870] text-[#163300] hover:bg-[#9fe870] border-none font-bold text-xs py-1 px-3 shadow-sm">
+            <TrendingUp className="h-3.5 w-3.5 mr-1" />
+            Active Trip: {activeTrip.origin}
+          </Badge>
+        </div>
+      </section>
+
+      {/* 3. Quick Action Pills (Horizontal Scroll) */}
+      <section className="px-6 py-4">
+        <div className="flex items-center gap-3 overflow-x-auto pb-4 scrollbar-hide -mx-6 px-6">
+          <Button 
+            onClick={() => navigate('/owner/inventory')}
+            className="pill-button h-14 px-6 bg-[#9fe870] text-[#163300] hover:bg-[#8ade60] shadow-sm shrink-0"
+          >
+            <Package className="h-5 w-5" />
+            Catalog
+          </Button>
+          <Button 
+            onClick={() => navigate('/explore')}
+            className="pill-button h-14 px-6 bg-[#163300] text-white hover:bg-[#1f4700] shadow-sm shrink-0"
+          >
+            <Sparkles className="h-5 w-5" />
+            Wishlist Requests
+          </Button>
+          <Button 
+            onClick={() => navigate('/reports')}
+            className="pill-button h-14 px-6 bg-white text-[#163300] hover:bg-slate-50 border border-slate-200 shadow-sm shrink-0"
+          >
+            <Receipt className="h-5 w-5" />
+            Analytics
+          </Button>
+        </div>
+      </section>
+
+      {/* 4. Combined Activity Feed */}
+      <main className="px-6 pt-2 space-y-6">
+        
+        {/* Active Trip Info Card */}
+        <div className="fintech-card p-5">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="font-black text-[#163300] text-lg">Trip Status</h3>
+            <span className="text-xs font-bold text-slate-500 bg-slate-100 px-2 py-1 rounded-md">{activeTrip.date}</span>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1">
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Manual Rate</p>
+              <p className="font-black text-[#163300] text-lg">Rp {tripSettings?.currency?.manualRate?.toLocaleString() || '13,500'}</p>
+            </div>
+            <div className="space-y-1 text-right">
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Orders</p>
+              <p className="font-black text-[#163300] text-lg">{activeTrip.requests}</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Activity Feed */}
+        <div className="space-y-4">
+          <h3 className="text-sm font-bold text-[#163300] px-1">Recent Activity</h3>
+          
+          <div className="space-y-3">
+            {allActivities.length === 0 && (
+              <p className="text-xs font-semibold text-slate-400 text-center py-4">No recent activity.</p>
+            )}
+            
+            {allActivities.slice(0, 5).map((activity) => (
+              <div key={activity.id} className="flex items-center justify-between p-4 fintech-card">
+                {activity.type === 'sale' ? (
+                  <>
+                    <div className="flex items-center gap-4">
+                      <div className="h-12 w-12 rounded-full bg-[#9fe870]/20 flex items-center justify-center shrink-0">
+                        <ShoppingCart className="h-5 w-5 text-[#163300]" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <h4 className="text-sm font-bold text-[#163300] truncate">Sale: {activity.customerName}</h4>
+                        <p className="text-xs font-semibold text-slate-500 truncate">
+                          {activity.items?.map((it: any) => `${it.qty}x ${it.name}`).join(', ')}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="text-right shrink-0">
+                      <p className="text-sm font-black text-[#163300]">+Rp {activity.total?.toLocaleString()}</p>
+                      <p className="text-xs font-semibold text-slate-400">{activity.date}</p>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="flex items-center gap-4">
+                      <div className="h-12 w-12 rounded-full bg-slate-100 flex items-center justify-center shrink-0">
+                        <Receipt className="h-5 w-5 text-slate-600" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <h4 className="text-sm font-bold text-[#163300] truncate">{activity.description}</h4>
+                        <p className="text-xs font-semibold text-slate-500 truncate">{activity.category}</p>
+                      </div>
+                    </div>
+                    <div className="text-right shrink-0">
+                      <p className="text-sm font-black text-red-600">-Rp {activity.amount?.toLocaleString()}</p>
+                      <p className="text-xs font-semibold text-slate-400">{activity.date}</p>
+                    </div>
+                  </>
+                )}
+              </div>
+            ))}
+          </div>
+          
+          <div className="pt-2">
+            <Button variant="ghost" className="w-full text-[#163300] font-bold text-sm bg-slate-200/50 hover:bg-slate-200 rounded-2xl h-12" onClick={() => navigate('/reports')}>
               View All Transactions
             </Button>
           </div>
         </div>
 
+        {/* Temporary Debug Footer */}
+        <div className="mt-8 p-3 rounded-xl bg-red-50 text-red-700 text-[10px] font-mono text-center font-bold break-all">
+           Debug: {debugInfo}
+        </div>
       </main>
     </div>
   );

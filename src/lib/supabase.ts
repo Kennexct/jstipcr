@@ -24,8 +24,10 @@ const getSupabaseConfig = () => {
 
 export const isSupabaseConfigured = () => {
   const { url, key } = getSupabaseConfig();
-  const isKeyValid = key.trim().startsWith('ey');
-  return url.trim() !== '' && key.trim() !== '' && isKeyValid;
+  const cleanKey = key.trim().replace(/^["']|["']$/g, '');
+  const cleanUrl = url.trim().replace(/^["']|["']$/g, '').replace(/\/$/, '');
+  const isKeyValid = cleanKey.startsWith('ey');
+  return cleanUrl !== '' && cleanKey !== '' && isKeyValid;
 };
 
 console.log(
@@ -44,7 +46,9 @@ async function postgrestRequest(
     preferSingle?: boolean;
   } = {}
 ) {
-  const { url: supaUrl, key: supaKey } = getSupabaseConfig();
+  const { url: rawUrl, key: rawKey } = getSupabaseConfig();
+  const supaUrl = rawUrl.trim().replace(/^["']|["']$/g, '').replace(/\/$/, '');
+  const supaKey = rawKey.trim().replace(/^["']|["']$/g, '');
   const method = options.method || 'GET';
   const query = options.query ? `?${options.query}` : '';
   const url = `${supaUrl}/rest/v1/${table}${query}`;
