@@ -188,9 +188,6 @@ export function OwnerDashboard() {
           </DialogContent>
         </Dialog>
 
-        <Button variant="ghost" size="icon" className="rounded-full h-11 w-11 bg-white shadow-sm hover:bg-slate-50" onClick={() => navigate('/trip-settings')}>
-          <Settings className="h-5 w-5 text-[#163300]" />
-        </Button>
       </header>
 
       {/* 2. Massive Balance Section */}
@@ -233,6 +230,13 @@ export function OwnerDashboard() {
           >
             <Receipt className="h-5 w-5" />
             Analytics
+          </Button>
+          <Button 
+            onClick={() => navigate('/trip-settings')}
+            className="pill-button h-14 px-6 bg-white text-[#163300] hover:bg-slate-50 border border-slate-200 shadow-sm shrink-0"
+          >
+            <Settings className="h-5 w-5" />
+            Trip Settings
           </Button>
         </div>
       </section>

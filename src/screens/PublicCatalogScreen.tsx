@@ -83,8 +83,8 @@ export function PublicCatalogScreen() {
   return (
     <div className="min-h-screen bg-[#f2f5f7] pb-24">
       {/* Header */}
-      <header className="px-6 pt-10 pb-4 flex items-center justify-between sticky top-0 bg-[#f2f5f7]/90 backdrop-blur-md z-40">
-        <h1 className="text-3xl font-black tracking-tight text-slate-900">Catalog</h1>
+      <header className="sticky top-0 z-50 bg-[#f2f5f7]/80 backdrop-blur-md pt-8 pb-4 border-none h-auto flex items-center px-6 gap-4">
+        <h1 className="text-xl font-black tracking-tight text-[#163300] flex-1">Catalog</h1>
         <button className="h-10 w-10 rounded-full bg-white flex items-center justify-center shadow-sm relative hover:scale-105 transition-transform">
           <Bell className="h-5 w-5 text-slate-800" />
           <span className="absolute top-2 right-2 h-2.5 w-2.5 bg-rose-500 rounded-full border-2 border-white" />

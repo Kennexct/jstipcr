@@ -129,18 +129,14 @@ export function OwnerRequestDetailScreen() {
   };
 
   return (
-    <div className="min-h-screen bg-muted/5 pb-32">
-      <header className="sticky top-0 z-50 bg-background border-b px-4 h-16 flex items-center gap-3">
-        <Button variant="ghost" size="icon" className="rounded-full" onClick={() => navigate(-1)}>
-          <ArrowLeft className="h-5 w-5" />
+    <div className="min-h-screen bg-[#f2f5f7] pb-24">
+      <header className="sticky top-0 z-50 bg-[#f2f5f7]/80 backdrop-blur-md pt-8 pb-4 border-none h-auto flex items-center px-4 gap-4">
+        <Button variant="ghost" size="icon" className="rounded-full bg-white shadow-sm hover:bg-slate-50 shrink-0" onClick={() => navigate(-1)}>
+          <ArrowLeft className="h-5 w-5 text-[#163300]" />
         </Button>
         <div className="flex-1">
-          <h2 className="text-sm font-bold">{isNew ? 'New Request' : `Request #${id}`}</h2>
-          <p className="text-[10px] text-muted-foreground font-medium uppercase">{isNew ? 'Draft mode' : 'Customer: Jane Doe'}</p>
+          <h2 className="text-xl font-black tracking-tight text-[#163300]">{isNew ? 'New Request' : `Request #${id}`}</h2>
         </div>
-        <Button variant="ghost" size="icon" className="rounded-full">
-          <MoreHorizontal className="h-5 w-5" />
-        </Button>
       </header>
 
       <div className="p-4 space-y-6">

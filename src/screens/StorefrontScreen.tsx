@@ -157,11 +157,11 @@ export function StorefrontScreen() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50/50 pb-20">
+    <div className="min-h-screen bg-[#f2f5f7] pb-20">
       {/* Sticky Header */}
-      <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-xl border-b h-16 flex items-center justify-between px-4">
-        <Button variant="ghost" size="icon" className="rounded-full" onClick={() => navigate(-1)}>
-          <ArrowLeft className="h-5 w-5" />
+      <header className="sticky top-0 z-50 bg-[#f2f5f7]/80 backdrop-blur-md pt-8 pb-4 border-none h-auto flex items-center justify-between px-4">
+        <Button variant="ghost" size="icon" className="rounded-full bg-white shadow-sm hover:bg-slate-50 shrink-0" onClick={() => navigate(-1)}>
+          <ArrowLeft className="h-5 w-5 text-[#163300]" />
         </Button>
         <span className="text-xs font-black uppercase tracking-[0.2em] opacity-60">Storefront Product</span>
         <div className="w-10 h-10" />

@@ -97,8 +97,8 @@ export function OwnerInventoryScreen() {
   );
 
   return (
-    <div className="min-h-screen bg-[#f2f5f7]">
-      <header className="sticky top-0 z-50 bg-[#f2f5f7] px-4 pt-8 pb-4 flex items-center justify-between gap-3">
+    <div className="min-h-screen bg-[#f2f5f7] pb-24">
+      <header className="sticky top-0 z-50 bg-[#f2f5f7]/80 backdrop-blur-md px-4 pt-8 pb-4 flex items-center justify-between gap-3">
         <Button variant="ghost" size="icon" className="rounded-full bg-white shadow-sm hover:bg-slate-50 shrink-0" onClick={() => navigate('/owner')}>
           <ArrowLeft className="h-5 w-5 text-[#163300]" />
         </Button>

@@ -486,7 +486,7 @@ export function ExploreScreen() {
   return (
     <div className="min-h-screen bg-[#f2f5f7] pb-24">
       {/* Sticky Header mimicking Inventory Screen */}
-      <header className="sticky top-0 z-50 bg-[#f2f5f7] px-4 pt-8 pb-4 flex items-center justify-between gap-3">
+      <header className="sticky top-0 z-50 bg-[#f2f5f7]/80 backdrop-blur-md px-4 pt-8 pb-4 flex items-center justify-between gap-3">
         <Button variant="ghost" size="icon" className="rounded-full bg-white shadow-sm hover:bg-slate-50 shrink-0" onClick={() => navigate('/')}>
           <ArrowLeft className="h-5 w-5 text-[#163300]" />
         </Button>
@@ -859,9 +859,9 @@ export function ExploreScreen() {
                               {/* Visual toggle checkbox */}
                               <div className="shrink-0 transition-transform active:scale-90">
                                 {checked ? (
-                                  <CheckSquare className="h-6 w-6 text-[#163300] fill-[#9fe870]" />
+                                  <CheckSquare className="h-8 w-8 text-[#163300] fill-[#9fe870]" />
                                 ) : (
-                                  <Square className="h-6 w-6 text-slate-300" />
+                                  <Square className="h-8 w-8 text-slate-300" />
                                 )}
                               </div>
 
@@ -881,7 +881,7 @@ export function ExploreScreen() {
                                     {item.type === 'sale' ? 'Invoice' : 'Wishlist'}
                                   </span>
                                   <span className="opacity-40">•</span>
-                                  <span className="font-bold text-[#163300]">Qty {item.qty}</span>
+                                  <span className="font-black text-[#163300] text-sm bg-slate-100 px-1.5 py-0.5 rounded">Qty {item.qty}</span>
                                   <span className="opacity-40">•</span>
                                   <span>Client: {item.requester}</span>
                                 </div>
@@ -983,6 +983,25 @@ export function ExploreScreen() {
                 )}
               </div>
             )}
+            
+            {/* Sticky Progress Bar for Checklist */}
+            <div className="fixed bottom-16 left-0 right-0 p-4 pb-6 bg-gradient-to-t from-[#f2f5f7] via-[#f2f5f7] to-transparent pointer-events-none z-30">
+              <div className="max-w-md mx-auto">
+                <Card className="fintech-card p-4 pointer-events-auto shadow-xl shadow-slate-200/50 border-t-4 border-t-[#9fe870]">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Shopping Progress</span>
+                    <span className="text-sm font-black text-[#163300]">{checkedCount} / {totalChecklistCount} Items</span>
+                  </div>
+                  <div className="h-2.5 w-full bg-slate-100 rounded-full overflow-hidden">
+                    <div 
+                      className="h-full bg-[#9fe870] transition-all duration-500 ease-out" 
+                      style={{ width: `${completionPercentage}%` }}
+                    />
+                  </div>
+                </Card>
+              </div>
+            </div>
+
           </div>
         </div>
       )}

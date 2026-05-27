@@ -189,7 +189,7 @@ export function ReportsScreen() {
       `}} />
 
       {/* Screen Header */}
-      <header className="sticky top-0 z-50 bg-[#f2f5f7] pt-8 pb-4 border-b h-auto flex items-center px-4 gap-4 no-print">
+      <header className="sticky top-0 z-50 bg-[#f2f5f7]/80 backdrop-blur-md pt-8 pb-4 border-none h-auto flex items-center px-4 gap-4 no-print">
         <Button variant="ghost" size="icon" className="rounded-full bg-white shadow-sm hover:bg-slate-50 shrink-0" onClick={() => navigate(-1)}>
           <ArrowLeft className="h-5 w-5 text-[#163300]" />
         </Button>
