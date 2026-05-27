@@ -94,6 +94,8 @@ export function OwnerDashboard() {
     revenue: expectedRevenue,
   };
 
+  const debugText = `URL: ${import.meta.env.VITE_SUPABASE_URL?.substring(0,25)}... | KEY-LEN: ${import.meta.env.VITE_SUPABASE_ANON_KEY?.length || 0}`;
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-muted/5">
@@ -107,7 +109,9 @@ export function OwnerDashboard() {
 
   return (
     <div className="min-h-screen bg-[#f2f5f7] pb-24 font-sans">
-      
+      <div className="w-full bg-red-600 text-white text-[10px] font-mono text-center p-1 break-all">
+        ENV_DEBUG: {debugText}
+      </div>
       {/* 1. Header & Profile */}
       <header className="px-6 pt-8 pb-4 flex items-center justify-between">
         <Dialog>
