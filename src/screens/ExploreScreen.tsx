@@ -422,7 +422,7 @@ export function ExploreScreen() {
           const isWishlistDuplicate = wishlistFound.some(w => w.name.toLowerCase() === it.name.toLowerCase());
           if (!isWishlistDuplicate) {
             salesItems.push({
-              id: `chk_sale_${sale.id}_${it.productId || index}`,
+              id: `chk_sale_${sale.id}_${index}`,
               name: it.name,
               qty: it.qty || 1,
               price: it.price,
