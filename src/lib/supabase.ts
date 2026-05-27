@@ -14,8 +14,8 @@ const getEnvValue = (key: string): string => {
 // Hardcoded connection for hosted environments to completely bypass missing .env injections.
 const getSupabaseConfig = () => {
   return {
-    url: 'https://xoggvbfsowlstickscex.supabase.co',
-    key: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhvZ2d2YmZzb3dsc3RpY2tzY2V4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk0MjYwMzcsImV4cCI6MjA5NTAwMjAzN30.fQSD9Su7Gt_WVre5YznOZCW7gpoOkodEAfg_sdqQYzU'
+    url: getEnvValue('VITE_SUPABASE_URL'),
+    key: getEnvValue('VITE_SUPABASE_ANON_KEY')
   };
 };
 

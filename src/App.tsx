@@ -1,19 +1,21 @@
-import { useEffect } from 'react';
+import { useEffect, Suspense, lazy } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, Outlet, useLocation } from 'react-router-dom';
-import { Layout } from './components/Layout';
-import { ExploreScreen } from './screens/ExploreScreen';
-import { OwnerDashboard } from './screens/OwnerDashboard';
-import { UploadItemScreen } from './screens/UploadItemScreen';
-import { TripSettingsScreen } from './screens/TripSettingsScreen';
-import { OwnerInventoryScreen } from './screens/OwnerInventoryScreen';
-import { OwnerRequestDetailScreen } from './screens/OwnerRequestDetailScreen';
-import { StorefrontScreen } from './screens/StorefrontScreen';
-import { PublicCatalogScreen } from './screens/PublicCatalogScreen';
-import { LoginScreen } from './screens/LoginScreen';
-import { SignUpScreen } from './screens/SignUpScreen';
-import { ReportsScreen } from './screens/ReportsScreen';
 import { MasterProvider, useMaster } from './context/MasterContext';
 import { Toaster } from 'sonner';
+
+// Lazy load all major components and screens
+const Layout = lazy(() => import('./components/Layout').then(m => ({ default: m.Layout })));
+const ExploreScreen = lazy(() => import('./screens/ExploreScreen').then(m => ({ default: m.ExploreScreen })));
+const OwnerDashboard = lazy(() => import('./screens/OwnerDashboard').then(m => ({ default: m.OwnerDashboard })));
+const UploadItemScreen = lazy(() => import('./screens/UploadItemScreen').then(m => ({ default: m.UploadItemScreen })));
+const TripSettingsScreen = lazy(() => import('./screens/TripSettingsScreen').then(m => ({ default: m.TripSettingsScreen })));
+const OwnerInventoryScreen = lazy(() => import('./screens/OwnerInventoryScreen').then(m => ({ default: m.OwnerInventoryScreen })));
+const OwnerRequestDetailScreen = lazy(() => import('./screens/OwnerRequestDetailScreen').then(m => ({ default: m.OwnerRequestDetailScreen })));
+const StorefrontScreen = lazy(() => import('./screens/StorefrontScreen').then(m => ({ default: m.StorefrontScreen })));
+const PublicCatalogScreen = lazy(() => import('./screens/PublicCatalogScreen').then(m => ({ default: m.PublicCatalogScreen })));
+const LoginScreen = lazy(() => import('./screens/LoginScreen').then(m => ({ default: m.LoginScreen })));
+const SignUpScreen = lazy(() => import('./screens/SignUpScreen').then(m => ({ default: m.SignUpScreen })));
+const ReportsScreen = lazy(() => import('./screens/ReportsScreen').then(m => ({ default: m.ReportsScreen })));
 
 function RequireAuth() {
   const { currentUser, loading } = useMaster();
@@ -43,37 +45,45 @@ function ScrollToTop() {
   return null;
 }
 
+const LoadingFallback = () => (
+  <div className="min-h-screen flex items-center justify-center bg-[#f4f4f4]">
+    <div className="h-8 w-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+  </div>
+);
+
 export default function App() {
   return (
     <MasterProvider>
       <BrowserRouter>
         <ScrollToTop />
-        <Routes>
-          {/* Public Storefront Route */}
-          <Route path="catalog" element={<PublicCatalogScreen />} />
-          <Route path="items/:id" element={<StorefrontScreen />} />
+        <Suspense fallback={<LoadingFallback />}>
+          <Routes>
+            {/* Public Storefront Route */}
+            <Route path="catalog" element={<PublicCatalogScreen />} />
+            <Route path="items/:id" element={<StorefrontScreen />} />
 
-          {/* Auth routes */}
-          <Route path="login" element={<LoginScreen />} />
-          <Route path="signup" element={<SignUpScreen />} />
+            {/* Auth routes */}
+            <Route path="login" element={<LoginScreen />} />
+            <Route path="signup" element={<SignUpScreen />} />
 
-          {/* Protect merchant routes */}
-          <Route element={<RequireAuth />}>
-            <Route path="/" element={<Layout />}>
-              <Route index element={<OwnerDashboard />} />
-              <Route path="explore" element={<ExploreScreen />} />
-              <Route path="owner/inventory" element={<OwnerInventoryScreen />} />
-              <Route path="owner/list-item" element={<UploadItemScreen />} />
-              <Route path="owner/edit-item/:id" element={<UploadItemScreen />} />
-              <Route path="owner/request/:id" element={<OwnerRequestDetailScreen />} />
-              <Route path="trip-settings" element={<TripSettingsScreen />} />
-              <Route path="reports" element={<ReportsScreen />} />
+            {/* Protect merchant routes */}
+            <Route element={<RequireAuth />}>
+              <Route path="/" element={<Layout />}>
+                <Route index element={<OwnerDashboard />} />
+                <Route path="explore" element={<ExploreScreen />} />
+                <Route path="owner/inventory" element={<OwnerInventoryScreen />} />
+                <Route path="owner/list-item" element={<UploadItemScreen />} />
+                <Route path="owner/edit-item/:id" element={<UploadItemScreen />} />
+                <Route path="owner/request/:id" element={<OwnerRequestDetailScreen />} />
+                <Route path="trip-settings" element={<TripSettingsScreen />} />
+                <Route path="reports" element={<ReportsScreen />} />
+              </Route>
             </Route>
-          </Route>
 
-          {/* Catch all */}
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
+            {/* Catch all */}
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </Suspense>
         <Toaster position="top-center" />
       </BrowserRouter>
     </MasterProvider>
