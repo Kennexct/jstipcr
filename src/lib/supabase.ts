@@ -80,7 +80,10 @@ async function postgrestRequest(
 
   if (!res.ok) {
     const errorText = await res.text();
-    throw new Error(`Supabase request failed: ${res.status} - ${errorText}`);
+    const errMsg = `Supabase request failed: ${res.status} - ${errorText}`;
+    console.error(errMsg);
+    alert(`DATABASE CONNECTION ERROR: ${errMsg}`); // Show to user so we can debug!
+    throw new Error(errMsg);
   }
 
   if (method === 'DELETE') {
