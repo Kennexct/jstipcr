@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowLeft, ArrowDownRight, ArrowUpRight, Filter, ShoppingCart, Wallet, ClipboardCheck } from 'lucide-react';
-import { Button } from '../components/ui/button';
+import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { useMaster } from '../context/MasterContext';
-import { Badge } from '../components/ui/badge';
+import { Badge } from '@/components/ui/badge';
 import { postgrestRequest } from '../lib/supabase';
 
 interface LedgerEntry {
