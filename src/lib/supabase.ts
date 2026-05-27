@@ -301,6 +301,7 @@ export const db = {
           image: item.image || '',
           status: item.status || 'find',
           note: item.note || '',
+          qty: item.qty || 1,
           merchant_id: merchantId || null
         };
         await postgrestRequest('jstip_wishlist', {
@@ -340,7 +341,13 @@ export const db = {
       sale.merchant_id = merchantId;
     }
     const sales = await getLocal('jastip_sales', []);
-    const updated = [sale, ...sales];
+    const isEdit = sales.some((s: any) => s.id === sale.id);
+    let updated;
+    if (isEdit) {
+      updated = sales.map((s: any) => s.id === sale.id ? sale : s);
+    } else {
+      updated = [sale, ...sales];
+    }
     setLocal('jastip_sales', updated);
 
     if (isSupabaseConfigured()) {
@@ -414,7 +421,13 @@ export const db = {
       expense.merchant_id = merchantId;
     }
     const expenses = await getLocal('jastip_expenses', []);
-    const updated = [expense, ...expenses];
+    const isEdit = expenses.some((e: any) => e.id === expense.id);
+    let updated;
+    if (isEdit) {
+      updated = expenses.map((e: any) => e.id === expense.id ? expense : e);
+    } else {
+      updated = [expense, ...expenses];
+    }
     setLocal('jastip_expenses', updated);
 
     if (isSupabaseConfigured()) {

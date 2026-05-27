@@ -243,7 +243,10 @@ export function MasterProvider({ children }: { children: ReactNode }) {
 
   const saveSale = async (sale: any) => {
     // Optimistic UI update
-    setSales(prev => [sale, ...prev]);
+    setSales(prev => {
+      const isEdit = prev.some(s => s.id === sale.id);
+      return isEdit ? prev.map(s => s.id === sale.id ? sale : s) : [sale, ...prev];
+    });
 
     try {
       await db.saveSale(sale, currentUser?.id);
