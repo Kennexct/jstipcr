@@ -636,7 +636,6 @@ export function ExploreScreen() {
                         type="button"
                         onClick={() => {
                           setSelectedStatusFilter(stat);
-                          toast.success(`Filter applied for status: ${stat.toUpperCase()}`);
                         }}
                         className={cn(
                           "w-full text-left px-4 py-3.5 rounded-2xl text-sm font-bold transition-all",

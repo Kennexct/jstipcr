@@ -210,7 +210,6 @@ export function TripSettingsScreen() {
                         manualRate: manualDefault,
                         updatedAt: new Date().toISOString()
                       });
-                      toast.success(`Shopping currency updated to ${matched.currencyCode} (Rate: Rp ${rate.toLocaleString()})`);
                     } catch (err) {
                       setSettings({
                         code: matched.currencyCode,
@@ -219,7 +218,6 @@ export function TripSettingsScreen() {
                         manualRate: Math.round(matched.defaultRate * 1.03),
                         updatedAt: new Date().toISOString()
                       });
-                      toast.warning(`Set fallback rate for ${matched.currencyCode}`);
                     }
                   }
                 }}
@@ -241,7 +239,6 @@ export function TripSettingsScreen() {
                   const matched = COUNTRIES.find(c => c.name === newDest);
                   if (matched) {
                     setPayoutCurrency(matched.currencyCode);
-                    toast.success(`Destination country changed to ${newDest}. Payout currency set to ${matched.currencyCode}.`);
                   }
                 }}
                 className="w-full h-12 rounded-xl bg-muted/30 border-none px-4 font-bold text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary"
@@ -292,7 +289,6 @@ export function TripSettingsScreen() {
                               if (!window.confirm(`Are you sure you want to change the shopping currency to ${curr.code}? This will fetch and calculate a new exchange rate.`)) {
                                   return;
                               }
-                              toast.info(`Fetching live rate for ${curr.code}...`);
                               const rate = await fetchLiveExchangeRate(curr.code);
                               const symbol = CURRENCY_SYMBOLS[curr.code] || '$';
                               const manualDefault = Math.round(rate * 1.03);
@@ -303,7 +299,6 @@ export function TripSettingsScreen() {
                                 manualRate: manualDefault,
                                 updatedAt: new Date().toISOString()
                               });
-                              toast.success(`Currency changed to ${curr.code}. Live rate: Rp ${rate.toLocaleString()}`);
                             }}
                           >
                             <span className="flex items-center gap-3">
@@ -374,7 +369,6 @@ export function TripSettingsScreen() {
                                 return;
                               }
                               setPayoutCurrency(curr.code);
-                              toast.success(`Payout currency updated to ${curr.code}`);
                             }}
                           >
                             <span className="flex items-center gap-3">
@@ -446,7 +440,6 @@ export function TripSettingsScreen() {
                             const reader = new FileReader();
                             reader.onloadend = () => {
                               setWatermarkImage(reader.result as string);
-                              toast.success('Watermark logo selected!');
                             };
                             reader.readAsDataURL(file);
                           }
