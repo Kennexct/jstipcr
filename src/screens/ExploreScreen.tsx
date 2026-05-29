@@ -184,12 +184,6 @@ export function ExploreScreen() {
   const [editingChecklistItem, setEditingChecklistItem] = useState<any>(null);
   const [editChecklistForm, setEditChecklistForm] = useState({ name: '', qty: 1, price: 0, customerName: '' });
 
-  // Found Status Modal state
-  const [foundModalItem, setFoundModalItem] = useState<WishlistItem | null>(null);
-  const [foundCostPrice, setFoundCostPrice] = useState('');
-  const [foundSellPrice, setFoundSellPrice] = useState('');
-  const [foundQty, setFoundQty] = useState('1');
-
   // Invoice Modal state
   const [invoiceModalSale, setInvoiceModalSale] = useState<any | null>(null);
 
@@ -294,45 +288,26 @@ export function ExploreScreen() {
   };
 
   const handleUpdateStatus = async (id: string, newStatus: 'pending' | 'found' | 'confirm' | 'out_of_stock' | 'cancelled') => {
-    const matchedItem = myWishlist.find(item => item.id === id);
-    if (!matchedItem) return;
+    // Prefer the currently edited item in the detail modal if it matches, to preserve unsaved price/qty changes
+    const baseItem = (selectedDetailItem && selectedDetailItem.id === id) 
+      ? selectedDetailItem 
+      : myWishlist.find(item => item.id === id);
+      
+    if (!baseItem) return;
     
-    if (newStatus === 'found' && matchedItem.status === 'pending') {
-      setFoundModalItem(matchedItem);
-      setFoundCostPrice(matchedItem.cost?.toString() || '');
-      setFoundSellPrice(matchedItem.sellPrice?.toString() || matchedItem.price.toString());
-      setFoundQty(matchedItem.qty?.toString() || '1');
-      return;
-    }
-
-    const confirmed = await confirm(`Are you sure you want to change the status of "${matchedItem.name}" to ${newStatus.toUpperCase()}?`);
+    const confirmed = await confirm(`Are you sure you want to change the status of "${baseItem.name}" to ${newStatus.toUpperCase()}?`);
     if (!confirmed) return;
     
-    const updatedItem = { ...matchedItem, status: newStatus };
+    const updatedItem = { ...baseItem, status: newStatus };
 
     try {
       await saveWishlist(updatedItem);
+      if (selectedDetailItem && selectedDetailItem.id === id) {
+        setSelectedDetailItem(updatedItem);
+      }
       toast.info(`Status of ${updatedItem.name} set to ${newStatus.toUpperCase()}`);
     } catch (e) {
       toast.error('Failed to update status. Please try again.');
-    }
-  };
-
-  const handleFoundSubmit = async () => {
-    if (!foundModalItem) return;
-    const updatedItem = { 
-      ...foundModalItem, 
-      status: 'found' as const,
-      cost: parseInt(foundCostPrice) || 0,
-      sellPrice: parseInt(foundSellPrice) || 0,
-      qty: parseInt(foundQty) || 1
-    };
-    try {
-      await saveWishlist(updatedItem);
-      toast.success(`Item successfully marked as FOUND with updated prices.`);
-      setFoundModalItem(null);
-    } catch (e) {
-      toast.error('Failed to update wishlist item.');
     }
   };
 
@@ -1572,80 +1547,6 @@ export function ExploreScreen() {
         </DialogContent>
       </Dialog>
       </div>
-
-      {/* Found Status Details Pop-up */}
-      <Dialog open={foundModalItem !== null} onOpenChange={(open) => !open && setFoundModalItem(null)}>
-        <DialogContent className="max-w-md bg-white border-slate-100 rounded-[2rem] p-6 shadow-2xl">
-          <DialogHeader className="text-left pb-2 space-y-1">
-            <div className="flex items-center gap-2 mb-2 text-blue-600">
-              <Search className="h-5 w-5" />
-              <DialogTitle className="text-xl font-black tracking-tight uppercase italic">
-                Mark as Found
-              </DialogTitle>
-            </div>
-            <DialogDescription className="text-xs font-semibold text-slate-500">
-              You found "{foundModalItem?.name}"! Please enter the exact pricing details.
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="space-y-4 pt-2">
-            <div className="space-y-1.5 text-left">
-              <label className="text-[10px] font-black uppercase tracking-widest text-slate-500">Actual Cost Price</label>
-              <div className="relative">
-                <Input 
-                  type="number"
-                  placeholder="e.g. 50000" 
-                  value={foundCostPrice}
-                  onChange={e => setFoundCostPrice(e.target.value)}
-                  className="h-14 rounded-2xl bg-slate-50 border-slate-100 font-bold text-sm text-slate-800" 
-                />
-              </div>
-            </div>
-
-            <div className="space-y-1.5 text-left">
-              <label className="text-[10px] font-black uppercase tracking-widest text-slate-500">Final Sell Price to Customer</label>
-              <div className="relative">
-                <Input 
-                  type="number"
-                  placeholder="e.g. 75000" 
-                  value={foundSellPrice}
-                  onChange={e => setFoundSellPrice(e.target.value)}
-                  className="h-14 rounded-2xl bg-blue-50 border-blue-100 font-bold text-sm text-blue-900 focus-visible:ring-blue-400" 
-                />
-              </div>
-            </div>
-
-            <div className="space-y-1.5 text-left">
-              <label className="text-[10px] font-black uppercase tracking-widest text-slate-500">Quantity Found</label>
-              <div className="relative">
-                <Input 
-                  type="number"
-                  min="1"
-                  value={foundQty}
-                  onChange={e => setFoundQty(e.target.value)}
-                  className="h-14 rounded-2xl bg-slate-50 border-slate-100 font-bold text-sm text-slate-800" 
-                />
-              </div>
-            </div>
-
-            <div className="pt-4 flex gap-2">
-              <Button 
-                variant="outline"
-                className="w-full h-12 rounded-2xl font-bold border-slate-200"
-                onClick={() => setFoundModalItem(null)}
-              >
-                Cancel
-              </Button>
-              <Button 
-                className="w-full h-12 rounded-2xl font-black uppercase bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-500/30"
-                onClick={handleFoundSubmit}
-              >
-                Confirm Found
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
 
       {/* Checklist Automatic Invoice Success Pop-up */}
       <Dialog open={invoiceModalSale !== null} onOpenChange={(open) => !open && setInvoiceModalSale(null)}>
