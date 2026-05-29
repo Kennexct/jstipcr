@@ -23,7 +23,7 @@ export default defineConfig(() => {
         output: {
           manualChunks: {
             vendor: ['react', 'react-dom', 'react-router-dom'],
-            ui: ['lucide-react', 'recharts', 'motion', 'shadcn'],
+            ui: ['lucide-react', 'recharts', 'motion'],
             utils: ['date-fns', 'clsx', 'tailwind-merge']
           }
         }
