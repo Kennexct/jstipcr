@@ -32,16 +32,6 @@ import {
 } from '@/components/ui/dialog';
 
 // Watermark is now applied via CSS overlay (WatermarkOverlay)
-      } else {
-        resolve(originalImageSrc);
-      }
-    };
-    img.onerror = () => {
-      resolve(originalImageSrc);
-    };
-    img.src = originalImageSrc;
-  });
-};
 
 const resizeImageToMax = (originalImageSrc: string, maxDim: number): Promise<string> => {
   return new Promise((resolve) => {
