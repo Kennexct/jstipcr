@@ -236,6 +236,18 @@ export function ExploreScreen() {
       setIsSubmitting(false);
       return;
     }
+    setIsSubmitting(true);
+
+    let uploadedImage = formImage;
+    if (formImage && formImage.startsWith('data:')) {
+      try {
+        const { db } = await import('../lib/supabase');
+        uploadedImage = await db.uploadImage(formImage, 'catalog');
+      } catch (e) {
+        console.error("Failed to upload wishlist image:", e);
+      }
+    }
+
     const newEntry: WishlistItem = {
       id: 'w_' + Date.now(),
       name: formName,
@@ -244,7 +256,7 @@ export function ExploreScreen() {
       qty: parseInt(formQty) || 1,
       requester: formCustomer || 'Walk-in Client',
       status: 'pending',
-      image: formImage || undefined
+      image: uploadedImage || undefined
     };
 
     try {
@@ -269,18 +281,28 @@ export function ExploreScreen() {
     if (file) {
       const reader = new FileReader();
       reader.onloadend = async () => {
+        toast.loading('Uploading photo...', { id: 'wishlist-upload' });
         const base64Image = reader.result as string;
+        let uploadedImage = base64Image;
+
+        try {
+          const { db } = await import('../lib/supabase');
+          uploadedImage = await db.uploadImage(base64Image, 'catalog');
+        } catch (e) {
+          console.error("Failed to upload wishlist detail image:", e);
+        }
+
         const updatedItem = {
           ...selectedDetailItem,
-          image: base64Image
+          image: uploadedImage
         };
         
         try {
           await saveWishlist(updatedItem);
           setSelectedDetailItem(updatedItem);
-          toast.success('Photo added to wishlist item successfully!');
+          toast.success('Photo added to wishlist item successfully!', { id: 'wishlist-upload' });
         } catch (err) {
-          toast.error('Failed to upload photo');
+          toast.error('Failed to upload photo', { id: 'wishlist-upload' });
         }
       };
       reader.readAsDataURL(file);

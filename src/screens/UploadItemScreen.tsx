@@ -342,14 +342,33 @@ export function UploadItemScreen() {
       }
     }
 
+    let uploadedFinalImage = finalImage;
+    let uploadedBaseImage = baseImage;
+    try {
+      const { db } = await import('../lib/supabase');
+      toast.loading("Uploading image to cloud storage...", { id: 'upload-toast' });
+      if (finalImage.startsWith('data:')) {
+        uploadedFinalImage = await db.uploadImage(finalImage, 'catalog');
+      }
+      if (baseImage.startsWith('data:') && baseImage !== finalImage) {
+        uploadedBaseImage = await db.uploadImage(baseImage, 'catalog');
+      } else if (baseImage === finalImage) {
+        uploadedBaseImage = uploadedFinalImage;
+      }
+      toast.dismiss('upload-toast');
+    } catch (e) {
+      console.error("Failed to upload image to bucket:", e);
+      toast.dismiss('upload-toast');
+    }
+
     const itemToSave = {
       id: id || 'item_' + Date.now(),
       name: name.trim(),
       price: Number(publishPrice),
       cost: Number(price),
       currency: costCurrency,
-      image: finalImage,
-      rawImage: baseImage,
+      image: uploadedFinalImage,
+      rawImage: uploadedBaseImage,
       status: 'active'
     };
 
