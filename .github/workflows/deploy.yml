@@ -39,7 +39,10 @@ jobs:
       - name: Build and Push Docker Image
         run: |-
           DOCKER_TAG="${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/cloud-run-source-deploy/${{ env.SERVICE_NAME }}:${{ github.sha }}"
-          docker build -t $DOCKER_TAG .
+          docker build \
+            --build-arg VITE_SUPABASE_URL="${{ secrets.VITE_SUPABASE_URL }}" \
+            --build-arg VITE_SUPABASE_ANON_KEY="${{ secrets.VITE_SUPABASE_ANON_KEY }}" \
+            -t $DOCKER_TAG .
           docker push $DOCKER_TAG
 
       - name: Deploy to Cloud Run
