@@ -418,7 +418,7 @@ export function ExploreScreen() {
               <div className="flex flex-wrap items-center gap-1.5 text-xs font-semibold text-slate-500">
                 <span className="text-[#163300]">{item.requester}</span>
                 <span className="opacity-40">•</span>
-                <span className="font-bold text-[#163300]">Rp {item.price.toLocaleString()}</span>
+                <span className="font-bold text-[#163300]">Rp {(item.sellPrice || item.price).toLocaleString()}</span>
                 <span className="opacity-40">•</span>
                 <span className="flex items-center gap-0.5"><MapPinIcon className="h-3 w-3" />{item.location}</span>
               </div>
@@ -1300,7 +1300,7 @@ export function ExploreScreen() {
                       </div>
                       {computedPriceInIdr > 0 && editBudgetCurrency !== 'IDR' && (
                         <p className="text-[10px] font-medium text-slate-500 pt-1">
-                          ≈ Rp {computedPriceInIdr.toLocaleString()} (Sell Price)
+                          ≈ Rp {computedPriceInIdr.toLocaleString()} (Cost Base)
                         </p>
                       )}
                     </div>
