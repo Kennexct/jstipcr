@@ -259,30 +259,7 @@ export function OwnerInventoryScreen() {
                   <Edit2 className="h-5 w-5" /> Edit Product
                 </Button>
 
-                <div className="grid grid-cols-2 gap-2">
-                  <Button 
-                    variant="outline"
-                    className="h-10 rounded-xl text-[10px] font-bold uppercase"
-                    onClick={() => {
-                      const id = selectedItem.id;
-                      setSelectedItem(null);
-                      handlePreviewItem(id);
-                    }}
-                  >
-                    <Eye className="h-3.5 w-3.5 mr-1" /> View Storefront
-                  </Button>
-                  <Button 
-                    variant="outline"
-                    className="h-10 rounded-xl text-[10px] font-bold uppercase"
-                    onClick={() => {
-                      toast.success('Product link copied!', {
-                        description: 'Share this link with your customers.'
-                      });
-                    }}
-                  >
-                    <Share2 className="h-3.5 w-3.5 mr-1" /> Share Link
-                  </Button>
-                </div>
+
 
                 <Button 
                   variant="ghost"

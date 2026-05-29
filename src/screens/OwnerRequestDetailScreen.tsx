@@ -18,7 +18,8 @@ import {
   Package,
   DollarSign,
   MapPin,
-  TrendingUp
+  TrendingUp,
+  ShieldCheck
 } from 'lucide-react';
 import { Button, buttonVariants } from '@/components/ui/button';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
@@ -46,7 +47,7 @@ interface WishlistItem {
   cost: number;  // Foreign Cost
   currency: string;
   shippingCost: number;
-  status: 'pending' | 'found' | 'out_of_stock' | 'cancelled';
+  status: 'pending' | 'found' | 'confirm' | 'out_of_stock' | 'cancelled';
   logs?: string[];
 }
 
@@ -75,7 +76,16 @@ export function OwnerRequestDetailScreen() {
 
   const updateItemStatus = async (itemId: string, status: WishlistItem['status']) => {
     const item = items.find(i => i.id === itemId);
-    const itemName = item ? item.name : 'this item';
+    if (!item) return;
+
+    if (status === 'found' || status === 'confirm') {
+      if (!item.cost || item.cost <= 0 || !item.price || item.price <= 0) {
+        toast.error(`Please input exact Foreign Cost and Publish Price before updating status.`);
+        return;
+      }
+    }
+
+    const itemName = item.name || 'this item';
     const confirmed = await confirm({
       title: 'Update Status',
       description: `Are you sure you want to change the status of "${itemName}" to ${status.toUpperCase().replace('_', ' ')}?`
@@ -300,15 +310,16 @@ export function OwnerRequestDetailScreen() {
                         <div className="pt-1">
                           <input 
                             type="checkbox"
+                            disabled={item.status !== 'confirm'}
                             checked={selectedItems.includes(item.id)}
                             onChange={(e) => {
                               if (e.target.checked) setSelectedItems([...selectedItems, item.id]);
                               else setSelectedItems(selectedItems.filter(id => id !== item.id));
                             }}
-                            className="h-5 w-5 rounded-md border-slate-300 text-primary focus:ring-primary/20 transition-all cursor-pointer"
+                            className="h-5 w-5 rounded-md border-slate-300 text-primary focus:ring-primary/20 transition-all cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
                           />
                         </div>
-                        <div className="space-y-3 flex-1">
+                        <div className="space-y-3 flex-1 opacity-100 transition-opacity" style={{ opacity: item.status === 'cancelled' ? 0.5 : 1 }}>
                           <input 
                             className="text-sm font-black bg-transparent border-none focus:ring-0 w-full p-0 leading-tight uppercase tracking-tight"
                             defaultValue={item.name}
@@ -398,6 +409,13 @@ export function OwnerRequestDetailScreen() {
                           onClick={() => updateItemStatus(item.id, 'found')}
                           icon={CheckCircle2} 
                           label="Found" 
+                          color="blue" 
+                        />
+                        <StatusButton 
+                          active={item.status === 'confirm'} 
+                          onClick={() => updateItemStatus(item.id, 'confirm')}
+                          icon={ShieldCheck} 
+                          label="Confirm" 
                           color="green" 
                         />
                         <StatusButton 
@@ -556,6 +574,7 @@ export function OwnerRequestDetailScreen() {
 function StatusButton({ active, icon: Icon, label, color, onClick }: any) {
   const colors = {
     green: active ? 'bg-green-500 text-white' : 'bg-green-50 text-green-600',
+    blue: active ? 'bg-blue-500 text-white' : 'bg-blue-50 text-blue-600',
     yellow: active ? 'bg-yellow-500 text-white' : 'bg-yellow-50 text-yellow-600',
     red: active ? 'bg-red-500 text-white' : 'bg-red-50 text-red-600',
   };
