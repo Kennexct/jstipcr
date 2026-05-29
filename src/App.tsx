@@ -54,14 +54,16 @@ const LoadingFallback = () => (
 );
 
 import { ConfirmProvider } from './context/ConfirmContext';
+import { ErrorBoundary } from './components/ErrorBoundary';
 
 export default function App() {
   return (
-    <MasterProvider>
-      <ConfirmProvider>
-        <BrowserRouter>
-          <ScrollToTop />
-          <Suspense fallback={<LoadingFallback />}>
+    <ErrorBoundary>
+      <MasterProvider>
+        <ConfirmProvider>
+          <BrowserRouter>
+            <ScrollToTop />
+            <Suspense fallback={<LoadingFallback />}>
             <Routes>
               {/* Public Storefront Route */}
               <Route path="catalog" element={<PublicCatalogScreen />} />
@@ -90,10 +92,11 @@ export default function App() {
               {/* Catch all */}
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
-          </Suspense>
-          <Toaster position="top-center" />
-        </BrowserRouter>
-      </ConfirmProvider>
-    </MasterProvider>
+            </Suspense>
+            <Toaster position="top-center" />
+          </BrowserRouter>
+        </ConfirmProvider>
+      </MasterProvider>
+    </ErrorBoundary>
   );
 }

@@ -1,0 +1,16 @@
+{
+  "name": "JStip - Traveler Hub",
+  "short_name": "JStip",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f2f5f7",
+  "theme_color": "#163300",
+  "description": "Traveler Sourcing Ledger for Jastip merchants",
+  "icons": [
+    {
+      "src": "/vite.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml"
+    }
+  ]
+}
