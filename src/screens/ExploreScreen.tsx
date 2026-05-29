@@ -49,7 +49,7 @@ export interface WishlistItem {
   id: string;
   name: string;
   requester: string;
-  status: 'find' | 'found' | 'out of stock' | 'cancel' | 'hold';
+  status: 'pending' | 'found' | 'confirm' | 'out_of_stock' | 'cancelled';
   price: number;
   sellPrice?: number;
   location: string;
@@ -197,7 +197,7 @@ export function ExploreScreen() {
       price: 0,
       qty: parseInt(formQty) || 1,
       requester: formCustomer || 'Walk-in Client',
-      status: 'find',
+      status: 'pending',
       image: formImage || undefined
     };
 
@@ -242,7 +242,7 @@ export function ExploreScreen() {
     }
   };
 
-  const handleUpdateStatus = async (id: string, newStatus: 'find' | 'found' | 'out of stock' | 'cancel' | 'hold') => {
+  const handleUpdateStatus = async (id: string, newStatus: 'pending' | 'found' | 'confirm' | 'out_of_stock' | 'cancelled') => {
     const matchedItem = myWishlist.find(item => item.id === id);
     if (!matchedItem) return;
     
@@ -301,37 +301,34 @@ export function ExploreScreen() {
     toggleBoughtId(id);
   };
 
-  // Status Style badge coloring helper
   const getStatusStyle = (status: WishlistItem['status']) => {
     switch (status) {
       case 'found':
-        return 'bg-emerald-50 text-emerald-700 border-emerald-100 border text-center';
-      case 'out of stock':
-        return 'bg-rose-50 text-rose-700 border-rose-100 border text-center';
-      case 'cancel':
-        return 'bg-red-50 text-red-600 border-red-100 border text-center';
-      case 'hold':
-        return 'bg-amber-50 text-amber-700 border-amber-100 border text-center';
-      case 'find':
-      default:
         return 'bg-blue-50 text-blue-700 border-blue-100 border text-center';
+      case 'confirm':
+        return 'bg-emerald-50 text-emerald-700 border-emerald-100 border text-center';
+      case 'out_of_stock':
+        return 'bg-amber-50 text-amber-700 border-amber-100 border text-center';
+      case 'cancelled':
+        return 'bg-red-50 text-red-600 border-red-100 border text-center';
+      case 'pending':
+      default:
+        return 'bg-slate-50 text-slate-700 border-slate-200 border text-center';
     }
   };
 
-  // Convert status codes to beautiful readable tags
   const getStatusLabel = (status: WishlistItem['status']) => {
     switch (status) {
-      case 'found': return '✅ Found';
-      case 'out of stock': return '❌ Out of Stock';
-      case 'cancel': return '🚫 Cancelled';
-      case 'hold': return '⏸️ On Hold';
-      case 'find':
+      case 'found': return '🔍 Found';
+      case 'confirm': return '✅ Confirm';
+      case 'out_of_stock': return '❌ Out of Stock';
+      case 'cancelled': return '🚫 Cancelled';
+      case 'pending':
       default:
-        return '⏳ Find / Searching';
+        return '⏳ Pending';
     }
   };
 
-  // Helper method to render a consistent custom styled Wishlist card item
   const renderWishlistItem = (item: WishlistItem, i: number, opacityClass: string = "") => {
     return (
       <Card 
@@ -344,8 +341,6 @@ export function ExploreScreen() {
       >
         <CardContent className="p-4 flex items-center justify-between gap-4 overflow-visible">
           <div className="flex items-center gap-4 min-w-0 flex-1">
-            
-            {/* Image Thumbnail */}
             <div className="h-14 w-14 rounded-full flex items-center justify-center shrink-0 overflow-hidden bg-[#f2f5f7] border relative">
               {item.image ? (
                 <img src={item.image} className="h-full w-full object-cover" alt={item.name} referrerPolicy="no-referrer" />
@@ -353,8 +348,6 @@ export function ExploreScreen() {
                 <Package className="h-6 w-6 text-slate-400" />
               )}
             </div>
-
-            {/* Specifics */}
             <div className="space-y-1 min-w-0 flex-1">
               <h4 className="text-sm font-bold text-[#163300] truncate">
                 {item.name}
@@ -368,13 +361,11 @@ export function ExploreScreen() {
               </div>
             </div>
           </div>
-
-          {/* Interactive Status Badges with custom dropdown overlay */}
           <div className="relative shrink-0 flex items-center gap-1">
             <button
               type="button"
               onClick={(e) => {
-                e.stopPropagation(); // Stop opening details dialog
+                e.stopPropagation();
                 setActiveDropdownId(activeDropdownId === item.id ? null : item.id);
               }}
               className={cn(
@@ -385,8 +376,6 @@ export function ExploreScreen() {
               <span>{item.status}</span>
               <span className="text-[7px] opacity-60">▼</span>
             </button>
-
-            {/* Inline Popop Dropdown */}
             {activeDropdownId === item.id && (
               <>
                 <div 
@@ -399,11 +388,11 @@ export function ExploreScreen() {
                 <div className="absolute right-0 top-10 mt-1 bg-white border border-slate-100 rounded-2xl shadow-xl p-2.5 z-50 min-w-[170px] space-y-1 text-left cursor-default" onClick={e => e.stopPropagation()}>
                   <p className="text-[8px] font-black uppercase text-muted-foreground tracking-widest px-1.5 pb-1.5 border-b">Set Status</p>
                   {[
-                    { code: 'find', label: '🔍 Find (Search)', color: 'text-blue-600 hover:bg-blue-50/70' },
-                    { code: 'found', label: '✅ Found (Acquired)', color: 'text-emerald-600 hover:bg-emerald-50/70' },
-                    { code: 'out of stock', label: '❌ Out of Stock', color: 'text-rose-600 hover:bg-rose-50/70' },
-                    { code: 'cancel', label: '🚫 Cancel / Revoked', color: 'text-slate-500 hover:bg-slate-50' },
-                    { code: 'hold', label: '⏸️ Hold / Postpone', color: 'text-amber-600 hover:bg-amber-50/70' },
+                    { code: 'pending', label: '⏳ Pending', color: 'text-slate-600 hover:bg-slate-50/70' },
+                    { code: 'found', label: '🔍 Found', color: 'text-blue-600 hover:bg-blue-50/70' },
+                    { code: 'confirm', label: '✅ Confirm', color: 'text-emerald-600 hover:bg-emerald-50/70' },
+                    { code: 'out_of_stock', label: '❌ Out of Stock', color: 'text-amber-600 hover:bg-amber-50/70' },
+                    { code: 'cancelled', label: '🚫 Cancelled', color: 'text-red-500 hover:bg-red-50' },
                   ].map((opt) => (
                     <button
                       key={opt.code}
@@ -427,17 +416,14 @@ export function ExploreScreen() {
               </>
             )}
           </div>
-
         </CardContent>
       </Card>
     );
   };
 
-  // Query and merge product list from (1) recorded sales, and (2) customer wishlist with found status
   const getMergedChecklistItems = () => {
-    // A. Sourced from Customer Wishlist with FOUND status
     const wishlistFound = myWishlist
-      .filter(item => item.status === 'found')
+      .filter(item => item.status === 'confirm')
       .map(item => ({
         id: `chk_wishlist_${item.id}`,
         name: item.name,
@@ -446,15 +432,13 @@ export function ExploreScreen() {
         requester: item.requester,
         location: item.location,
         type: 'wishlist' as const,
-        sourceLabel: 'Wishlist (Found Task)'
+        sourceLabel: 'Wishlist (Confirmed)'
       }));
 
-    // B. Sourced from recorded sales in OwnerDashboard
     const salesItems: any[] = [];
     sales.forEach(sale => {
       if (sale.items && Array.isArray(sale.items)) {
         sale.items.forEach((it: any, index: number) => {
-          // If a wishlist task with the same product name is already in the checklist, skip duplicating it as a sale item
           const isWishlistDuplicate = wishlistFound.some(w => w.name.toLowerCase() === it.name.toLowerCase());
           if (!isWishlistDuplicate) {
             salesItems.push({
@@ -498,12 +482,10 @@ export function ExploreScreen() {
     return Array.from(map.values()).sort((a, b) => b.qty - a.qty);
   }, [checklistItems, boughtIds]);
 
-  // Calculate stats for checklist completed items
   const checkedCount = checklistItems.filter(item => isItemChecked(item.id, item.type)).length;
   const totalChecklistCount = checklistItems.length;
   const completionPercentage = totalChecklistCount > 0 ? Math.round((checkedCount / totalChecklistCount) * 100) : 0;
 
-  // Filter the standard wishlist page
   const filteredMyWishlist = myWishlist.filter(item => {
     const matchesSearch = 
       item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -516,12 +498,11 @@ export function ExploreScreen() {
     return matchesSearch && item.status === selectedStatusFilter;
   });
 
-  const pendingWishlist = filteredMyWishlist.filter(item => item.status !== 'found');
-  const foundWishlist = filteredMyWishlist.filter(item => item.status === 'found');
+  const pendingWishlist = filteredMyWishlist.filter(item => item.status === 'pending');
+  const foundWishlist = filteredMyWishlist.filter(item => item.status === 'found' || item.status === 'confirm');
 
   return (
     <div className="min-h-screen bg-[#f2f5f7] pb-24">
-      {/* Sticky Header mimicking Inventory Screen */}
       <header className="sticky top-0 z-50 bg-[#f2f5f7]/80 backdrop-blur-md px-4 pt-8 pb-4 flex items-center justify-between gap-3">
         <Button variant="ghost" size="icon" className="rounded-full bg-white shadow-sm hover:bg-slate-50 shrink-0" onClick={() => navigate('/')}>
           <ArrowLeft className="h-5 w-5 text-[#163300]" />
@@ -543,7 +524,6 @@ export function ExploreScreen() {
               </DialogHeader>
               
               <div className="space-y-4 mt-2">
-                {/* Photo Upload Area */}
                 <div className="space-y-1.5">
                   <label className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Product Photo</label>
                   {formImage ? (
@@ -591,7 +571,6 @@ export function ExploreScreen() {
                   </div>
                 </div>
 
-
                 <div className="space-y-1.5">
                   <label className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Quantity</label>
                   <div className="relative">
@@ -635,7 +614,6 @@ export function ExploreScreen() {
       </header>
 
       <div className="p-4 space-y-4">
-        {/* SUB MENU: SLIDING PILL SWITCH */}
       <div className="bg-slate-100 p-1.5 rounded-2xl flex gap-1.5">
         <button
           type="button"
@@ -653,7 +631,6 @@ export function ExploreScreen() {
           type="button"
           onClick={() => {
             setViewMode('checklist');
-            // reset filters/search inside checklist
             setActiveDropdownId(null);
           }}
           className={cn(
@@ -667,10 +644,8 @@ export function ExploreScreen() {
         </button>
       </div>
 
-      {/* RENDER VIEW 1: STANDALONE WISHLIST BOARD */}
       {viewMode === 'board' && (
         <>
-          {/* Search Bar & Micro Filter Toolbar */}
           <div className="space-y-3">
             <div className="flex gap-2">
               <div className="relative flex-1">
@@ -692,7 +667,7 @@ export function ExploreScreen() {
                     <DialogDescription className="text-sm text-slate-500 font-medium">Narrow down tasks by state</DialogDescription>
                   </DialogHeader>
                   <div className="grid grid-cols-1 gap-2 py-2">
-                    {['all', 'find', 'found', 'out of stock', 'cancel', 'hold'].map(stat => (
+                    {['all', 'pending', 'found', 'confirm', 'out_of_stock', 'cancelled'].map(stat => (
                       <button
                         key={stat}
                         type="button"

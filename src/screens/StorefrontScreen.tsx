@@ -59,23 +59,19 @@ export function StorefrontScreen() {
   const [clientNotes, setClientNotes] = useState('');
   const [submitting, setSubmitting] = useState(false);
   
-  const { catalogItems, saveWishlist } = useMaster();
+  const { catalogItems, saveWishlist, currentUser, tripSettings } = useMaster();
   const confirm = useConfirm();
 
   useEffect(() => {
     async function loadData() {
       try {
-        const [items, loadedSettings] = await Promise.all([
-          db.getItems(),
-          db.getSettings()
-        ]);
-        setSettings(loadedSettings);
+        const items = await db.getItems();
 
         const foundItem = items.find(i => i.id === id);
         if (foundItem) {
           setItem(foundItem);
           setClientBudget(foundItem.price.toString());
-          setClientLocation(loadedSettings.trip?.origin || 'Seoul');
+          setClientLocation(tripSettings?.trip?.origin || 'Seoul');
         }
       } catch (e) {
         console.error('Failed to load storefront data:', e);
@@ -154,12 +150,8 @@ export function StorefrontScreen() {
   };
 
   const handleSubmitOrder = async () => {
-    const budgetNum = parseInt(clientBudget.replace(/[^0-9]/g, '')) || 0;
-    if (budgetNum <= 0) {
-      toast.error('Please enter a valid target budget');
-      return;
-    }
     const qty = parseInt(orderQty) || 1;
+    const finalPrice = qty * (item?.price || 0);
 
     const confirmed = await confirm({
       title: 'Submit Request',
@@ -174,8 +166,8 @@ export function StorefrontScreen() {
       name: `[${qty}x] ${item.name}`,
       requester: `${clientName.trim()} (${customerEmail})`,
       status: 'pending',
-      price: budgetNum, // This is IDR publish price they are willing to pay per item
-      location: clientLocation.trim() || settings?.trip?.origin || 'Seoul',
+      price: finalPrice, 
+      location: tripSettings?.trip?.origin || 'Seoul',
       image: item.image,
       note: clientNotes.trim() || undefined,
       merchantId: merchantId,
@@ -296,7 +288,7 @@ export function StorefrontScreen() {
                 </Avatar>
                 <div className="space-y-0.5 text-left">
                   <div className="flex items-center gap-1.5">
-                    <h4 className="text-sm font-bold text-slate-800">Jane Doe</h4>
+                    <h4 className="text-sm font-bold text-slate-800">{currentUser?.businessName || currentUser?.username || 'Star Traveler'}</h4>
                     <Badge variant="ghost" className="h-4 text-[7px] font-black uppercase bg-primary/10 text-primary border-none px-1 rounded-md">
                       Star Traveler
                     </Badge>
@@ -304,7 +296,7 @@ export function StorefrontScreen() {
                   <div className="flex items-center gap-2 text-xs text-muted-foreground font-semibold">
                     <span className="flex items-center gap-0.5 text-slate-700"><Star className="h-3 w-3 fill-yellow-400 text-yellow-400" /> 4.98</span>
                     <span>•</span>
-                    <span className="flex items-center gap-0.5"><MapPin className="h-3 w-3 text-red-500" /> {settings?.trip?.origin || 'Seoul'} → {settings?.trip?.destination || 'Jakarta'}</span>
+                    <span className="flex items-center gap-0.5"><MapPin className="h-3 w-3 text-red-500" /> {tripSettings?.trip?.origin || 'Seoul'} → {tripSettings?.trip?.destination || 'Jakarta'}</span>
                   </div>
                 </div>
               </div>
@@ -319,11 +311,11 @@ export function StorefrontScreen() {
             <div className="flex justify-between items-center relative z-10">
               <div className="space-y-1 text-left">
                 <p className="text-[8px] opacity-40 font-black uppercase tracking-widest">Departure Date</p>
-                <p className="text-xs font-bold uppercase tracking-tight">{settings?.trip?.date || '22 May 2026'}</p>
+                <p className="text-xs font-bold uppercase tracking-tight">{tripSettings?.trip?.date || '22 May 2026'}</p>
               </div>
               <div className="space-y-1 text-right">
                 <p className="text-[8px] opacity-40 font-black uppercase tracking-widest">Sourcing Currency</p>
-                <p className="text-xs font-bold uppercase tracking-tight">{settings?.currency?.code || 'SGD'} ({settings?.currency?.symbol || 'S$'})</p>
+                <p className="text-xs font-bold uppercase tracking-tight">{tripSettings?.currency?.code || 'SGD'} ({tripSettings?.currency?.symbol || 'S$'})</p>
               </div>
             </div>
             
@@ -336,13 +328,13 @@ export function StorefrontScreen() {
                 </div>
                 <div>
                   <p className="text-[8px] opacity-40 font-black uppercase tracking-widest">Sourcing Origin</p>
-                  <p className="text-xs font-bold uppercase tracking-tight">{settings?.trip?.origin || 'Seoul'}</p>
+                  <p className="text-xs font-bold uppercase tracking-tight">{tripSettings?.trip?.origin || 'Seoul'}</p>
                 </div>
               </div>
               <div className="flex items-center gap-2 text-right justify-end">
                 <div>
                   <p className="text-[8px] opacity-40 font-black uppercase tracking-widest">Destination</p>
-                  <p className="text-xs font-bold uppercase tracking-tight">{settings?.trip?.destination || 'Jakarta'}</p>
+                  <p className="text-xs font-bold uppercase tracking-tight">{tripSettings?.trip?.destination || 'Jakarta'}</p>
                 </div>
                 <div className="h-8 w-8 rounded-full bg-white/10 flex items-center justify-center shrink-0">
                   <MapPin className="h-4 w-4 text-red-400" />
@@ -483,28 +475,16 @@ export function StorefrontScreen() {
                   </div>
 
                   <div className="space-y-1.5 text-left col-span-2">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Budget (Rp/item) *</label>
+                    <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Price</label>
                     <div className="relative">
                       <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-black text-slate-500">Rp</span>
                       <Input 
-                        placeholder="0"
-                        value={clientBudget === '' ? '' : Number(clientBudget.replace(/[^0-9]/g, '')).toLocaleString()}
-                        onChange={e => setClientBudget(e.target.value.replace(/[^0-9]/g, ''))}
-                        inputMode="numeric"
-                        className="h-11 pl-9 rounded-xl bg-muted/30 border-none font-bold text-sm text-slate-800" 
+                        disabled
+                        value={(item ? ((parseInt(orderQty) || 1) * item.price) : 0).toLocaleString()}
+                        className="h-11 pl-9 rounded-xl bg-muted/30 border-none font-bold text-sm text-slate-800 disabled:opacity-75" 
                       />
                     </div>
                   </div>
-                </div>
-
-                <div className="space-y-1.5 text-left">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Target Sourcing City</label>
-                  <Input 
-                    placeholder="e.g. Seoul" 
-                    value={clientLocation}
-                    onChange={e => setClientLocation(e.target.value)}
-                    className="h-11 rounded-xl bg-muted/30 border-none font-bold text-sm text-slate-800" 
-                  />
                 </div>
 
                 <div className="space-y-1.5 text-left">
