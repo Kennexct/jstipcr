@@ -112,7 +112,7 @@ export function StorefrontScreen() {
           'Authorization': `Bearer re_ZuqXFC69_9FnA4hZJqKA3eUNJkMnQvz9n`
         },
         body: JSON.stringify({
-          from: 'JastipFlow <onboarding@resend.dev>',
+          from: 'JStip <onboarding@resend.dev>',
           to: [customerEmail],
           subject: 'Your Storefront Request Verification Code',
           html: `<div style="font-family: sans-serif; text-align: center; padding: 20px; background-color: #f2f5f7; border-radius: 12px;">

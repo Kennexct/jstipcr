@@ -41,11 +41,11 @@ export function SignUpScreen() {
           'Authorization': `Bearer re_ZuqXFC69_9FnA4hZJqKA3eUNJkMnQvz9n`
         },
         body: JSON.stringify({
-          from: 'JastipFlow <onboarding@resend.dev>',
+          from: 'JStip <onboarding@resend.dev>',
           to: [username],
-          subject: 'Your JastipFlow Verification Code',
+          subject: 'Your JStip Verification Code',
           html: `<div style="font-family: sans-serif; text-align: center; padding: 20px; background-color: #f2f5f7; border-radius: 12px;">
-                  <h2 style="color: #163300; margin-bottom: 8px;">Welcome to JastipFlow!</h2>
+                  <h2 style="color: #163300; margin-bottom: 8px;">Welcome to JStip!</h2>
                   <p style="color: #64748b; font-size: 14px;">Use the following code to verify your email address:</p>
                   <h1 style="font-size: 36px; letter-spacing: 8px; color: #163300; margin: 24px 0;">${generatedOtp}</h1>
                   <p style="color: #94a3b8; font-size: 12px;">If you didn't request this, you can safely ignore this email.</p>
@@ -97,7 +97,7 @@ export function SignUpScreen() {
             <Shield className="h-6 w-6" />
           </div>
           <h2 className="text-2xl font-black tracking-tight text-[#163300]">Register Merchant</h2>
-          <p className="text-xs text-slate-500 uppercase font-bold tracking-widest">Join JastipFlow Network</p>
+          <p className="text-xs text-slate-500 uppercase font-bold tracking-widest">Join JStip Network</p>
         </div>
 
         <Card className="border-none bg-white rounded-3xl overflow-hidden fintech-card">

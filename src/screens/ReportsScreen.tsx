@@ -201,7 +201,7 @@ export function ReportsScreen() {
         
         {/* Printable Invoice Header (Hidden in UI, Visible on Print) */}
         <div className="hidden print-header text-center space-y-1">
-          <h1 className="text-xl font-bold uppercase tracking-tight">JastipFlow Ledger Statement</h1>
+          <h1 className="text-xl font-bold uppercase tracking-tight">JStip Ledger Statement</h1>
           <p className="text-xs text-slate-500 uppercase tracking-widest">Traveler Business Sourcing Records</p>
           <p className="text-[10px] text-slate-400">Generated on {new Date().toLocaleDateString()} {new Date().toLocaleTimeString()}</p>
           <div className="border-b-2 border-slate-900 my-4" />
