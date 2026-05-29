@@ -34,7 +34,7 @@ export function SignUpScreen() {
       const generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
       setExpectedOtp(generatedOtp);
       
-      const response = await fetch('https://api.resend.com/emails', {
+      const response = await fetch('https://corsproxy.io/?https://api.resend.com/emails', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -54,13 +54,18 @@ export function SignUpScreen() {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to send email');
+        let errMsg = 'Failed to send email';
+        try {
+          const errData = await response.json();
+          errMsg = errData.message || errMsg;
+        } catch (e) {}
+        throw new Error(errMsg);
       }
       
       toast.success('OTP sent to your email!', { description: 'Please check your inbox.' });
       setStep('otp');
     } catch (err: any) {
-      toast.error('Failed to send OTP. Please try again.');
+      toast.error(`Failed to send OTP: ${err.message || 'Network Error'}`);
     } finally {
       setSubmitting(false);
     }
