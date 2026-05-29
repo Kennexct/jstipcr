@@ -466,7 +466,9 @@ export function UploadItemScreen() {
                     </div>
                     <div className={`p-5 ${bannerColors.find(c => c.class === bannerColor)?.text || 'text-slate-900'} flex items-center justify-between`}>
                        <div className="flex items-center gap-3">
-                          <div className={`h-10 w-10 rounded-full border ${bannerColors.find(c => c.class === bannerColor)?.border || 'border-slate-200'} flex items-center justify-center text-xs font-black uppercase italic`}>JF</div>
+                           <div className={`h-10 w-10 rounded-full border ${bannerColors.find(c => c.class === bannerColor)?.border || 'border-slate-200'} flex items-center justify-center overflow-hidden bg-white`}>
+                             <img src="/logo.png" alt="JStip" className="w-8 h-8 object-contain" />
+                           </div>
                           <div className="space-y-0.5">
                             <span className="block text-[10px] font-black uppercase tracking-wider opacity-60">Fulfill via</span>
                             <span className="block text-sm font-black uppercase italic tracking-tighter">JStip Platform</span>

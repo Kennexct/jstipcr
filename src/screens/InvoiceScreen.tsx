@@ -41,8 +41,8 @@ export function InvoiceScreen() {
         <CardContent className="p-8 space-y-8">
           <div className="flex justify-between items-start">
             <div>
-              <div className="h-12 w-12 rounded-2xl bg-[#163300] flex items-center justify-center text-[#9fe870] shadow-sm mb-4">
-                <span className="font-black italic text-xl">JF</span>
+              <div className="h-16 w-16 mb-4 flex items-center justify-center">
+                <img src="/logo.png" alt="JStip" className="w-full h-full object-contain drop-shadow-md" />
               </div>
               <h1 className="text-3xl font-black text-slate-800 uppercase tracking-tighter">INVOICE</h1>
               <p className="text-xs text-muted-foreground mt-1">#{invoice.id}</p>

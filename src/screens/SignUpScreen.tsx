@@ -93,8 +93,8 @@ export function SignUpScreen() {
     <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md space-y-6">
         <div className="text-center space-y-2">
-          <div className="h-12 w-12 rounded-2xl bg-[#163300] flex items-center justify-center text-[#9fe870] mx-auto shadow-sm">
-            <Shield className="h-6 w-6" />
+          <div className="h-16 w-16 shadow-xl shadow-[#163300]/20 rounded-2xl overflow-hidden bg-white flex items-center justify-center">
+            <img src="/logo.png" alt="JStip Logo" className="h-full w-full object-cover" />
           </div>
           <h2 className="text-2xl font-black tracking-tight text-[#163300]">Register Merchant</h2>
           <p className="text-xs text-slate-500 uppercase font-bold tracking-widest">Join JStip Network</p>
