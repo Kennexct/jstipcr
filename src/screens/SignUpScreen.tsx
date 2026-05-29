@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { toast } from 'sonner';
 import { getCleanErrorMessage } from '../lib/error';
+import { motion, AnimatePresence } from 'motion/react';
 
 export function SignUpScreen() {
   const navigate = useNavigate();
