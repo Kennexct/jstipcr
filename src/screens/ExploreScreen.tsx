@@ -295,6 +295,14 @@ export function ExploreScreen() {
       
     if (!baseItem) return;
     
+    // If changing to 'found' from outside the detail modal (or before prices are set), 
+    // open the detail modal instead of saving instantly so the user can input the prices
+    if (newStatus === 'found' && (!selectedDetailItem || selectedDetailItem.id !== id)) {
+      toast.info('Please update the exact pricing details first.');
+      setSelectedDetailItem({ ...baseItem, status: 'found' });
+      return;
+    }
+
     const confirmed = await confirm(`Are you sure you want to change the status of "${baseItem.name}" to ${newStatus.toUpperCase()}?`);
     if (!confirmed) return;
     
