@@ -23,7 +23,7 @@ export function InvoiceScreen() {
 
   return (
     <div className="min-h-screen bg-[#f2f5f7] p-4 pb-24">
-      <header className="flex items-center justify-between mb-6 sticky top-0 z-50 bg-[#f2f5f7]/80 backdrop-blur-md py-4">
+      <header className="flex items-center justify-between mb-6 sticky top-0 z-50 bg-[#f2f5f7]/80 backdrop-blur-md py-4 print:hidden">
         <Button variant="ghost" size="icon" onClick={() => navigate(-1)} className="bg-white shadow-sm rounded-full">
           <ArrowLeft className="h-5 w-5 text-[#163300]" />
         </Button>
