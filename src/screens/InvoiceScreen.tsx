@@ -58,7 +58,7 @@ export function InvoiceScreen() {
 
           <div className="pt-4 border-t border-slate-100">
             <h4 className="text-[10px] uppercase font-black tracking-widest text-muted-foreground mb-2">Billed To</h4>
-            <p className="font-black text-lg text-slate-800 uppercase tracking-tight">{invoice.customerName}</p>
+            <p className="font-black text-lg text-slate-800 uppercase tracking-tight">{invoice.customerName || 'Walk-in Customer'}</p>
           </div>
 
           <div className="space-y-4">
@@ -68,24 +68,31 @@ export function InvoiceScreen() {
               <div className="col-span-4 text-right">Amount (IDR)</div>
             </div>
             
-            {invoice.items.map((item: any, i: number) => (
+            {(invoice.items || []).map((item: any, i: number) => (
               <div key={i} className="grid grid-cols-12 gap-2 items-center text-sm py-2">
-                <div className="col-span-6 font-bold uppercase tracking-tight text-slate-700">{item.name}</div>
+                <div className="col-span-6 font-bold uppercase tracking-tight text-slate-700">{item.name || 'Misc Item'}</div>
                 <div className="col-span-2 text-center text-muted-foreground font-medium">{item.qty || 1}</div>
-                <div className="col-span-4 text-right font-black">Rp {item.price.toLocaleString()}</div>
+                <div className="col-span-4 text-right font-black">Rp {(item.price || 0).toLocaleString()}</div>
               </div>
             ))}
+            {(!invoice.items || invoice.items.length === 0) && (
+              <div className="grid grid-cols-12 gap-2 items-center text-sm py-2">
+                <div className="col-span-6 font-bold uppercase tracking-tight text-slate-700">General Items</div>
+                <div className="col-span-2 text-center text-muted-foreground font-medium">1</div>
+                <div className="col-span-4 text-right font-black">Rp {(invoice.total || 0).toLocaleString()}</div>
+              </div>
+            )}
           </div>
 
           <div className="border-t border-slate-100 pt-6 flex justify-end">
             <div className="w-2/3 md:w-1/2 space-y-3">
               <div className="flex justify-between text-sm">
                 <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Subtotal</span>
-                <span className="font-black">Rp {invoice.total.toLocaleString()}</span>
+                <span className="font-black">Rp {(invoice.total || 0).toLocaleString()}</span>
               </div>
               <div className="flex justify-between text-xl font-black pt-3 border-t-2 border-dashed border-slate-200">
                 <span className="text-sm font-black uppercase tracking-widest self-end">Total Due</span>
-                <span className="text-primary text-3xl tracking-tighter">Rp {invoice.total.toLocaleString()}</span>
+                <span className="text-primary text-3xl tracking-tighter">Rp {(invoice.total || 0).toLocaleString()}</span>
               </div>
             </div>
           </div>
