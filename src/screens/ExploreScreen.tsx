@@ -44,6 +44,52 @@ import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { useMaster } from '../context/MasterContext';
 import { useConfirm } from '../context/ConfirmContext';
+import { useState, ChangeEvent, useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { motion } from 'motion/react';
+import { 
+  Search, 
+  Filter, 
+  Plus, 
+  Package, 
+  ArrowLeft,
+  DollarSign, 
+  MapPin as MapPinIcon, 
+  Clock, 
+  MoreVertical, 
+  CheckCircle2, 
+  Users,
+  Camera,
+  X,
+  Check,
+  Ban,
+  AlertCircle,
+  CheckSquare,
+  Square,
+  ShoppingBag,
+  ListTodo,
+  Info,
+  Calendar,
+  Edit2,
+  Trash2,
+  Minus
+} from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Button, buttonVariants } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { 
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogDescription,
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
+import { useMaster } from '../context/MasterContext';
+import { useConfirm } from '../context/ConfirmContext';
 
 export interface WishlistItem {
   id: string;
@@ -52,6 +98,8 @@ export interface WishlistItem {
   status: 'pending' | 'found' | 'confirm' | 'out_of_stock' | 'cancelled';
   price: number;
   sellPrice?: number;
+  cost?: number;
+  qty?: number;
   location: string;
   image?: string;
 }
@@ -136,6 +184,15 @@ export function ExploreScreen() {
   const [editingChecklistItem, setEditingChecklistItem] = useState<any>(null);
   const [editChecklistForm, setEditChecklistForm] = useState({ name: '', qty: 1, price: 0, customerName: '' });
 
+  // Found Status Modal state
+  const [foundModalItem, setFoundModalItem] = useState<WishlistItem | null>(null);
+  const [foundCostPrice, setFoundCostPrice] = useState('');
+  const [foundSellPrice, setFoundSellPrice] = useState('');
+  const [foundQty, setFoundQty] = useState('1');
+
+  // Invoice Modal state
+  const [invoiceModalSale, setInvoiceModalSale] = useState<any | null>(null);
+
   const handleCloseDetail = async (explicitSave: boolean = false) => {
     if (selectedDetailItem) {
       const original = myWishlist.find(w => w.id === selectedDetailItem.id);
@@ -148,22 +205,17 @@ export function ExploreScreen() {
 
       if (isDirty) {
         if (explicitSave) {
-          // Explicit save triggered by the Save & Close button
           await saveWishlist(selectedDetailItem);
         } else {
-          // Accidental close (ESC or click outside)
           const discard = await confirm("You have unsaved changes. Are you sure you want to discard them and close?");
           if (!discard) {
-            // Abort the closing process, let the user continue editing
             return;
           }
-          // If they confirmed discard, we do NOT save and simply let it close.
         }
       }
     }
     setSelectedDetailItem(null);
   };
-
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -205,7 +257,6 @@ export function ExploreScreen() {
       await saveWishlist(newEntry);
       toast.success('Fulfillment task recorded successfully!');
       setIsDialogOpen(false);
-      // Reset Form
       setFormName('');
       setFormQty('1');
       setFormLocation('');
@@ -246,6 +297,14 @@ export function ExploreScreen() {
     const matchedItem = myWishlist.find(item => item.id === id);
     if (!matchedItem) return;
     
+    if (newStatus === 'found' && matchedItem.status === 'pending') {
+      setFoundModalItem(matchedItem);
+      setFoundCostPrice(matchedItem.cost?.toString() || '');
+      setFoundSellPrice(matchedItem.sellPrice?.toString() || matchedItem.price.toString());
+      setFoundQty(matchedItem.qty?.toString() || '1');
+      return;
+    }
+
     const confirmed = await confirm(`Are you sure you want to change the status of "${matchedItem.name}" to ${newStatus.toUpperCase()}?`);
     if (!confirmed) return;
     
@@ -256,6 +315,24 @@ export function ExploreScreen() {
       toast.info(`Status of ${updatedItem.name} set to ${newStatus.toUpperCase()}`);
     } catch (e) {
       toast.error('Failed to update status. Please try again.');
+    }
+  };
+
+  const handleFoundSubmit = async () => {
+    if (!foundModalItem) return;
+    const updatedItem = { 
+      ...foundModalItem, 
+      status: 'found' as const,
+      cost: parseInt(foundCostPrice) || 0,
+      sellPrice: parseInt(foundSellPrice) || 0,
+      qty: parseInt(foundQty) || 1
+    };
+    try {
+      await saveWishlist(updatedItem);
+      toast.success(`Item successfully marked as FOUND with updated prices.`);
+      setFoundModalItem(null);
+    } catch (e) {
+      toast.error('Failed to update wishlist item.');
     }
   };
 
@@ -286,7 +363,10 @@ export function ExploreScreen() {
               sourceCategory: 'Wishlist'
             }]
           };
-          if (saveSale) await saveSale(newSale);
+          if (saveSale) {
+            await saveSale(newSale);
+            setInvoiceModalSale(newSale);
+          }
         } catch (e) {
           console.error("Failed to generate automatic sale", e);
         }
@@ -1237,7 +1317,7 @@ export function ExploreScreen() {
                       </div>
                       {computedPriceInIdr > 0 && editBudgetCurrency !== 'IDR' && (
                         <p className="text-[10px] font-medium text-slate-500 pt-1">
-                          ≈ Rp {computedPriceInIdr.toLocaleString()} (Cost Base)
+                          ≈ Rp {computedPriceInIdr.toLocaleString()} (Sell Price)
                         </p>
                       )}
                     </div>
@@ -1492,6 +1572,111 @@ export function ExploreScreen() {
         </DialogContent>
       </Dialog>
       </div>
+
+      {/* Found Status Details Pop-up */}
+      <Dialog open={foundModalItem !== null} onOpenChange={(open) => !open && setFoundModalItem(null)}>
+        <DialogContent className="max-w-md bg-white border-slate-100 rounded-[2rem] p-6 shadow-2xl">
+          <DialogHeader className="text-left pb-2 space-y-1">
+            <div className="flex items-center gap-2 mb-2 text-blue-600">
+              <Search className="h-5 w-5" />
+              <DialogTitle className="text-xl font-black tracking-tight uppercase italic">
+                Mark as Found
+              </DialogTitle>
+            </div>
+            <DialogDescription className="text-xs font-semibold text-slate-500">
+              You found "{foundModalItem?.name}"! Please enter the exact pricing details.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 pt-2">
+            <div className="space-y-1.5 text-left">
+              <label className="text-[10px] font-black uppercase tracking-widest text-slate-500">Actual Cost Price</label>
+              <div className="relative">
+                <Input 
+                  type="number"
+                  placeholder="e.g. 50000" 
+                  value={foundCostPrice}
+                  onChange={e => setFoundCostPrice(e.target.value)}
+                  className="h-14 rounded-2xl bg-slate-50 border-slate-100 font-bold text-sm text-slate-800" 
+                />
+              </div>
+            </div>
+
+            <div className="space-y-1.5 text-left">
+              <label className="text-[10px] font-black uppercase tracking-widest text-slate-500">Final Sell Price to Customer</label>
+              <div className="relative">
+                <Input 
+                  type="number"
+                  placeholder="e.g. 75000" 
+                  value={foundSellPrice}
+                  onChange={e => setFoundSellPrice(e.target.value)}
+                  className="h-14 rounded-2xl bg-blue-50 border-blue-100 font-bold text-sm text-blue-900 focus-visible:ring-blue-400" 
+                />
+              </div>
+            </div>
+
+            <div className="space-y-1.5 text-left">
+              <label className="text-[10px] font-black uppercase tracking-widest text-slate-500">Quantity Found</label>
+              <div className="relative">
+                <Input 
+                  type="number"
+                  min="1"
+                  value={foundQty}
+                  onChange={e => setFoundQty(e.target.value)}
+                  className="h-14 rounded-2xl bg-slate-50 border-slate-100 font-bold text-sm text-slate-800" 
+                />
+              </div>
+            </div>
+
+            <div className="pt-4 flex gap-2">
+              <Button 
+                variant="outline"
+                className="w-full h-12 rounded-2xl font-bold border-slate-200"
+                onClick={() => setFoundModalItem(null)}
+              >
+                Cancel
+              </Button>
+              <Button 
+                className="w-full h-12 rounded-2xl font-black uppercase bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-500/30"
+                onClick={handleFoundSubmit}
+              >
+                Confirm Found
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Checklist Automatic Invoice Success Pop-up */}
+      <Dialog open={invoiceModalSale !== null} onOpenChange={(open) => !open && setInvoiceModalSale(null)}>
+        <DialogContent className="max-w-sm text-center p-6 border-slate-100 rounded-[2rem] bg-white">
+          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 mb-4">
+            <CheckCircle2 className="h-8 w-8 text-emerald-600" />
+          </div>
+          <DialogTitle className="text-xl font-black text-slate-800 mb-2">Item Acquired!</DialogTitle>
+          <DialogDescription className="text-sm font-medium text-slate-500 mb-6">
+            The item has been successfully checked off. A sale invoice has been generated for {invoiceModalSale?.customerName || 'Customer'}.
+          </DialogDescription>
+          <div className="bg-slate-50 rounded-2xl p-4 mb-6 text-left space-y-2 border border-slate-100">
+            <p className="text-xs font-bold text-slate-400 uppercase tracking-widest border-b pb-2 mb-2">Sale Details</p>
+            <div className="flex justify-between items-center text-sm font-bold text-slate-700">
+              <span>{invoiceModalSale?.items?.[0]?.name || 'Item'}</span>
+              <span>x{invoiceModalSale?.items?.[0]?.qty || 1}</span>
+            </div>
+            <div className="flex justify-between items-center text-sm font-black text-primary pt-2 border-t mt-2">
+              <span>Total</span>
+              <span>Rp {invoiceModalSale?.total?.toLocaleString()}</span>
+            </div>
+          </div>
+          <Button 
+            className="w-full h-14 rounded-2xl font-black text-sm shadow-lg shadow-primary/20"
+            onClick={() => setInvoiceModalSale(null)}
+          >
+            Awesome, Close
+          </Button>
+        </DialogContent>
+      </Dialog>
+
     </div>
   );
 }

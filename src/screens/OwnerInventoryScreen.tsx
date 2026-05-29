@@ -106,7 +106,7 @@ export function OwnerInventoryScreen() {
         <div className="flex items-center gap-2 shrink-0">
           <Button 
             variant="outline"
-            className="rounded-full h-10 px-4 bg-white text-xs font-bold text-[#163300] shadow-sm flex items-center gap-2" 
+            className="hidden rounded-full h-10 px-4 bg-white text-xs font-bold text-[#163300] shadow-sm items-center gap-2" 
             onClick={handleShareCatalog}
           >
             <Share2 className="h-4 w-4" /> Share Catalog
