@@ -28,11 +28,14 @@ export function InvoiceScreen() {
           <ArrowLeft className="h-5 w-5 text-[#163300]" />
         </Button>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={() => window.print()} className="gap-2 rounded-xl">
+          <Button variant="outline" size="sm" onClick={() => window.print()} className="gap-2 rounded-xl border-primary text-primary hover:bg-primary/5">
             <Printer className="h-4 w-4" /> Print
           </Button>
-          <Button variant="default" size="sm" onClick={() => toast.success("Invoice link copied!")} className="gap-2 bg-primary rounded-xl">
-            <Share2 className="h-4 w-4" /> Share
+          <Button variant="default" size="sm" onClick={() => {
+            navigator.clipboard.writeText(window.location.href);
+            toast.success("Invoice link copied to clipboard!");
+          }} className="gap-2 bg-primary rounded-xl shadow-lg shadow-primary/20">
+            <Share2 className="h-4 w-4" /> Share Link
           </Button>
         </div>
       </header>
