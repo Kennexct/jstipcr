@@ -40,7 +40,7 @@ export function ReportsScreen() {
     return acc + saleCost;
   }, 0);
 
-  const netProfitVal = totalSalesVal - totalExpensesVal;
+  const netProfitVal = totalSalesVal - totalCostVal - totalExpensesVal;
 
   const getOriginalCurrencyCode = (exp: any): string => {
     if (exp.originalCurrency) return exp.originalCurrency;
@@ -315,7 +315,7 @@ export function ReportsScreen() {
                                 <span>Rp {totalPublish.toLocaleString()}</span>
                               </div>
                               <div className="flex justify-between text-[10px] font-medium text-slate-500">
-                                <span>Cost: Rp {unitCost.toLocaleString()}/ea</span>
+                                <span>Cost: Rp {totalCost.toLocaleString()}</span>
                                 <span className={profit >= 0 ? "text-emerald-600 font-bold" : "text-red-600 font-bold"}>
                                   Margin: Rp {profit.toLocaleString()}
                                 </span>
