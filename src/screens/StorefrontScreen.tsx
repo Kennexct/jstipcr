@@ -22,6 +22,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { WatermarkOverlay } from '../components/WatermarkOverlay';
 import { Input } from '@/components/ui/input';
 import { useMaster } from '../context/MasterContext';
 import { useConfirm } from '../context/ConfirmContext';
@@ -235,7 +236,8 @@ export function StorefrontScreen() {
       </header>
 
       {/* Hero Image Section */}
-      <div className="relative aspect-square w-full max-w-md mx-auto overflow-hidden bg-muted/20 border-b">
+      <div className="relative aspect-square w-full bg-slate-100 overflow-hidden">
+        <WatermarkOverlay />
         <img 
           src={item.image} 
           alt={item.name} 

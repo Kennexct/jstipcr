@@ -16,6 +16,7 @@ import { motion } from 'motion/react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
+import { WatermarkOverlay } from '../components/WatermarkOverlay';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { useMaster } from '../context/MasterContext';
@@ -30,34 +31,7 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog';
 
-const applyWatermark = (originalImageSrc: string, watermarkImageSrc: string): Promise<string> => {
-  return new Promise((resolve) => {
-    const img = new Image();
-    if (!originalImageSrc.startsWith('data:')) {
-      img.crossOrigin = "anonymous";
-    }
-    img.onload = () => {
-      const canvas = document.createElement('canvas');
-      canvas.width = img.width;
-      canvas.height = img.height;
-      const ctx = canvas.getContext('2d');
-      if (ctx) {
-        ctx.drawImage(img, 0, 0);
-        const wmImg = new Image();
-        wmImg.crossOrigin = "anonymous";
-        wmImg.onload = () => {
-          const size = Math.min(canvas.width, canvas.height) * 0.15;
-          const x = canvas.width - size - 20;
-          const y = canvas.height - size - 20;
-          ctx.globalAlpha = 0.6;
-          ctx.drawImage(wmImg, x, y, size, size);
-          ctx.globalAlpha = 1.0;
-          resolve(canvas.toDataURL('image/jpeg', 0.85));
-        };
-        wmImg.onerror = () => {
-          resolve(originalImageSrc);
-        };
-        wmImg.src = watermarkImageSrc;
+// Watermark is now applied via CSS overlay (WatermarkOverlay)
       } else {
         resolve(originalImageSrc);
       }
@@ -241,16 +215,9 @@ export function UploadItemScreen() {
 
 
   const processImageWithAI = async (dataUrl: string) => {
-    let finalUrl = dataUrl;
-    if (tripSettings?.watermark?.enabled && tripSettings?.watermark?.image) {
-      try {
-        finalUrl = await applyWatermark(dataUrl, tripSettings.watermark.image);
-      } catch (e) {
-        console.error('Failed to apply watermark:', e);
-      }
-    }
-    setImage(finalUrl);
-    setRawImage(finalUrl);
+    // Watermark is now handled via CSS Overlay, so we just use the raw resized dataUrl.
+    setRawImage(dataUrl);
+    setImage(dataUrl);
     if (!isAiConfigured() || isEdit) return;
 
     setIsAnalyzing(true);
@@ -406,7 +373,8 @@ export function UploadItemScreen() {
             onChange={handleFileChange}
           />
           {image ? (
-            <div className="relative aspect-square w-full rounded-3xl overflow-hidden shadow-xl group">
+            <div className="relative aspect-square bg-slate-50 w-full overflow-hidden border-b border-slate-100">
+              <WatermarkOverlay />
               <img src={image} alt="Preview" className={`w-full h-full object-cover transition-all ${isAnalyzing ? 'blur-sm scale-105 brightness-50' : ''}`} />
               
               {isAnalyzing && (
@@ -453,6 +421,7 @@ export function UploadItemScreen() {
                 >
                   <div className={`${bannerColors.find(c => c.class === bannerColor)?.class || 'bg-white'} rounded-3xl overflow-hidden w-full max-w-sm shadow-2xl relative transition-colors duration-300`}>
                     <div className="relative aspect-square">
+                      <WatermarkOverlay />
                       <img src={image} className="w-full h-full object-cover" />
                       <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6 pt-12">
                         <div className="space-y-1 text-left">

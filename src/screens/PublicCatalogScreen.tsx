@@ -9,6 +9,8 @@ import {
   ShoppingBag,
   Share2
 } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
+import { WatermarkOverlay } from '../components/WatermarkOverlay';
 import { Input } from '@/components/ui/input';
 import { db } from '../lib/supabase';
 import { toast } from 'sonner';
@@ -166,6 +168,7 @@ export function PublicCatalogScreen() {
                   <div className="w-full aspect-square relative flex items-center justify-center mb-4">
                     {/* Circle Backdrop */}
                     <div className="absolute inset-2 bg-[#f2f5f7] rounded-full opacity-50 group-hover:scale-105 transition-transform" />
+                    <WatermarkOverlay />
                     <img 
                       src={item.image || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500&q=80'} 
                       alt={item.name}

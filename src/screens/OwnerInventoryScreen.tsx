@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { WatermarkOverlay } from '../components/WatermarkOverlay';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { toast } from 'sonner';
 import {
@@ -151,7 +152,8 @@ export function OwnerInventoryScreen() {
               >
                 <CardContent className="p-4 flex gap-4 items-center">
                   {/* Left: Image */}
-                  <div className="relative h-20 w-20 rounded-2xl overflow-hidden shrink-0 bg-slate-100 border border-slate-100 shadow-sm">
+                  <div className="relative h-20 w-20 rounded-xl overflow-hidden shrink-0 bg-slate-100">
+                    <WatermarkOverlay />
                     {item.image ? (
                       <img src={item.image} alt={item.name} className="h-full w-full object-cover" />
                     ) : (
@@ -231,11 +233,14 @@ export function OwnerInventoryScreen() {
               {/* Cover Image & Name block */}
               <div className="space-y-4">
                 <div className="relative h-48 w-full rounded-2xl overflow-hidden bg-[#f2f5f7]">
-                  {selectedItem.image ? (
-                    <img src={selectedItem.image} alt={selectedItem.name} className="h-full w-full object-cover" />
-                  ) : (
-                    <Package className="h-10 w-10 text-slate-300 absolute inset-0 m-auto" />
-                  )}
+                  <div className="h-48 w-full bg-slate-100 overflow-hidden relative">
+                    <WatermarkOverlay />
+                    {selectedItem.image ? (
+                      <img src={selectedItem.image} alt={selectedItem.name} className="h-full w-full object-cover" />
+                    ) : (
+                      <Package className="h-10 w-10 text-slate-300 absolute inset-0 m-auto" />
+                    )}
+                  </div>
                   <Badge className="absolute top-3 left-3 bg-[#9fe870] text-[#163300] border-none font-bold">Live</Badge>
                 </div>
                 <h3 className="text-lg font-black text-[#163300] leading-tight">{selectedItem.name}</h3>
