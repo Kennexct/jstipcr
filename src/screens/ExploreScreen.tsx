@@ -1577,12 +1577,21 @@ export function ExploreScreen() {
               <span>Rp {invoiceModalSale?.total?.toLocaleString()}</span>
             </div>
           </div>
-          <Button 
-            className="w-full h-14 rounded-2xl font-black text-sm shadow-lg shadow-primary/20"
-            onClick={() => setInvoiceModalSale(null)}
-          >
-            Awesome, Close
-          </Button>
+          <div className="flex gap-3">
+            <Button 
+              variant="outline"
+              className="flex-1 h-14 rounded-2xl font-bold text-sm border-slate-200"
+              onClick={() => setInvoiceModalSale(null)}
+            >
+              Close
+            </Button>
+            <Button 
+              className="flex-1 h-14 rounded-2xl font-black text-sm shadow-lg shadow-primary/20 bg-[#163300] hover:bg-[#1f4700] text-white"
+              onClick={() => navigate(`/invoice/${invoiceModalSale?.id}`)}
+            >
+              View Full Invoice
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
 

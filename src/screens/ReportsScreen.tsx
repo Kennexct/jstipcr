@@ -287,7 +287,15 @@ export function ReportsScreen() {
               ) : (
                 <div className="divide-y divide-slate-100 max-h-[450px] overflow-y-auto">
                   {sales.map((sale) => (
-                    <div key={sale.id} className="p-5 space-y-4">
+                    <div 
+                      key={sale.id} 
+                      className="p-5 space-y-4 cursor-pointer hover:bg-slate-50 transition-colors relative group"
+                      onClick={() => navigate(`/invoice/${sale.id}`)}
+                      title="Click to view full invoice"
+                    >
+                      <div className="absolute right-4 top-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Badge className="bg-blue-50 text-blue-600 hover:bg-blue-100 border-none text-[9px] px-2 py-0.5 font-bold uppercase tracking-widest">View Invoice</Badge>
+                      </div>
                       <div className="flex justify-between items-start">
                         <div className="text-left space-y-1">
                           <h4 className="text-sm font-bold text-[#163300]">{sale.customerName}</h4>
