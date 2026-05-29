@@ -104,6 +104,13 @@ export function OwnerInventoryScreen() {
         </Button>
         <h2 className="text-xl font-black text-[#163300] tracking-tight flex-1">Inventory</h2>
         <div className="flex items-center gap-2 shrink-0">
+          <Button 
+            variant="outline"
+            className="rounded-full h-10 px-4 bg-white text-xs font-bold text-[#163300] shadow-sm flex items-center gap-2" 
+            onClick={handleShareCatalog}
+          >
+            <Share2 className="h-4 w-4" /> Share Catalog
+          </Button>
           <Button size="icon" className="rounded-full h-10 w-10 bg-[#163300] text-white hover:bg-[#1f4700]" onClick={() => navigate('/owner/list-item')}>
             <Plus className="h-5 w-5" />
           </Button>
