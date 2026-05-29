@@ -34,7 +34,7 @@ export function SignUpScreen() {
       const generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
       setExpectedOtp(generatedOtp);
       
-      const response = await fetch('https://corsproxy.io/?https://api.resend.com/emails', {
+      const response = await fetch('/api/resend/emails', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
