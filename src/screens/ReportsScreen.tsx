@@ -154,7 +154,7 @@ export function ReportsScreen() {
   };
 
   return (
-    <div className="min-h-screen bg-[#f2f5f7] text-slate-900 pb-28">
+    <div className="min-h-screen bg-[#f2f5f7] text-slate-900 pb-28 print:min-h-0 print:pb-0 print:bg-white">
       {/* Print Styles Injection */}
       <style dangerouslySetInnerHTML={{__html: `
         @media print {
@@ -172,6 +172,7 @@ export function ReportsScreen() {
             text-align: center !important;
           }
           .print-table {
+            display: table !important;
             width: 100% !important;
             border-collapse: collapse !important;
             margin-top: 15px !important;
