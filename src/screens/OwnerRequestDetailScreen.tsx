@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useMaster } from '../context/MasterContext';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   ArrowLeft, 
@@ -53,10 +54,12 @@ export function OwnerRequestDetailScreen() {
   const { id } = useParams();
   const navigate = useNavigate();
   const confirm = useConfirm();
+  const { saveSale } = useMaster();
   
   const isNew = id === 'new';
   
   const [items, setItems] = useState<WishlistItem[]>([]);
+  const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [avatar, setAvatar] = useState<string | null>(null);
 
   useEffect(() => {
@@ -122,10 +125,29 @@ export function OwnerRequestDetailScreen() {
   const grandTotal = totalPublish + totalShipping;
   const totalProfit = totalPublish - totalCostIdr;
 
-  const handleShareInvoice = () => {
-    toast.success('Invoice link copied to clipboard!', {
-      description: 'Share this link with your customer via Chat.'
-    });
+  const handleGenerateInvoice = async () => {
+    if (selectedItems.length === 0) {
+      toast.error('Please select at least one item to generate an invoice.');
+      return;
+    }
+    
+    const itemsToBill = items.filter(i => selectedItems.includes(i.id));
+    const total = itemsToBill.reduce((sum, item) => sum + item.price + (item.shippingCost || 0), 0);
+    
+    const salePayload = {
+      id: `INV_${Date.now()}`,
+      customerName: "Jane Doe",
+      total: total,
+      items: itemsToBill.map(i => ({ productId: i.id, name: i.name, price: i.price + (i.shippingCost || 0), qty: 1 }))
+    };
+
+    try {
+      await saveSale(salePayload);
+      toast.success('Invoice generated successfully!');
+      navigate(`/invoice/${salePayload.id}`);
+    } catch (e) {
+      toast.error('Failed to generate invoice');
+    }
   };
 
   return (
@@ -275,6 +297,17 @@ export function OwnerRequestDetailScreen() {
                   <Card className={`border-none shadow-sm overflow-hidden ${item.status === 'cancelled' ? 'opacity-50' : ''}`}>
                     <CardContent className="p-4 space-y-4">
                       <div className="flex justify-between items-start gap-4">
+                        <div className="pt-1">
+                          <input 
+                            type="checkbox"
+                            checked={selectedItems.includes(item.id)}
+                            onChange={(e) => {
+                              if (e.target.checked) setSelectedItems([...selectedItems, item.id]);
+                              else setSelectedItems(selectedItems.filter(id => id !== item.id));
+                            }}
+                            className="h-5 w-5 rounded-md border-slate-300 text-primary focus:ring-primary/20 transition-all cursor-pointer"
+                          />
+                        </div>
                         <div className="space-y-3 flex-1">
                           <input 
                             className="text-sm font-black bg-transparent border-none focus:ring-0 w-full p-0 leading-tight uppercase tracking-tight"
@@ -480,9 +513,9 @@ export function OwnerRequestDetailScreen() {
                  <Button 
                    variant="ghost"
                    className="h-12 rounded-2xl bg-white/5 text-white font-black text-[9px] gap-1 border border-white/10 hover:bg-white/10"
-                   onClick={handleShareInvoice}
+                   onClick={handleGenerateInvoice}
                  >
-                   <Share2 className="h-3.5 w-3.5" /> SHARE INVOICE
+                   <Receipt className="h-3.5 w-3.5" /> INVOICE ({selectedItems.length})
                  </Button>
                  <Button 
                     variant="ghost"
